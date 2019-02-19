@@ -1,7 +1,7 @@
 # Личный проект «Большое путешествие» [![Build status][travis-image]][travis-url]
 
-* Студент: [Ольга Дука](https://up.htmlacademy.ru/ecmascript/8/user/337127).
-* Наставник: `Неизвестно`.
+* Студент: [Ольга Дука](https://htmlacademy.ru/profile/id337127).
+* Наставник: [Артем Рудов](https://htmlacademy.ru/profile/artrudov).
 
 ---
 
