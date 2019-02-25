@@ -97,16 +97,10 @@
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "boardEvents", function() { return boardEvents; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "renderEvents", function() { return renderEvents; });
-/* harmony import */ var _main_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./main.js */ "./src/main.js");
+/* harmony import */ var _utils_index_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./utils/index.js */ "./src/utils/index.js");
 
 
 const boardEvents = document.querySelector(`.trip-day__items`);
-const Num = {
-  MIN_PRICE_EVENT: 20,
-  MAX_PRICE_EVENT: 100,
-  MIN_PRICE_SERVICE: 10,
-  MAX_PRICE_SERVICE: 200
-};
 
 const getHtmlEvent = () => {
   return `<article class="trip-point">
@@ -116,13 +110,13 @@ const getHtmlEvent = () => {
               <span class="trip-point__timetable">10:00&nbsp;&mdash; 11:00</span>
               <span class="trip-point__duration">1h 30m</span>
             </p>
-            <p class="trip-point__price">&euro;&nbsp;${Object(_main_js__WEBPACK_IMPORTED_MODULE_0__["getRandomInt"])(Num.MIN_PRICE_EVENT, Num.MAX_PRICE_EVENT)}</p>
+            <p class="trip-point__price">&euro;&nbsp;${Object(_utils_index_js__WEBPACK_IMPORTED_MODULE_0__["getRandomInRange"])(_utils_index_js__WEBPACK_IMPORTED_MODULE_0__["Price"].MIN_PRICE_EVENT, _utils_index_js__WEBPACK_IMPORTED_MODULE_0__["Price"].MAX_PRICE_EVENT)}</p>
             <ul class="trip-point__offers">
               <li>
-                <button class="trip-point__offer">Order UBER +&euro;&nbsp;${Object(_main_js__WEBPACK_IMPORTED_MODULE_0__["getRandomInt"])(Num.MIN_PRICE_SERVICE, Num.MAX_PRICE_SERVICE)}</button>
+                <button class="trip-point__offer">Order UBER +&euro;&nbsp;${Object(_utils_index_js__WEBPACK_IMPORTED_MODULE_0__["getRandomInRange"])(_utils_index_js__WEBPACK_IMPORTED_MODULE_0__["Price"].MIN_PRICE_SERVICE, _utils_index_js__WEBPACK_IMPORTED_MODULE_0__["Price"].MAX_PRICE_SERVICE)}</button>
               </li>
               <li>
-                <button class="trip-point__offer">Upgrade to business +&euro;&nbsp;${Object(_main_js__WEBPACK_IMPORTED_MODULE_0__["getRandomInt"])(Num.MIN_PRICE_SERVICE, Num.MAX_PRICE_SERVICE)}</button>
+                <button class="trip-point__offer">Upgrade to business +&euro;&nbsp;${Object(_utils_index_js__WEBPACK_IMPORTED_MODULE_0__["getRandomInRange"])(_utils_index_js__WEBPACK_IMPORTED_MODULE_0__["Price"].MIN_PRICE_SERVICE, _utils_index_js__WEBPACK_IMPORTED_MODULE_0__["Price"].MAX_PRICE_SERVICE)}</button>
               </li>
             </ul>
           </article>`;
@@ -168,40 +162,66 @@ const renderFilters = (arrFilters) => {
 /*!*********************!*\
   !*** ./src/main.js ***!
   \*********************/
-/*! exports provided: getRandomInt */
+/*! no exports provided */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getRandomInt", function() { return getRandomInt; });
-/* harmony import */ var _event_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./event.js */ "./src/event.js");
-/* harmony import */ var _filter_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./filter.js */ "./src/filter.js");
+/* harmony import */ var _utils_index_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./utils/index.js */ "./src/utils/index.js");
+/* harmony import */ var _event_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./event.js */ "./src/event.js");
+/* harmony import */ var _filter_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./filter.js */ "./src/filter.js");
 
 
 
-const Num = {
-  MAX_EVENT_IN_FILTER: 8,
-  START_EVENTS: 7
-};
-const NAME_FILTERS = [`all`, `overdue`, `today`, `favorites`, `repeating`, `tags`, `archive`];
 
-const getRandomInt = (max) => Math.floor(Math.random() * max);
 
 const toggleFilter = (event) => {
-  _filter_js__WEBPACK_IMPORTED_MODULE_1__["formFilter"].querySelector(`input:checked`).checked = false;
+  _filter_js__WEBPACK_IMPORTED_MODULE_2__["formFilter"].querySelector(`input:checked`).checked = false;
   event.target.checked = true;
 };
 
-Object(_filter_js__WEBPACK_IMPORTED_MODULE_1__["renderFilters"])(NAME_FILTERS);
-Object(_event_js__WEBPACK_IMPORTED_MODULE_0__["renderEvents"])(Num.START_EVENTS);
+Object(_filter_js__WEBPACK_IMPORTED_MODULE_2__["renderFilters"])(_utils_index_js__WEBPACK_IMPORTED_MODULE_0__["NAME_EVENTS"]);
+Object(_event_js__WEBPACK_IMPORTED_MODULE_1__["renderEvents"])(_utils_index_js__WEBPACK_IMPORTED_MODULE_0__["NumConst"].START_EVENTS);
 
-_filter_js__WEBPACK_IMPORTED_MODULE_1__["formFilter"].onclick = (event) => {
+_filter_js__WEBPACK_IMPORTED_MODULE_2__["formFilter"].onclick = (event) => {
   if (event.target.className === `trip-filter__item` && !event.target.previousElementSibling.disabled) {
     toggleFilter(event);
-    _event_js__WEBPACK_IMPORTED_MODULE_0__["boardEvents"].innerHTML = ``;
-    Object(_event_js__WEBPACK_IMPORTED_MODULE_0__["renderEvents"])(getRandomInt(0, Num.MAX_EVENT_IN_FILTER));
+    _event_js__WEBPACK_IMPORTED_MODULE_1__["boardEvents"].innerHTML = ``;
+    Object(_event_js__WEBPACK_IMPORTED_MODULE_1__["renderEvents"])(Object(_utils_index_js__WEBPACK_IMPORTED_MODULE_0__["getRandomInRange"])(0, _utils_index_js__WEBPACK_IMPORTED_MODULE_0__["NumConst"].MAX_EVENT_IN_FILTER));
   }
 };
+
+
+/***/ }),
+
+/***/ "./src/utils/index.js":
+/*!****************************!*\
+  !*** ./src/utils/index.js ***!
+  \****************************/
+/*! exports provided: NumConst, Price, NAME_EVENTS, getRandomInRange */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "NumConst", function() { return NumConst; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Price", function() { return Price; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "NAME_EVENTS", function() { return NAME_EVENTS; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getRandomInRange", function() { return getRandomInRange; });
+const NumConst = {
+  MAX_EVENT_IN_FILTER: 10,
+  START_EVENTS: 7
+};
+
+const Price = {
+  MIN_PRICE_EVENT: 20,
+  MAX_PRICE_EVENT: 100,
+  MIN_PRICE_SERVICE: 10,
+  MAX_PRICE_SERVICE: 200
+};
+
+const NAME_EVENTS = [`everything`, `future`, `past`];
+
+const getRandomInRange = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
 
 
 /***/ })
