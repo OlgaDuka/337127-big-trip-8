@@ -1,14 +1,29 @@
-import {NumConst, NAME_EVENTS, getRandomInRange} from './utils/index.js';
-import {renderEvents, boardEvents} from './event.js';
-import {renderFilters, formFilter} from './filter.js';
+import {NumConst, NAME_FILTERS, getRandomInRange} from './utils/index.js';
+import {eventTrip} from './data.js';
+import {createEvent} from './create-event.js';
+import {createFilter} from './create-filter.js';
 
+export const formFilter = document.querySelector(`.trip-filter`);
+export const boardEvents = document.querySelector(`.trip-day__items`);
 
 const toggleFilter = (event) => {
   formFilter.querySelector(`input:checked`).checked = false;
   event.target.checked = true;
 };
 
-renderFilters(NAME_EVENTS);
+const renderEvents = (num) => {
+  for (let i = 0; i < num; i += 1) {
+    boardEvents.insertAdjacentHTML(`beforeend`, createEvent(eventTrip()));
+  }
+};
+
+const renderFilters = (arrFilters) => {
+  arrFilters.forEach(function (element) {
+    formFilter.insertAdjacentHTML(`beforeend`, createFilter(element));
+  });
+};
+
+renderFilters(NAME_FILTERS);
 renderEvents(NumConst.START_EVENTS);
 
 formFilter.onclick = (event) => {
