@@ -1,32 +1,22 @@
 import {Price, getRandomInRange} from './utils/index.js';
+import {eventTrip} from './data.js';
+
+export const boardEvents = document.querySelector(`.trip-day__items`);
 
 const getDuration = (timeStop, timeStart) => {
-  let stroka = new Date(timeStop - timeStart).toLocaleString(`en-US`, {hour: `2-digit`, minute: `2-digit`});
-  let hour = ``;
-  let minute = ``;
-  if (stroka.length === 8) {
-    hour = stroka.substr(0, 2);
-    minute = stroka.substr(3, 2);
-  } else {
-    hour = stroka.substr(0, 1);
-    minute = stroka.substr(2, 2);
-  }
-  stroka = hour + `H ` + minute + `M`;
-  return stroka;
+  let stroke = new Date(timeStop - timeStart);
+  let hours = `${stroke.toLocaleString(`en-US`, {hour: `2-digit`})}H `;
+  let minutes = `${stroke.toLocaleString(`en-US`, {minute: `2-digit`})}M`;
+  return hours + minutes;
 };
 
 const getOffer = (ob) => {
-  let htmlOffer = ``;
-  for (let offer of ob.offers) {
-    htmlOffer += `<li>
-                      <button class="trip-point__offer">${offer} +&euro;&nbsp;${getRandomInRange(Price.MIN_PRICE_OFFER, Price.MAX_PRICE_OFFER)}</button>
-                  </li>`;
-  }
-  return htmlOffer;
+  return ob.offers.map((offer) => `<li>
+      <button class="trip-point__offer">${offer} +&euro;&nbsp;${getRandomInRange(Price.MIN_PRICE_OFFER, Price.MAX_PRICE_OFFER)}</button>
+    </li>`);
 };
 
-export const createEvent = (obEvent) => {
-  return `<article class="trip-point">
+export const createEvent = (obEvent) => `<article class="trip-point">
             <i class="trip-icon">${obEvent.type[1]}</i>
             <h3 class="trip-point__title">${obEvent.type[0]}</h3>
             <p class="trip-point__schedule">
@@ -38,4 +28,9 @@ export const createEvent = (obEvent) => {
               ${getOffer(obEvent)}
             </ul>
           </article>`;
+
+export const renderEvents = (num) => {
+  for (let i = 0; i < num; i += 1) {
+    boardEvents.insertAdjacentHTML(`beforeend`, createEvent(eventTrip()));
+  }
 };
