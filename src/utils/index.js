@@ -3,13 +3,6 @@ export const NumConst = {
   START_EVENTS: 7
 };
 
-export const Price = {
-  MIN_PRICE_EVENT: 20,
-  MAX_PRICE_EVENT: 100,
-  MIN_PRICE_OFFER: 10,
-  MAX_PRICE_OFFER: 200
-};
-
 const TIME = 86400000; // количество милисекунд в сутках
 
 export const EVENT_TYPES = new Array([
