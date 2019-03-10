@@ -18,12 +18,13 @@ const TIME_STOP = 43200000; // кол-во милисекунд в полови�
 
 
 export const eventTrip = () => {
+  const time = getRandomDate(DAY);
   return {
     type: getRandomIndexArr(EVENT_TYPES[0]),
     title: getRandomIndexArr(CITY_NAMES),
-    day: new Date(getRandomDate(DAY)),
-    timeStart: getRandomDate(DAY),
-    timeStop: getRandomDate(DAY) + getRandomInRange(TIME_START, TIME_STOP),
+    day: new Date(time),
+    timeStart: time,
+    timeStop: time + getRandomInRange(TIME_START, TIME_STOP),
     picture: getRandomPhoto(getRandomInRange(DEF_MIN_PHOTO, DEF_MAX_PHOTO)),
     offers: getArrFromSet(OFFER_NAMES, DEF_MIN_OFFERS, DEF_MAX_OFFERS),
     destinations: getArrFromSet(DESTINATIONS, DEF_MIN_DESTINATIONS, DEF_MAX_DESTINATIONS),

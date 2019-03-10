@@ -3,6 +3,13 @@ export const NumConst = {
   START_EVENTS: 7
 };
 
+export const Price = {
+  MIN_PRICE_EVENT: 20,
+  MAX_PRICE_EVENT: 100,
+  MIN_PRICE_OFFER: 10,
+  MAX_PRICE_OFFER: 200
+};
+
 const TIME = 86400000; // количество милисекунд в сутках
 
 export const EVENT_TYPES = new Array([
@@ -23,9 +30,9 @@ export const OFFER_NAMES = new Set([
   `Switch to comfort class`,
   `Add meal`,
   `Choose seats`,
-  `The provision of international calling cards`,
+  `Get of calling cards`,
   `Add insurance`,
-  `Booking tickets for events`,
+  `Booking ticket for event`,
   `Booking cars`
 ]);
 
@@ -75,4 +82,14 @@ export const getArrFromSet = (originalSet, min, max) => {
     }
   }
   return arrResult;
+};
+
+export const getTime = (time) => {
+  return new Date(time).toLocaleString(`en-US`, {hour: `numeric`, minute: `numeric`, hour12: false});
+};
+
+export const createElement = (template) => {
+  const newElement = document.createElement(`div`);
+  newElement.innerHTML = template;
+  return newElement.firstChild;
 };
