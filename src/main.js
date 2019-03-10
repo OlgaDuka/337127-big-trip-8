@@ -29,6 +29,22 @@ const renderEvents = (dist, arr) => {
       dist.replaceChild(pointOpen.element, point.element);
       point.unrender();
     };
+    pointOpen.onSubmit = () => {
+      point.render();
+      dist.replaceChild(point.element, pointOpen.element);
+      pointOpen.unrender();
+    };
+    pointOpen.onDelete = () => {
+      pointOpen.unrender();
+      arr.splice(i, 1);
+      dist.innerHTML = ``;
+      renderEvents(dist, arr);
+    };
+    pointOpen.onKeyEsc = () => {
+      point.render();
+      dist.replaceChild(point.element, pointOpen.element);
+      pointOpen.unrender();
+    };
   }
 };
 

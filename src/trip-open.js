@@ -1,4 +1,4 @@
-import {getRandomInRange, getTime, getDuration, getOffer, createElement, Price} from './utils/index.js';
+import {getRandomInRange, getTime, createElement, Price} from './utils/index.js';
 
 class TripOpen {
   constructor(data) {
@@ -14,15 +14,60 @@ class TripOpen {
     this._isCollapse = data.isCollapse;
 
     this._element = null;
-    this._onClick = null;
-  }
+    this._onSubmit = null;
+    this._onDelete = null;
+    this._onKeyEsc = null;
 
-  _onPointClick() {
-    return (typeof this._onClick === `function`) && this._onClick();
+    this._onSubmitButtonClick = this._onSubmitButtonClick.bind(this);
+    this._onDeleteButtonClick = this._onDeleteButtonClick.bind(this);
+    this._onKeydownEsc = this._onKeydownEsc.bind(this);
   }
 
   get element() {
     return this._element;
+  }
+
+  _onSubmitButtonClick(evt) {
+    evt.preventDefault();
+    if (typeof this._onSubmit === `function`) {
+      this._onSubmit();
+    }
+  }
+
+  set onSubmit(fn) {
+    this._onSubmit = fn;
+  }
+
+  _onDeleteButtonClick() {
+    if (typeof this._onDelete === `function`) {
+      this._onDelete();
+    }
+  }
+
+  set onDelete(fn) {
+    this._onDelete = fn;
+  }
+
+  _onKeydownEsc(evt) {
+    if ((typeof this._onKeyEsc === `function`) && (evt.keyCode === 27)) {
+      this._onKeyEsc();
+    }
+  }
+
+  set onKeyEsc(fn) {
+    this._onKeyEsc = fn;
+  }
+
+  _getOffers() {
+    return this._offers.map((offer) => `<input class="point__offers-input visually-hidden" type="checkbox" id="${offer}" name="offer" value="${offer}">
+    <label for="${offer}" class="point__offers-label">
+      <span class="point__offer-service">${offer}</span> + €<span class="point__offer-price">${getRandomInRange(Price.MIN_PRICE_OFFER, Price.MAX_PRICE_OFFER)}</span>
+    </label>`).join(``);
+  }
+
+  _getPictures() {
+    return this._picture.map((picture) =>
+      `<img src="http:${picture}" alt="picture from place" class="point__destination-image">`).join(``);
   }
 
   get template() {
@@ -77,7 +122,7 @@ class TripOpen {
 
                     <label class="point__time">
                       choose time
-                      <input class="point__input" type="text" value="00:00 — 00:00" name="time" placeholder="00:00 — 00:00">
+                      <input class="point__input" type="text" value="${getTime(this._timeStart)} — ${getTime(this._timeStop)}" name="time" placeholder="00:00 — 00:00">
                     </label>
 
                     <label class="point__price">
@@ -87,8 +132,8 @@ class TripOpen {
                     </label>
 
                     <div class="point__buttons">
-                      <button class="point__button point__button--save" type="submit">Save</button>
-                      <button class="point__button" type="reset">Delete</button>
+                      <button class="point__button point__button--save point__button-save" type="submit">Save</button>
+                      <button class="point__button point__button-delete" type="reset">Delete</button>
                     </div>
 
                     <div class="paint__favorite-wrap">
@@ -102,37 +147,15 @@ class TripOpen {
                       <h3 class="point__details-title">offers</h3>
 
                       <div class="point__offers-wrap">
-                        <input class="point__offers-input visually-hidden" type="checkbox" id="add-luggage" name="offer" value="add-luggage">
-                        <label for="add-luggage" class="point__offers-label">
-                          <span class="point__offer-service">Add luggage</span> + €<span class="point__offer-price">30</span>
-                        </label>
-
-                        <input class="point__offers-input visually-hidden" type="checkbox" id="switch-to-comfort-class" name="offer" value="switch-to-comfort-class">
-                        <label for="switch-to-comfort-class" class="point__offers-label">
-                          <span class="point__offer-service">Switch to comfort class</span> + €<span class="point__offer-price">100</span>
-                        </label>
-
-                        <input class="point__offers-input visually-hidden" type="checkbox" id="add-meal" name="offer" value="add-meal">
-                        <label for="add-meal" class="point__offers-label">
-                          <span class="point__offer-service">Add meal </span> + €<span class="point__offer-price">15</span>
-                        </label>
-
-                        <input class="point__offers-input visually-hidden" type="checkbox" id="choose-seats" name="offer" value="choose-seats">
-                        <label for="choose-seats" class="point__offers-label">
-                          <span class="point__offer-service">Choose seats</span> + €<span class="point__offer-price">5</span>
-                        </label>
+                        ${this._getOffers()}
                       </div>
 
                     </section>
                     <section class="point__destination">
                       <h3 class="point__details-title">Destination</h3>
-                      <p class="point__destination-text">Geneva is a city in Switzerland that lies at the southern tip of expansive Lac Léman (Lake Geneva). Surrounded by the Alps and Jura mountains, the city has views of dramatic Mont Blanc.</p>
+                      <p class="point__destination-text">${this._destinations}</p>
                       <div class="point__destination-images">
-                        <img src="http://picsum.photos/330/140?r=123" alt="picture from place" class="point__destination-image">
-                        <img src="http://picsum.photos/300/200?r=1234" alt="picture from place" class="point__destination-image">
-                        <img src="http://picsum.photos/300/100?r=12345" alt="picture from place" class="point__destination-image">
-                        <img src="http://picsum.photos/200/300?r=123456" alt="picture from place" class="point__destination-image">
-                        <img src="http://picsum.photos/100/300?r=1234567" alt="picture from place" class="point__destination-image">
+                        ${this._getPictures()}
                       </div>
                     </section>
                     <input type="hidden" class="point__total-price" name="total-price" value="">
@@ -141,16 +164,20 @@ class TripOpen {
               </article>`.trim();
   }
 
-  set onClick(fn) {
-    this._onClick = fn;
-  }
-
   bind() {
-    this._element.addEventListener(`click`, this._onPointClick);
+    this._element.querySelector(`.point__button-save`)
+      .addEventListener(`submit`, this._onSubmitButtonClick);
+    this._element.querySelector(`.point__button-delete`)
+        .addEventListener(`click`, this._onDeleteButtonClick);
+    document.addEventListener(`keydown`, this._onKeydownEsc);
   }
 
   unbind() {
-    this._element.removeEventListener(`click`, this._onPointClick);
+    this._element.querySelector(`.point__button-save`)
+      .removeEventListener(`submit`, this._onSubmitButtonClick);
+    this._element.querySelector(`.point__button-delete`)
+      .removeEventListener(`click`, this._onDeleteButtonClick);
+    document.removeEventListener(`keydown`, this._onKeydownEsc);
   }
 
   render() {

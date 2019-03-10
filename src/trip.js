@@ -20,14 +20,16 @@ class Trip {
   }
 
   _onPointClick() {
-    return (typeof this._onClick === `function`) && this._onClick();
+    if (typeof this._onClick === `function`) {
+      this._onClick();
+    }
   }
 
   get element() {
     return this._element;
   }
 
-  getOffer() {
+  _getOffer() {
     return this._offers.map((offer) => `<li>
         <button class="trip-point__offer">${offer} +&euro;&nbsp;${getRandomInRange(Price.MIN_PRICE_OFFER, Price.MAX_PRICE_OFFER)}</button>
       </li>`).join(``);
@@ -56,7 +58,12 @@ class Trip {
                 </p>
                 <p class="trip-point__price">&euro;&nbsp;${getRandomInRange(Price.MIN_PRICE_EVENT, Price.MAX_PRICE_EVENT)}</p>
                 <ul class="trip-point__offers">
-                  ${this.getOffer(this._offers)}
+                  <li>
+                    <button class="trip-point__offer">${this._offers[0]} +&euro;&nbsp;${getRandomInRange(Price.MIN_PRICE_OFFER, Price.MAX_PRICE_OFFER)}</button>
+                  </li>
+                  <li>
+                    <button class="trip-point__offer">${this._offers[1]} +&euro;&nbsp;${getRandomInRange(Price.MIN_PRICE_OFFER, Price.MAX_PRICE_OFFER)}</button>
+                  </li>
                 </ul>
               </article>`.trim();
   }

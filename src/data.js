@@ -6,12 +6,12 @@ import {getRandomInRange,
   getRandomPhoto,
   EVENT_TYPES, CITY_NAMES, OFFER_NAMES, DESTINATIONS} from './utils/index.js';
 
-const DEF_MIN_OFFERS = 0;
+const DEF_MIN_OFFERS = 2;
 const DEF_MIN_DESTINATIONS = 1;
-const DEF_MAX_OFFERS = 2;
+const DEF_MAX_OFFERS = 5;
 const DEF_MAX_DESTINATIONS = 3;
-const DEF_MIN_PHOTO = 1;
-const DEF_MAX_PHOTO = 5;
+const DEF_MIN_PHOTO = 3;
+const DEF_MAX_PHOTO = 8;
 const DAY = 7;
 const TIME_START = 0;
 const TIME_STOP = 43200000; // кол-во милисекунд в половине суток

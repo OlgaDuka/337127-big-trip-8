@@ -1,6 +1,6 @@
 export const NumConst = {
-  MAX_EVENT_IN_FILTER: 10,
-  START_EVENTS: 7
+  MAX_EVENT_IN_FILTER: 5,
+  START_EVENTS: 4
 };
 
 export const Price = {
@@ -59,9 +59,9 @@ export const getRandomBoolean = () => Boolean(Math.round(Math.random()));
 export const getRandomIndexArr = (arr) => arr[Math.floor(Math.random() * arr.length)];
 export const getRandomDate = (day) => Date.now() + Math.floor(Math.random() * day) * TIME;
 export const getRandomPhoto = (amount) => {
-  let result = ``;
+  let result = new Array(amount);
   for (let i = 0; i < amount; i += 1) {
-    result += `//picsum.photos/300/150?r=${Math.random()}`;
+    result[i] = `//picsum.photos/300/150?r=${Math.random()}`;
   }
   return result;
 };
