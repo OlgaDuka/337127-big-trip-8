@@ -1,9 +1,10 @@
-import {getRandomInRange, getTime, createElement, Price} from './utils/index.js';
+import {getTime, createElement} from './utils/index.js';
 
-class TripOpen {
+export default class TripOpen {
   constructor(data) {
     this._type = data.type;
     this._title = data.title;
+    this._price = data.price;
     this._day = data.day;
     this._timeStart = data.timeStart;
     this._timeStop = data.timeStop;
@@ -29,9 +30,7 @@ class TripOpen {
 
   _onSubmitButtonClick(evt) {
     evt.preventDefault();
-    if (typeof this._onSubmit === `function`) {
-      this._onSubmit();
-    }
+    return (typeof this._onSubmit === `function`) && this._onSubmit();
   }
 
   set onSubmit(fn) {
@@ -39,9 +38,7 @@ class TripOpen {
   }
 
   _onDeleteButtonClick() {
-    if (typeof this._onDelete === `function`) {
-      this._onDelete();
-    }
+    return (typeof this._onDelete === `function`) && this._onDelete();
   }
 
   set onDelete(fn) {
@@ -49,9 +46,7 @@ class TripOpen {
   }
 
   _onKeydownEsc(evt) {
-    if ((typeof this._onKeyEsc === `function`) && (evt.keyCode === 27)) {
-      this._onKeyEsc();
-    }
+    return (typeof this._onKeyEsc === `function`) && (evt.keyCode === 27) && this._onKeyEsc();
   }
 
   set onKeyEsc(fn) {
@@ -59,9 +54,9 @@ class TripOpen {
   }
 
   _getOffers() {
-    return this._offers.map((offer) => `<input class="point__offers-input visually-hidden" type="checkbox" id="${offer}" name="offer" value="${offer}">
-    <label for="${offer}" class="point__offers-label">
-      <span class="point__offer-service">${offer}</span> + €<span class="point__offer-price">${getRandomInRange(Price.MIN_PRICE_OFFER, Price.MAX_PRICE_OFFER)}</span>
+    return this._offers.map((offer) => `<input class="point__offers-input visually-hidden" type="checkbox" id="${offer[0]}" name="offer" value="${offer[0]}">
+    <label for="${offer[0]}" class="point__offers-label">
+      <span class="point__offer-service">${offer[0]}</span> + €<span class="point__offer-price">${offer[1]}</span>
     </label>`).join(``);
   }
 
@@ -80,7 +75,7 @@ class TripOpen {
                     </label>
 
                     <div class="travel-way">
-                      <label class="travel-way__label" for="travel-way__toggle">✈️</label>
+                      <label class="travel-way__label" for="travel-way__toggle">${this._type[1]}</label>
 
                       <input type="checkbox" class="travel-way__toggle visually-hidden" id="travel-way__toggle">
 
@@ -95,7 +90,7 @@ class TripOpen {
                           <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-train" name="travel-way" value="train">
                           <label class="travel-way__select-label" for="travel-way-train">🚂 train</label>
 
-                          <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-flight" name="travel-way" value="train" checked>
+                          <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-flight" name="travel-way" value="train">
                           <label class="travel-way__select-label" for="travel-way-flight">✈️ flight</label>
                         </div>
 
@@ -110,8 +105,8 @@ class TripOpen {
                     </div>
 
                     <div class="point__destination-wrap">
-                      <label class="point__destination-label" for="destination">Flight to</label>
-                      <input class="point__destination-input" list="destination-select" id="destination" value="Chamonix" name="destination">
+                      <label class="point__destination-label" for="destination">${(this._type[0])}</label>
+                      <input class="point__destination-input" list="destination-select" id="destination" value="${this._title}" name="destination">
                       <datalist id="destination-select">
                         <option value="airport"></option>
                         <option value="Geneva"></option>
@@ -128,7 +123,7 @@ class TripOpen {
                     <label class="point__price">
                       write price
                       <span class="point__price-currency">€</span>
-                      <input class="point__input" type="text" value="160" name="price">
+                      <input class="point__input" type="text" value="${this._price}" name="price">
                     </label>
 
                     <div class="point__buttons">
@@ -166,15 +161,15 @@ class TripOpen {
 
   bind() {
     this._element.querySelector(`.point__button-save`)
-      .addEventListener(`submit`, this._onSubmitButtonClick);
+      .addEventListener(`click`, this._onSubmitButtonClick);
     this._element.querySelector(`.point__button-delete`)
-        .addEventListener(`click`, this._onDeleteButtonClick);
+      .addEventListener(`click`, this._onDeleteButtonClick);
     document.addEventListener(`keydown`, this._onKeydownEsc);
   }
 
   unbind() {
     this._element.querySelector(`.point__button-save`)
-      .removeEventListener(`submit`, this._onSubmitButtonClick);
+      .removeEventListener(`click`, this._onSubmitButtonClick);
     this._element.querySelector(`.point__button-delete`)
       .removeEventListener(`click`, this._onDeleteButtonClick);
     document.removeEventListener(`keydown`, this._onKeydownEsc);
@@ -188,8 +183,7 @@ class TripOpen {
 
   unrender() {
     this.unbind();
+    this._element.remove();
     this._element = null;
   }
 }
-
-export {TripOpen};

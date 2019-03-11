@@ -1,9 +1,10 @@
-import {getRandomInRange, getTime, createElement, Price} from './utils/index.js';
+import {getTime, createElement} from './utils/index.js';
 
-class Trip {
+export default class Trip {
   constructor(data) {
     this._type = data.type;
     this._title = data.title;
+    this._price = data.price;
     this._day = data.day;
     this._timeStart = data.timeStart;
     this._timeStop = data.timeStop;
@@ -20,9 +21,7 @@ class Trip {
   }
 
   _onPointClick() {
-    if (typeof this._onClick === `function`) {
-      this._onClick();
-    }
+    return (typeof this._onClick === `function`) && this._onClick();
   }
 
   get element() {
@@ -31,7 +30,7 @@ class Trip {
 
   _getOffer() {
     return this._offers.map((offer) => `<li>
-        <button class="trip-point__offer">${offer} +&euro;&nbsp;${getRandomInRange(Price.MIN_PRICE_OFFER, Price.MAX_PRICE_OFFER)}</button>
+        <button class="trip-point__offer">${offer[0]} +&euro;&nbsp;${offer[1]}</button>
       </li>`).join(``);
   }
 
@@ -42,27 +41,21 @@ class Trip {
     return hours + minutes;
   }
 
-  getNamePoint() {
-    const arrResult = document.querySelector(`.trip__points`).textContent.split(`— `);
-    const maxIndex = arrResult.length - 1;
-    return [arrResult, maxIndex];
-  }
-
   get template() {
     return `<article class="trip-point">
                 <i class="trip-icon">${this._type[1]}</i>
-                <h3 class="trip-point__title">${this._type[0]} to ${this.getNamePoint()[0][getRandomInRange(0, this.getNamePoint()[1])]}</h3>
+                <h3 class="trip-point__title">${this._type[0]} ${this._title}</h3>
                 <p class="trip-point__schedule">
                   <span class="trip-point__timetable">${getTime(this._timeStart)}&nbsp;&mdash; ${getTime(this._timeStop)}</span>
                   <span class="trip-point__duration">${this.getDuration(this._timeStop, this._timeStart)}</span>
                 </p>
-                <p class="trip-point__price">&euro;&nbsp;${getRandomInRange(Price.MIN_PRICE_EVENT, Price.MAX_PRICE_EVENT)}</p>
+                <p class="trip-point__price">&euro;&nbsp;${this._price}</p>
                 <ul class="trip-point__offers">
                   <li>
-                    <button class="trip-point__offer">${this._offers[0]} +&euro;&nbsp;${getRandomInRange(Price.MIN_PRICE_OFFER, Price.MAX_PRICE_OFFER)}</button>
+                    <button class="trip-point__offer">${this._offers[0][0]} +&euro;&nbsp;${this._offers[0][1]}</button>
                   </li>
                   <li>
-                    <button class="trip-point__offer">${this._offers[1]} +&euro;&nbsp;${getRandomInRange(Price.MIN_PRICE_OFFER, Price.MAX_PRICE_OFFER)}</button>
+                    <button class="trip-point__offer">${this._offers[1][0]} +&euro;&nbsp;${this._offers[1][1]}</button>
                   </li>
                 </ul>
               </article>`.trim();
@@ -88,8 +81,7 @@ class Trip {
 
   unrender() {
     this.unbind();
+    this._element.remove();
     this._element = null;
   }
 }
-
-export {Trip};

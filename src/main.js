@@ -1,7 +1,7 @@
 import {NumConst, NAME_FILTERS, getRandomInRange} from './utils/index.js';
 import {eventTrip} from './data.js';
-import {Trip} from './trip.js';
-import {TripOpen} from './trip-open.js';
+import Trip from './trip.js';
+import TripOpen from './trip-open.js';
 import {renderFilters, formFilter} from './create-filter.js';
 
 export const boardEvents = document.querySelector(`.trip-day__items`);
@@ -20,30 +20,35 @@ const createData = (amount) => {
 };
 
 const renderEvents = (dist, arr) => {
+  let isOpen = false;
   for (let i = 0; i < arr.length; i += 1) {
     let point = new Trip(arr[i]);
     let pointOpen = new TripOpen(arr[i]);
     dist.appendChild(point.render());
     point.onClick = () => {
-      pointOpen.render();
-      dist.replaceChild(pointOpen.element, point.element);
-      point.unrender();
+      if (!isOpen) {
+        pointOpen.render();
+        dist.replaceChild(pointOpen.element, point.element);
+        point.unrender();
+        isOpen = true;
+      }
     };
     pointOpen.onSubmit = () => {
       point.render();
       dist.replaceChild(point.element, pointOpen.element);
       pointOpen.unrender();
+      isOpen = false;
     };
     pointOpen.onDelete = () => {
       pointOpen.unrender();
       arr.splice(i, 1);
-      dist.innerHTML = ``;
-      renderEvents(dist, arr);
+      isOpen = false;
     };
     pointOpen.onKeyEsc = () => {
       point.render();
       dist.replaceChild(point.element, pointOpen.element);
       pointOpen.unrender();
+      isOpen = false;
     };
   }
 };

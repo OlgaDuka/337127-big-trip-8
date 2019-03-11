@@ -4,7 +4,8 @@ import {getRandomInRange,
   getRandomDate,
   getArrFromSet,
   getRandomPhoto,
-  EVENT_TYPES, CITY_NAMES, OFFER_NAMES, DESTINATIONS} from './utils/index.js';
+  getRandomNamePoint,
+  EVENT_TYPES, OFFER_NAMES, DESTINATIONS} from './utils/index.js';
 
 const DEF_MIN_OFFERS = 2;
 const DEF_MIN_DESTINATIONS = 1;
@@ -15,13 +16,18 @@ const DEF_MAX_PHOTO = 8;
 const DAY = 7;
 const TIME_START = 0;
 const TIME_STOP = 43200000; // кол-во милисекунд в половине суток
-
+const Price = {
+  MIN_PRICE_EVENT: 100,
+  MAX_PRICE_EVENT: 300,
+};
 
 export const eventTrip = () => {
   const time = getRandomDate(DAY);
+  const typePoint = getRandomIndexArr(EVENT_TYPES[0]);
   return {
-    type: getRandomIndexArr(EVENT_TYPES[0]),
-    title: getRandomIndexArr(CITY_NAMES),
+    type: typePoint,
+    title: getRandomNamePoint(),
+    price: getRandomInRange(Price.MIN_PRICE_EVENT, Price.MAX_PRICE_EVENT),
     day: new Date(time),
     timeStart: time,
     timeStop: time + getRandomInRange(TIME_START, TIME_STOP),
