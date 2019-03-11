@@ -89,10 +89,6 @@ export const getArrFromSet = (originalSet, min, max) => {
   return arrResult;
 };
 
-export const getTime = (time) => {
-  return new Date(time).toLocaleString(`en-US`, {hour: `numeric`, minute: `numeric`, hour12: false});
-};
-
 export const createElement = (template) => {
   const newElement = document.createElement(`div`);
   newElement.innerHTML = template;
