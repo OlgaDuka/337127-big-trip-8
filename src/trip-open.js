@@ -1,7 +1,8 @@
-import {getTime, createElement} from './utils/index.js';
+import Component from './component.js';
 
-export default class TripOpen {
+export default class TripOpen extends Component {
   constructor(data) {
+    super();
     this._type = data.type;
     this._title = data.title;
     this._price = data.price;
@@ -14,7 +15,6 @@ export default class TripOpen {
     this._isFavorite = data.isFavorite;
     this._isCollapse = data.isCollapse;
 
-    this._element = null;
     this._onSubmit = null;
     this._onDelete = null;
     this._onKeyEsc = null;
@@ -22,10 +22,6 @@ export default class TripOpen {
     this._onSubmitButtonClick = this._onSubmitButtonClick.bind(this);
     this._onDeleteButtonClick = this._onDeleteButtonClick.bind(this);
     this._onKeydownEsc = this._onKeydownEsc.bind(this);
-  }
-
-  get element() {
-    return this._element;
   }
 
   _onSubmitButtonClick(evt) {
@@ -51,6 +47,22 @@ export default class TripOpen {
 
   set onKeyEsc(fn) {
     this._onKeyEsc = fn;
+  }
+
+  bind() {
+    this._element.querySelector(`.point__button-save`)
+      .addEventListener(`click`, this._onSubmitButtonClick);
+    this._element.querySelector(`.point__button-delete`)
+      .addEventListener(`click`, this._onDeleteButtonClick);
+    document.addEventListener(`keydown`, this._onKeydownEsc);
+  }
+
+  unbind() {
+    this._element.querySelector(`.point__button-save`)
+      .removeEventListener(`click`, this._onSubmitButtonClick);
+    this._element.querySelector(`.point__button-delete`)
+      .removeEventListener(`click`, this._onDeleteButtonClick);
+    document.removeEventListener(`keydown`, this._onKeydownEsc);
   }
 
   _getOffers() {
@@ -117,7 +129,7 @@ export default class TripOpen {
 
                     <label class="point__time">
                       choose time
-                      <input class="point__input" type="text" value="${getTime(this._timeStart)} — ${getTime(this._timeStop)}" name="time" placeholder="00:00 — 00:00">
+                      <input class="point__input" type="text" value="${this.getTime(this._timeStart)} — ${this.getTime(this._timeStop)}" name="time" placeholder="00:00 — 00:00">
                     </label>
 
                     <label class="point__price">
@@ -157,33 +169,5 @@ export default class TripOpen {
                   </section>
                 </form>
               </article>`.trim();
-  }
-
-  bind() {
-    this._element.querySelector(`.point__button-save`)
-      .addEventListener(`click`, this._onSubmitButtonClick);
-    this._element.querySelector(`.point__button-delete`)
-      .addEventListener(`click`, this._onDeleteButtonClick);
-    document.addEventListener(`keydown`, this._onKeydownEsc);
-  }
-
-  unbind() {
-    this._element.querySelector(`.point__button-save`)
-      .removeEventListener(`click`, this._onSubmitButtonClick);
-    this._element.querySelector(`.point__button-delete`)
-      .removeEventListener(`click`, this._onDeleteButtonClick);
-    document.removeEventListener(`keydown`, this._onKeydownEsc);
-  }
-
-  render() {
-    this._element = createElement(this.template);
-    this.bind();
-    return this._element;
-  }
-
-  unrender() {
-    this.unbind();
-    this._element.remove();
-    this._element = null;
   }
 }

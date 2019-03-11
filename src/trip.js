@@ -1,7 +1,8 @@
-import {getTime, createElement} from './utils/index.js';
+import Component from './component.js';
 
-export default class Trip {
+export default class Trip extends Component {
   constructor(data) {
+    super();
     this._type = data.type;
     this._title = data.title;
     this._price = data.price;
@@ -14,7 +15,6 @@ export default class Trip {
     this._isFavorite = data.isFavorite;
     this._isCollapse = data.isCollapse;
 
-    this._element = null;
     this._onClick = null;
 
     this._onPointClick = this._onPointClick.bind(this);
@@ -24,8 +24,16 @@ export default class Trip {
     return (typeof this._onClick === `function`) && this._onClick();
   }
 
-  get element() {
-    return this._element;
+  set onClick(fn) {
+    this._onClick = fn;
+  }
+
+  bind() {
+    this._element.addEventListener(`click`, this._onPointClick);
+  }
+
+  unbind() {
+    this._element.removeEventListener(`click`, this._onPointClick);
   }
 
   _getOffer() {
@@ -46,7 +54,7 @@ export default class Trip {
                 <i class="trip-icon">${this._type[1]}</i>
                 <h3 class="trip-point__title">${this._type[0]} ${this._title}</h3>
                 <p class="trip-point__schedule">
-                  <span class="trip-point__timetable">${getTime(this._timeStart)}&nbsp;&mdash; ${getTime(this._timeStop)}</span>
+                  <span class="trip-point__timetable">${this.getTime(this._timeStart)}&nbsp;&mdash; ${this.getTime(this._timeStop)}</span>
                   <span class="trip-point__duration">${this.getDuration(this._timeStop, this._timeStart)}</span>
                 </p>
                 <p class="trip-point__price">&euro;&nbsp;${this._price}</p>
@@ -59,29 +67,5 @@ export default class Trip {
                   </li>
                 </ul>
               </article>`.trim();
-  }
-
-  set onClick(fn) {
-    this._onClick = fn;
-  }
-
-  bind() {
-    this._element.addEventListener(`click`, this._onPointClick);
-  }
-
-  unbind() {
-    this._element.removeEventListener(`click`, this._onPointClick);
-  }
-
-  render() {
-    this._element = createElement(this.template);
-    this.bind();
-    return this._element;
-  }
-
-  unrender() {
-    this.unbind();
-    this._element.remove();
-    this._element = null;
   }
 }
