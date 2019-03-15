@@ -11,7 +11,7 @@ export default class Trip extends Component {
     this._timeStop = data.timeStop;
     this._picture = data.picture;
     this._offers = data.offers;
-    this._destinations = data.destinations;
+    this._description = data.description;
     this._isFavorite = data.isFavorite;
     this._isCollapse = data.isCollapse;
 
@@ -34,6 +34,16 @@ export default class Trip extends Component {
 
   unbind() {
     this._element.removeEventListener(`click`, this._onPointClick);
+  }
+
+  update(data) {
+    this._type = data.type;
+    this._title = data.title;
+    this._price = data.price;
+    this._day = data.day;
+    this._timeStart = data.timeStart;
+    this._timeStop = data.timeStop;
+    this._offers = data.offers;
   }
 
   _getOffer() {
@@ -59,13 +69,14 @@ export default class Trip extends Component {
                 </p>
                 <p class="trip-point__price">&euro;&nbsp;${this._price}</p>
                 <ul class="trip-point__offers">
-                  <li>
-                    <button class="trip-point__offer">${this._offers[0][0]} +&euro;&nbsp;${this._offers[0][1]}</button>
-                  </li>
-                  <li>
-                    <button class="trip-point__offer">${this._offers[1][0]} +&euro;&nbsp;${this._offers[1][1]}</button>
-                  </li>
                 </ul>
               </article>`.trim();
   }
 }
+
+// <li>
+//  <button class="trip-point__offer">${this._offers[0][0]} +&euro;&nbsp;${this._offers[0][1]}</button>
+// </li>
+// <li>
+//  <button class="trip-point__offer">${this._offers[1][0]} +&euro;&nbsp;${this._offers[1][1]}</button>
+// </li>

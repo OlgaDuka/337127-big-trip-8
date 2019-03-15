@@ -1,3 +1,4 @@
+import flatpickr from 'flatpickr';
 import Component from './component.js';
 
 export default class TripOpen extends Component {
@@ -11,7 +12,7 @@ export default class TripOpen extends Component {
     this._timeStop = data.timeStop;
     this._picture = data.picture;
     this._offers = data.offers;
-    this._destinations = data.destinations;
+    this._description = data.description;
     this._isFavorite = data.isFavorite;
     this._isCollapse = data.isCollapse;
 
@@ -26,7 +27,12 @@ export default class TripOpen extends Component {
 
   _onSubmitButtonClick(evt) {
     evt.preventDefault();
-    return (typeof this._onSubmit === `function`) && this._onSubmit();
+    const formData = new FormData(this._element.querySelector(`.point__form`));
+    const newData = this._processForm(formData);
+    if (typeof this._onSubmit === `function`) {
+      this._onSubmit(newData);
+    }
+    this.update(newData);
   }
 
   set onSubmit(fn) {
@@ -49,12 +55,80 @@ export default class TripOpen extends Component {
     this._onKeyEsc = fn;
   }
 
+  _partialUpdate() {
+    this._element.innerHTML = this.template;
+  }
+
+  _processForm(formData) {
+    const entry = {
+      type: ``,
+      title: ``,
+      price: 0,
+      day: new Date(),
+      timeStart: new Date(),
+      timeStop: new Date(),
+      offers: new Set(),
+    };
+
+    const pointEditMapper = TripOpen.createMapper(entry);
+
+    for (const pair of formData.entries()) {
+      const [property, value] = pair;
+      if (pointEditMapper[property]) {
+        pointEditMapper[property](value);
+      }
+    }
+    return entry;
+  }
+
+  update(data) {
+    this._type = data.type;
+    this._title = data.title;
+    this._price = data.price;
+    this._day = data.day;
+    this._timeStart = data.timeStart;
+    this._timeStop = data.timeStop;
+    this._offers = data.offers;
+  }
+
+  static createMapper(target) {
+    return {
+      day: (value) => {
+        target.day = value;
+      },
+      travelway: (value) => {
+        target.type[1] = value;
+      },
+      destination: (value) => {
+        target.title = value;
+      },
+      time: (value) => {
+        target.timeStart = value;
+      },
+      price: (value) => {
+        target.price = value;
+      },
+      offer: (value) => {
+        target.offers.push(value);
+      }
+    };
+  }
+
   bind() {
     this._element.querySelector(`.point__button-save`)
       .addEventListener(`click`, this._onSubmitButtonClick);
     this._element.querySelector(`.point__button-delete`)
       .addEventListener(`click`, this._onDeleteButtonClick);
     document.addEventListener(`keydown`, this._onKeydownEsc);
+
+    this._element.querySelector(`input[name="time"]`).flatpickr({
+      mode: `range`,
+      enableTime: true,
+      noCalendar: true,
+      altInput: false,
+      dateFormat: `h:i`,
+      defaultDate: [`00:00`, `12:00`]
+    });
   }
 
   unbind() {
@@ -79,7 +153,7 @@ export default class TripOpen extends Component {
 
   get template() {
     return `<article class="point">
-                <form action="" method="get">
+                <form action="" method="get" class="point__form">
                   <header class="point__header">
                     <label class="point__date">
                       choose day
@@ -129,7 +203,7 @@ export default class TripOpen extends Component {
 
                     <label class="point__time">
                       choose time
-                      <input class="point__input" type="text" value="${this.getTime(this._timeStart)} — ${this.getTime(this._timeStop)}" name="time" placeholder="00:00 — 00:00">
+                      <input class="point__input" type="text" value="${this.getTime(this._timeStart)}" name="time" placeholder="00:00 — 00:00">
                     </label>
 
                     <label class="point__price">
@@ -154,13 +228,13 @@ export default class TripOpen extends Component {
                       <h3 class="point__details-title">offers</h3>
 
                       <div class="point__offers-wrap">
-                        ${this._getOffers()}
+
                       </div>
 
                     </section>
                     <section class="point__destination">
                       <h3 class="point__details-title">Destination</h3>
-                      <p class="point__destination-text">${this._destinations}</p>
+                      <p class="point__destination-text">${this._description}</p>
                       <div class="point__destination-images">
                         ${this._getPictures()}
                       </div>

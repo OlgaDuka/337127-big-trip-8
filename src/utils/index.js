@@ -31,7 +31,7 @@ export const OFFER_NAMES = new Set([
   [`Booking cars`, 0]
 ]);
 
-export const DESTINATIONS = new Set([
+export const DESCRIPTIONS = new Set([
   `Lorem ipsum dolor sit amet, consectetur adipiscing elit.`,
   `Cras aliquet varius magna, non porta ligula feugiat eget.`,
   `Fusce tristique felis at fermentum pharetra.`,

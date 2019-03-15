@@ -1,3 +1,4 @@
+import moment from 'moment';
 import {createElement} from './utils/index.js';
 
 export default class Component {
@@ -13,11 +14,11 @@ export default class Component {
   }
 
   getDate(time) {
-    return new Date(time).toLocaleString(`en-US`, {year: `numeric`, month: `long`, day: `numeric`});
+    return moment.unix(time).format(`DD MMMM`);
   }
 
   getTime(time) {
-    return new Date(time).toLocaleString(`en-US`, {hour: `numeric`, minute: `numeric`, hour12: false});
+    return moment.unix(time).format(`LT`);
   }
 
   get template() {
