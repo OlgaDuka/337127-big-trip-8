@@ -1,3 +1,4 @@
+import moment from 'moment';
 export const NumConst = {
   MAX_EVENT_IN_FILTER: 5,
   START_EVENTS: 4,
@@ -48,6 +49,13 @@ export const DESCRIPTIONS = new Set([
 export const CITY_NAMES = [`Singapore`, `Kuala-Lumpur`, `Manila`, `Karachi`, `Kolombo`, `Muli`, `Lima`, `Hong Kong`, `Macau`, `Dubai`, `Kathmandu`];
 
 export const NAME_FILTERS = [`everything`, `future`, `past`];
+
+export const getTimeStr = (time1, time2) => {
+  moment.locale(`en-gb`);
+  const str1 = moment(time1).format(`LT`);
+  const str2 = moment(time2).format(`LT`);
+  return `${str1} - ${str2}`;
+};
 
 export const getRandomInRange = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
 export const getRandomBoolean = () => Boolean(Math.round(Math.random()));

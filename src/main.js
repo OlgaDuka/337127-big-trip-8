@@ -35,11 +35,9 @@ const renderEvents = (dist, arr) => {
     };
     pointOpen.onSubmit = (newObject) => {
       const data = arr[i];
-      data.type = newObject.type;
       data.title = newObject.title;
       data.price = newObject.price;
-      data.timeStart = newObject.timeStart;
-      data.timeStop = newObject.timeStop;
+      data.time = newObject.time;
       //  data.offers = newObject.offers;
 
       point.update(data);

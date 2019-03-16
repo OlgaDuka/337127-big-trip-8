@@ -1,3 +1,4 @@
+import moment from 'moment';
 import flatpickr from 'flatpickr';
 import Component from './component.js';
 
@@ -10,6 +11,7 @@ export default class TripOpen extends Component {
     this._day = data.day;
     this._timeStart = data.timeStart;
     this._timeStop = data.timeStop;
+    this._time = data.time;
     this._picture = data.picture;
     this._offers = data.offers;
     this._description = data.description;
@@ -23,6 +25,8 @@ export default class TripOpen extends Component {
     this._onSubmitButtonClick = this._onSubmitButtonClick.bind(this);
     this._onDeleteButtonClick = this._onDeleteButtonClick.bind(this);
     this._onKeydownEsc = this._onKeydownEsc.bind(this);
+    this._onCloseFlatpickr = this._onCloseFlatpickr.bind(this);
+    this._onChangeType = this._onChangeType.bind(this);
   }
 
   _onSubmitButtonClick(evt) {
@@ -56,18 +60,18 @@ export default class TripOpen extends Component {
   }
 
   _partialUpdate() {
-    this._element.innerHTML = this.template;
+    // this._element.innerHTML = this.template;
+    this.unbind();
+    const oldElement = this._element;
+    this.render();
+    oldElement.parentNode.replaceChild(this._element, oldElement);
   }
 
   _processForm(formData) {
     const entry = {
-      type: ``,
       title: ``,
       price: 0,
-      day: new Date(),
-      timeStart: new Date(),
-      timeStop: new Date(),
-      offers: new Set(),
+      time: this._time,
     };
 
     const pointEditMapper = TripOpen.createMapper(entry);
@@ -82,36 +86,49 @@ export default class TripOpen extends Component {
   }
 
   update(data) {
-    this._type = data.type;
     this._title = data.title;
     this._price = data.price;
     this._day = data.day;
-    this._timeStart = data.timeStart;
-    this._timeStop = data.timeStop;
-    this._offers = data.offers;
+    this._time = data.time;
   }
 
   static createMapper(target) {
     return {
-      day: (value) => {
-        target.day = value;
+      'travel-way': (value) => {
+        target.type = value;
       },
-      travelway: (value) => {
-        target.type[1] = value;
-      },
-      destination: (value) => {
+      'destination': (value) => {
         target.title = value;
       },
-      time: (value) => {
-        target.timeStart = value;
+      'time': (value) => {
+        target.time = value.replace(`to`, `—`);
       },
-      price: (value) => {
+      'price': (value) => {
         target.price = value;
       },
-      offer: (value) => {
-        target.offers.push(value);
-      }
     };
+  }
+
+  _onCloseFlatpickr(selectedDates, dateStr) {
+    this._timeStart = moment(selectedDates[0]).format(`LT`);
+    this._timeStop = moment(selectedDates[1]).format(`LT`);
+    this._time = dateStr.replace(`to`, `—`);
+  }
+
+  _onChangeType(evt) {
+    let typeName = ``;
+    let typeIcon = ``;
+    let typeAdd = ``;
+    if (evt.target.classList[0] === `travel-way__select-label`) {
+      typeName = evt.target.previousElementSibling.value;
+      typeIcon = evt.target.textContent;
+      typeAdd = evt.target.parentElement.dataset[`add`];
+      typeName = typeName[0].toUpperCase() + typeName.slice(1) + ` ` + typeAdd;
+      typeIcon = typeIcon.split(` `, 1);
+      this._type[0] = typeName;
+      this._type[1] = typeIcon;
+    }
+    this._partialUpdate();
   }
 
   bind() {
@@ -120,14 +137,14 @@ export default class TripOpen extends Component {
     this._element.querySelector(`.point__button-delete`)
       .addEventListener(`click`, this._onDeleteButtonClick);
     document.addEventListener(`keydown`, this._onKeydownEsc);
+    this._element.querySelector(`.travel-way__select`)
+      .addEventListener(`click`, this._onChangeType);
 
     this._element.querySelector(`input[name="time"]`).flatpickr({
       mode: `range`,
       enableTime: true,
-      noCalendar: true,
-      altInput: false,
-      dateFormat: `h:i`,
-      defaultDate: [`00:00`, `12:00`]
+      dateFormat: `H:i`,
+      onClose: this._onCloseFlatpickr
     });
   }
 
@@ -136,6 +153,8 @@ export default class TripOpen extends Component {
       .removeEventListener(`click`, this._onSubmitButtonClick);
     this._element.querySelector(`.point__button-delete`)
       .removeEventListener(`click`, this._onDeleteButtonClick);
+    this._element.querySelector(`.travel-way__select`)
+      .removeEventListener(`click`, this._onChangeType);
     document.removeEventListener(`keydown`, this._onKeydownEsc);
   }
 
@@ -166,7 +185,7 @@ export default class TripOpen extends Component {
                       <input type="checkbox" class="travel-way__toggle visually-hidden" id="travel-way__toggle">
 
                       <div class="travel-way__select">
-                        <div class="travel-way__select-group">
+                        <div class="travel-way__select-group" data-add="to">
                           <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-taxi" name="travel-way" value="taxi">
                           <label class="travel-way__select-label" for="travel-way-taxi">🚕 taxi</label>
 
@@ -176,11 +195,11 @@ export default class TripOpen extends Component {
                           <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-train" name="travel-way" value="train">
                           <label class="travel-way__select-label" for="travel-way-train">🚂 train</label>
 
-                          <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-flight" name="travel-way" value="train">
+                          <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-flight" name="travel-way" value="flight">
                           <label class="travel-way__select-label" for="travel-way-flight">✈️ flight</label>
                         </div>
 
-                        <div class="travel-way__select-group">
+                        <div class="travel-way__select-group" data-add="in">
                           <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-check-in" name="travel-way" value="check-in">
                           <label class="travel-way__select-label" for="travel-way-check-in">🏨 check-in</label>
 
@@ -203,7 +222,9 @@ export default class TripOpen extends Component {
 
                     <label class="point__time">
                       choose time
-                      <input class="point__input" type="text" value="${this.getTime(this._timeStart)}" name="time" placeholder="00:00 — 00:00">
+                      <input class="point__input" type="text"
+                      value="${this._time}"
+                      name="time" placeholder="00:00 — 00:00">
                     </label>
 
                     <label class="point__price">

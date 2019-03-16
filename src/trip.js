@@ -9,6 +9,7 @@ export default class Trip extends Component {
     this._day = data.day;
     this._timeStart = data.timeStart;
     this._timeStop = data.timeStop;
+    this._time = data.time;
     this._picture = data.picture;
     this._offers = data.offers;
     this._description = data.description;
@@ -37,13 +38,10 @@ export default class Trip extends Component {
   }
 
   update(data) {
-    this._type = data.type;
     this._title = data.title;
     this._price = data.price;
     this._day = data.day;
-    this._timeStart = data.timeStart;
-    this._timeStop = data.timeStop;
-    this._offers = data.offers;
+    this._time = data.time;
   }
 
   _getOffer() {
@@ -64,7 +62,7 @@ export default class Trip extends Component {
                 <i class="trip-icon">${this._type[1]}</i>
                 <h3 class="trip-point__title">${this._type[0]} ${this._title}</h3>
                 <p class="trip-point__schedule">
-                  <span class="trip-point__timetable">${this.getTime(this._timeStart)}&nbsp;&mdash; ${this.getTime(this._timeStop)}</span>
+                  <span class="trip-point__timetable">${this._time}</span>
                   <span class="trip-point__duration">${this.getDuration(this._timeStop, this._timeStart)}</span>
                 </p>
                 <p class="trip-point__price">&euro;&nbsp;${this._price}</p>
