@@ -116,13 +116,10 @@ export default class TripOpen extends Component {
   }
 
   _onChangeType(evt) {
-    let typeName = ``;
-    let typeIcon = ``;
-    let typeAdd = ``;
     if (evt.target.classList[0] === `travel-way__select-label`) {
-      typeName = evt.target.previousElementSibling.value;
-      typeIcon = evt.target.textContent;
-      typeAdd = evt.target.parentElement.dataset[`add`];
+      let typeName = evt.target.previousElementSibling.value;
+      let typeIcon = evt.target.textContent;
+      let typeAdd = evt.target.parentElement.dataset[`add`];
       typeName = typeName[0].toUpperCase() + typeName.slice(1) + ` ` + typeAdd;
       typeIcon = typeIcon.split(` `, 1);
       this._type[0] = typeName;
