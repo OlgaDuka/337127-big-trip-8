@@ -72,6 +72,7 @@ export default class TripOpen extends Component {
       title: ``,
       price: 0,
       time: this._time,
+      offer: []
     };
 
     const pointEditMapper = TripOpen.createMapper(entry);
@@ -90,6 +91,7 @@ export default class TripOpen extends Component {
     this._price = data.price;
     this._day = data.day;
     this._time = data.time;
+    this._offers = data.offers;
   }
 
   static createMapper(target) {
@@ -246,7 +248,7 @@ export default class TripOpen extends Component {
                       <h3 class="point__details-title">offers</h3>
 
                       <div class="point__offers-wrap">
-
+                        ${this._getOffers()}
                       </div>
 
                     </section>

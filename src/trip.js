@@ -42,6 +42,7 @@ export default class Trip extends Component {
     this._price = data.price;
     this._day = data.day;
     this._time = data.time;
+    this._offers = data.offers;
   }
 
   _getOffer() {
@@ -67,14 +68,8 @@ export default class Trip extends Component {
                 </p>
                 <p class="trip-point__price">&euro;&nbsp;${this._price}</p>
                 <ul class="trip-point__offers">
+                  ${this._getOffer()}
                 </ul>
               </article>`.trim();
   }
 }
-
-// <li>
-//  <button class="trip-point__offer">${this._offers[0][0]} +&euro;&nbsp;${this._offers[0][1]}</button>
-// </li>
-// <li>
-//  <button class="trip-point__offer">${this._offers[1][0]} +&euro;&nbsp;${this._offers[1][1]}</button>
-// </li>
