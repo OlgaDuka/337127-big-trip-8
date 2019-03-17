@@ -123,12 +123,28 @@ export default class TripOpen extends Component {
 
   _onChangeOffers(evt) {
     const price = evt.target.nextElementSibling.querySelector(`.point__offer-price`).textContent;
+    const strFind = evt.target.value;
+    let num = -1;
     if (evt.target.checked) {
-      const num = this._state.offers.indexOf([evt.target.value, price, false]);
-      this._state.offers.splice(num, 1, [evt.target.value, price, true]);
+      for (let i = 0; i < this._state.offers.length; i += 1) {
+        if (this._state.offers[i][0] === strFind) {
+          num = i;
+          break;
+        }
+      }
+      if (num !== -1) {
+        this._state.offers.splice(num, 1, [evt.target.value, price, true]);
+      }
     } else {
-      const num = this._state.offers.indexOf([evt.target.value, price, true]);
-      this._state.offers.splice(num, 1, [evt.target.value, price, false]);
+      for (let i = 0; i < this._state.offers.length; i += 1) {
+        if (this._state.offers[i][0] === strFind) {
+          num = i;
+          break;
+        }
+      }
+      if (num !== -1) {
+        this._state.offers.splice(num, 1, [evt.target.value, price, false]);
+      }
     }
   }
 
