@@ -18,6 +18,21 @@ export default class TripOpen extends Component {
     this._isFavorite = data.isFavorite;
     this._isCollapse = data.isCollapse;
 
+    this._state = {
+      type: data.type,
+      title: data.title,
+      price: data.price,
+      day: data.day,
+      timeStart: data.timeStart,
+      timeStop: data.timeStop,
+      time: data.time,
+      picture: data.picture,
+      offers: data.offers,
+      description: data.description,
+      isFavorite: data.isFavorite,
+      isCollapse: data.isCollapse
+    };
+
     this._onSubmit = null;
     this._onDelete = null;
     this._onKeyEsc = null;
@@ -27,16 +42,17 @@ export default class TripOpen extends Component {
     this._onKeydownEsc = this._onKeydownEsc.bind(this);
     this._onCloseFlatpickr = this._onCloseFlatpickr.bind(this);
     this._onChangeType = this._onChangeType.bind(this);
+    this._onChangeDestination = this._onChangeDestination.bind(this);
+    this._onChangePrice = this._onChangePrice.bind(this);
+    this._onChangeOffers = this._onChangeOffers.bind(this);
   }
 
   _onSubmitButtonClick(evt) {
     evt.preventDefault();
-    const formData = new FormData(this._element.querySelector(`.point__form`));
-    const newData = this._processForm(formData);
     if (typeof this._onSubmit === `function`) {
-      this._onSubmit(newData);
+      this._onSubmit(this._state);
     }
-    this.update(newData);
+    this.update(this._state);
   }
 
   set onSubmit(fn) {
@@ -60,30 +76,10 @@ export default class TripOpen extends Component {
   }
 
   _partialUpdate() {
-    // this._element.innerHTML = this.template;
     this.unbind();
     const oldElement = this._element;
     this.render();
     oldElement.parentNode.replaceChild(this._element, oldElement);
-  }
-
-  _processForm(formData) {
-    const entry = {
-      title: ``,
-      price: 0,
-      time: this._time,
-      offer: []
-    };
-
-    const pointEditMapper = TripOpen.createMapper(entry);
-
-    for (const pair of formData.entries()) {
-      const [property, value] = pair;
-      if (pointEditMapper[property]) {
-        pointEditMapper[property](value);
-      }
-    }
-    return entry;
   }
 
   update(data) {
@@ -94,27 +90,13 @@ export default class TripOpen extends Component {
     this._offers = data.offers;
   }
 
-  static createMapper(target) {
-    return {
-      'travel-way': (value) => {
-        target.type = value;
-      },
-      'destination': (value) => {
-        target.title = value;
-      },
-      'time': (value) => {
-        target.time = value.replace(`to`, `—`);
-      },
-      'price': (value) => {
-        target.price = value;
-      },
-    };
-  }
-
   _onCloseFlatpickr(selectedDates, dateStr) {
     this._timeStart = moment(selectedDates[0]).format(`LT`);
     this._timeStop = moment(selectedDates[1]).format(`LT`);
     this._time = dateStr.replace(`to`, `—`);
+    this._state.timeStart = this._timeStart;
+    this._state.timeStop = this._timeStop;
+    this._state.time = this._time;
   }
 
   _onChangeType(evt) {
@@ -126,8 +108,28 @@ export default class TripOpen extends Component {
       typeIcon = typeIcon.split(` `, 1);
       this._type[0] = typeName;
       this._type[1] = typeIcon;
+      this._state.type = this._type;
     }
     this._partialUpdate();
+  }
+
+  _onChangeDestination(evt) {
+    this._state.title = evt.target.value;
+  }
+
+  _onChangePrice(evt) {
+    this._state.price = evt.target.value;
+  }
+
+  _onChangeOffers(evt) {
+    const price = evt.target.nextElementSibling.querySelector(`.point__offer-price`).textContent;
+    if (evt.target.checked) {
+      const num = this._state.offers.indexOf([evt.target.value, price, false]);
+      this._state.offers.splice(num, 1, [evt.target.value, price, true]);
+    } else {
+      const num = this._state.offers.indexOf([evt.target.value, price, true]);
+      this._state.offers.splice(num, 1, [evt.target.value, price, false]);
+    }
   }
 
   bind() {
@@ -136,10 +138,20 @@ export default class TripOpen extends Component {
     this._element.querySelector(`.point__button-delete`)
       .addEventListener(`click`, this._onDeleteButtonClick);
     document.addEventListener(`keydown`, this._onKeydownEsc);
+
     this._element.querySelector(`.travel-way__select`)
       .addEventListener(`click`, this._onChangeType);
+    this._element.querySelector(`input[name="destination"]`)
+      .addEventListener(`change`, this._onChangeDestination);
+    this._element.querySelector(`input[name="price"]`)
+      .addEventListener(`change`, this._onChangePrice);
 
-    this._element.querySelector(`input[name="time"]`).flatpickr({
+    const offers = this._element.querySelectorAll(`.point__offers-input`);
+    [].forEach.call(offers, (element) => {
+      element.addEventListener(`click`, this._onChangeOffers);
+    });
+
+    flatpickr(this._element.querySelector(`input[name="time"]`), {
       mode: `range`,
       enableTime: true,
       dateFormat: `H:i`,
@@ -152,13 +164,23 @@ export default class TripOpen extends Component {
       .removeEventListener(`click`, this._onSubmitButtonClick);
     this._element.querySelector(`.point__button-delete`)
       .removeEventListener(`click`, this._onDeleteButtonClick);
+    document.removeEventListener(`keydown`, this._onKeydownEsc);
+
     this._element.querySelector(`.travel-way__select`)
       .removeEventListener(`click`, this._onChangeType);
-    document.removeEventListener(`keydown`, this._onKeydownEsc);
+    this._element.querySelector(`input[name="destination"]`)
+      .removeEventListener(`change`, this._onChangeDestination);
+    this._element.querySelector(`input[name="price"]`)
+      .removeEventListener(`change`, this._onChangePrice);
+
+    const offers = this._element.querySelectorAll(`.point__offers-input`);
+    [].forEach.call(offers, (element) => {
+      element.removeEventListener(`click`, this._onChangeOffers);
+    });
   }
 
   _getOffers() {
-    return this._offers.map((offer) => `<input class="point__offers-input visually-hidden" type="checkbox" id="${offer[0]}" name="offer" value="${offer[0]}">
+    return this._offers.map((offer) => `<input class="point__offers-input visually-hidden" type="checkbox" id="${offer[0]}" name="offer" value="${offer[0]}" ${(offer[2] === true) ? `checked` : ``}>
     <label for="${offer[0]}" class="point__offers-label">
       <span class="point__offer-service">${offer[0]}</span> + €<span class="point__offer-price">${offer[1]}</span>
     </label>`).join(``);

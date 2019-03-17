@@ -22,14 +22,14 @@ export const EVENT_TYPES = new Array([
 ]);
 
 export const OFFER_NAMES = new Set([
-  [`Add luggage`, 0],
-  [`Switch to comfort class`, 0],
-  [`Add meal`, 0],
-  [`Choose seats`, 0],
-  [`Get of calling cards`, 0],
-  [`Add insurance`, 0],
-  [`Booking ticket for event`, 0],
-  [`Booking cars`, 0]
+  [`Add luggage`, `0`, false],
+  [`Switch to comfort class`, `0`, false],
+  [`Add meal`, `0`, false],
+  [`Choose seats`, `0`, false],
+  [`Get of calling cards`, `0`, false],
+  [`Add insurance`, `0`, false],
+  [`Booking ticket for event`, `0`, false],
+  [`Booking cars`, `0`, false]
 ]);
 
 export const DESCRIPTIONS = new Set([
@@ -86,8 +86,8 @@ export const getArrFromSet = (originalSet, min, max) => {
       let num = getRandomInRange(0, originalSet.size - 1);
       if (arrNumber.indexOf(num) === -1) {
         arrResult[i] = [...originalSet][num];
-        if (arrResult[i].length === 2) {
-          arrResult[i][1] = getRandomInRange(MIN_PRICE_OFFER, MAX_PRICE_OFFER);
+        if (arrResult[i].length === 3) {
+          arrResult[i][1] = `${getRandomInRange(MIN_PRICE_OFFER, MAX_PRICE_OFFER)}`;
         }
         arrNumber[i] = num;
         i += 1;

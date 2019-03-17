@@ -46,7 +46,12 @@ export default class Trip extends Component {
   }
 
   _getOffer() {
-    return this._offers.map((offer) => `<li>
+    let arrOffers = [];
+    arrOffers[0] = this._offers[0];
+    arrOffers[1] = this._offers[1];
+    this._offers[0][2] = true;
+    this._offers[1][2] = true;
+    return arrOffers.map((offer) => `<li>
         <button class="trip-point__offer">${offer[0]} +&euro;&nbsp;${offer[1]}</button>
       </li>`).join(``);
   }
