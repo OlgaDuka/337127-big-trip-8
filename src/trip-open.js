@@ -121,30 +121,26 @@ export default class TripOpen extends Component {
     this._state.price = evt.target.value;
   }
 
+  _replaceOffer(strFind, strPrice, flagOffer) {
+    let num = -1;
+    for (let i = 0; i < this._state.offers.length; i += 1) {
+      if (this._state.offers[i][0] === strFind) {
+        num = i;
+        break;
+      }
+    }
+    if (num !== -1) {
+      this._state.offers.splice(num, 1, [strFind, strPrice, flagOffer]);
+    }
+  }
+
   _onChangeOffers(evt) {
     const price = evt.target.nextElementSibling.querySelector(`.point__offer-price`).textContent;
-    const strFind = evt.target.value;
-    let num = -1;
+    const str = evt.target.value;
     if (evt.target.checked) {
-      for (let i = 0; i < this._state.offers.length; i += 1) {
-        if (this._state.offers[i][0] === strFind) {
-          num = i;
-          break;
-        }
-      }
-      if (num !== -1) {
-        this._state.offers.splice(num, 1, [evt.target.value, price, true]);
-      }
+      this._replaceOffer(str, price, true);
     } else {
-      for (let i = 0; i < this._state.offers.length; i += 1) {
-        if (this._state.offers[i][0] === strFind) {
-          num = i;
-          break;
-        }
-      }
-      if (num !== -1) {
-        this._state.offers.splice(num, 1, [evt.target.value, price, false]);
-      }
+      this._replaceOffer(str, price, false);
     }
   }
 
@@ -169,6 +165,9 @@ export default class TripOpen extends Component {
 
     flatpickr(this._element.querySelector(`input[name="time"]`), {
       mode: `range`,
+      time_24hr: true,
+      minDate: "today",
+      defaultDate: [this._timeStart, this._timeStop],
       enableTime: true,
       dateFormat: `H:i`,
       onClose: this._onCloseFlatpickr

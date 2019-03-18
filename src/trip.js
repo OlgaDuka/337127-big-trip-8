@@ -1,3 +1,4 @@
+import moment from 'moment';
 import Component from './component.js';
 
 export default class Trip extends Component {
@@ -46,21 +47,22 @@ export default class Trip extends Component {
   }
 
   _getOffer() {
-    let arrOffers = [];
-    arrOffers[0] = this._offers[0];
-    arrOffers[1] = this._offers[1];
-    this._offers[0][2] = true;
-    this._offers[1][2] = true;
-    return arrOffers.map((offer) => `<li>
-        <button class="trip-point__offer">${offer[0]} +&euro;&nbsp;${offer[1]}</button>
-      </li>`).join(``);
+    let htmlOffers = ``;
+    this._offers.map((offer) => {
+      if (offer[2]) {
+        htmlOffers +=  `<li>
+          <button class="trip-point__offer">${offer[0]} +&euro;&nbsp;${offer[1]}</button>
+          </li>`;
+      }
+    })
+    return htmlOffers;
   }
 
   getDuration() {
-    let stroke = new Date(this._timeStop - this._timeStart);
-    let hours = `${stroke.toLocaleString(`en-US`, {hour: `2-digit`, hour12: false})}H `;
-    let minutes = `${stroke.toLocaleString(`en-US`, {minute: `2-digit`})}M`;
-    return hours + minutes;
+    return moment(this._timeStop - this._timeStart).format(`LT`);
+    // let hours = `${stroke.toLocaleString(`en-US`, {hour: `2-digit`, hour12: false})}H `;
+    // let minutes = `${stroke.toLocaleString(`en-US`, {minute: `2-digit`})}M`;
+    // return hours + minutes;
   }
 
   get template() {

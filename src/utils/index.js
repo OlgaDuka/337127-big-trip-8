@@ -79,6 +79,7 @@ export const getRandomPhoto = (amount) => {
 export const getArrFromSet = (originalSet, min, max) => {
   const arrResult = [];
   const arrNumber = [];
+  let flagChoice = 0
   let i = 0;
   const j = getRandomInRange(min, max);
   if (j > 0) {
@@ -88,6 +89,10 @@ export const getArrFromSet = (originalSet, min, max) => {
         arrResult[i] = [...originalSet][num];
         if (arrResult[i].length === 3) {
           arrResult[i][1] = `${getRandomInRange(MIN_PRICE_OFFER, MAX_PRICE_OFFER)}`;
+          if (flagChoice < 2) {
+            arrResult[i][2] = true;
+            flagChoice += 1;
+          }
         }
         arrNumber[i] = num;
         i += 1;
