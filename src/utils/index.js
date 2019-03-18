@@ -79,7 +79,7 @@ export const getRandomPhoto = (amount) => {
 export const getArrFromSet = (originalSet, min, max) => {
   const arrResult = [];
   const arrNumber = [];
-  let flagChoice = 0
+  let flagChoice = 0;
   let i = 0;
   const j = getRandomInRange(min, max);
   if (j > 0) {

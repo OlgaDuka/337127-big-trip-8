@@ -50,19 +50,21 @@ export default class Trip extends Component {
     let htmlOffers = ``;
     this._offers.map((offer) => {
       if (offer[2]) {
-        htmlOffers +=  `<li>
+        htmlOffers += `<li>
           <button class="trip-point__offer">${offer[0]} +&euro;&nbsp;${offer[1]}</button>
           </li>`;
       }
-    })
+    });
     return htmlOffers;
   }
 
   getDuration() {
-    return moment(this._timeStop - this._timeStart).format(`LT`);
-    // let hours = `${stroke.toLocaleString(`en-US`, {hour: `2-digit`, hour12: false})}H `;
-    // let minutes = `${stroke.toLocaleString(`en-US`, {minute: `2-digit`})}M`;
-    // return hours + minutes;
+    const dateStart = moment(this._timeStart);
+    const dateEnd = moment(this._timeStop);
+    const duration = moment.duration(dateEnd.diff(dateStart));
+    const hours = duration.hours();
+    const minutes = duration.minutes();
+    return `${hours}H:${minutes}M`;
   }
 
   get template() {

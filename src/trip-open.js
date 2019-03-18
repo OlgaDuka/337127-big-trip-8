@@ -165,8 +165,8 @@ export default class TripOpen extends Component {
 
     flatpickr(this._element.querySelector(`input[name="time"]`), {
       mode: `range`,
-      time_24hr: true,
-      minDate: "today",
+      time24hr: true,
+      minDate: `today`,
       defaultDate: [this._timeStart, this._timeStop],
       enableTime: true,
       dateFormat: `H:i`,
