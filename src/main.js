@@ -20,35 +20,36 @@ const createData = (amount) => {
 };
 
 const renderEvents = (dist, arr) => {
-  let isOpen = false;
   for (let i = 0; i < arr.length; i += 1) {
     let point = new Trip(arr[i]);
     let pointOpen = new TripOpen(arr[i]);
     dist.appendChild(point.render());
     point.onClick = () => {
-      if (!isOpen) {
-        pointOpen.render();
-        dist.replaceChild(pointOpen.element, point.element);
-        point.unrender();
-        isOpen = true;
-      }
+      pointOpen.render();
+      dist.replaceChild(pointOpen.element, point.element);
+      point.unrender();
     };
-    pointOpen.onSubmit = () => {
+    pointOpen.onSubmit = (newObject) => {
+      const data = arr[i];
+      data.title = newObject.title;
+      data.price = newObject.price;
+      data.time = newObject.time;
+      data.offers = newObject.offers;
+
+      point.update(data);
+
       point.render();
       dist.replaceChild(point.element, pointOpen.element);
       pointOpen.unrender();
-      isOpen = false;
     };
     pointOpen.onDelete = () => {
       pointOpen.unrender();
       arr.splice(i, 1);
-      isOpen = false;
     };
     pointOpen.onKeyEsc = () => {
       point.render();
       dist.replaceChild(point.element, pointOpen.element);
       pointOpen.unrender();
-      isOpen = false;
     };
   }
 };

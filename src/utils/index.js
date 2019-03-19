@@ -1,3 +1,4 @@
+import moment from 'moment';
 export const NumConst = {
   MAX_EVENT_IN_FILTER: 5,
   START_EVENTS: 4,
@@ -21,17 +22,17 @@ export const EVENT_TYPES = new Array([
 ]);
 
 export const OFFER_NAMES = new Set([
-  [`Add luggage`, 0],
-  [`Switch to comfort class`, 0],
-  [`Add meal`, 0],
-  [`Choose seats`, 0],
-  [`Get of calling cards`, 0],
-  [`Add insurance`, 0],
-  [`Booking ticket for event`, 0],
-  [`Booking cars`, 0]
+  [`Add luggage`, `0`, false],
+  [`Switch to comfort class`, `0`, false],
+  [`Add meal`, `0`, false],
+  [`Choose seats`, `0`, false],
+  [`Get of calling cards`, `0`, false],
+  [`Add insurance`, `0`, false],
+  [`Booking ticket for event`, `0`, false],
+  [`Booking cars`, `0`, false]
 ]);
 
-export const DESTINATIONS = new Set([
+export const DESCRIPTIONS = new Set([
   `Lorem ipsum dolor sit amet, consectetur adipiscing elit.`,
   `Cras aliquet varius magna, non porta ligula feugiat eget.`,
   `Fusce tristique felis at fermentum pharetra.`,
@@ -48,6 +49,13 @@ export const DESTINATIONS = new Set([
 export const CITY_NAMES = [`Singapore`, `Kuala-Lumpur`, `Manila`, `Karachi`, `Kolombo`, `Muli`, `Lima`, `Hong Kong`, `Macau`, `Dubai`, `Kathmandu`];
 
 export const NAME_FILTERS = [`everything`, `future`, `past`];
+
+export const getTimeStr = (time1, time2) => {
+  moment.locale(`en-gb`);
+  const str1 = moment(time1).format(`LT`);
+  const str2 = moment(time2).format(`LT`);
+  return `${str1} - ${str2}`;
+};
 
 export const getRandomInRange = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
 export const getRandomBoolean = () => Boolean(Math.round(Math.random()));
@@ -71,6 +79,7 @@ export const getRandomPhoto = (amount) => {
 export const getArrFromSet = (originalSet, min, max) => {
   const arrResult = [];
   const arrNumber = [];
+  let flagChoice = 0;
   let i = 0;
   const j = getRandomInRange(min, max);
   if (j > 0) {
@@ -78,8 +87,12 @@ export const getArrFromSet = (originalSet, min, max) => {
       let num = getRandomInRange(0, originalSet.size - 1);
       if (arrNumber.indexOf(num) === -1) {
         arrResult[i] = [...originalSet][num];
-        if (arrResult[i].length === 2) {
-          arrResult[i][1] = getRandomInRange(MIN_PRICE_OFFER, MAX_PRICE_OFFER);
+        if (arrResult[i].length === 3) {
+          arrResult[i][1] = `${getRandomInRange(MIN_PRICE_OFFER, MAX_PRICE_OFFER)}`;
+          if (flagChoice < 2) {
+            arrResult[i][2] = true;
+            flagChoice += 1;
+          }
         }
         arrNumber[i] = num;
         i += 1;

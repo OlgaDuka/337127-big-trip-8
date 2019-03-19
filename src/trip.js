@@ -1,3 +1,4 @@
+import moment from 'moment';
 import Component from './component.js';
 
 export default class Trip extends Component {
@@ -9,9 +10,10 @@ export default class Trip extends Component {
     this._day = data.day;
     this._timeStart = data.timeStart;
     this._timeStop = data.timeStop;
+    this._time = data.time;
     this._picture = data.picture;
     this._offers = data.offers;
-    this._destinations = data.destinations;
+    this._description = data.description;
     this._isFavorite = data.isFavorite;
     this._isCollapse = data.isCollapse;
 
@@ -36,17 +38,33 @@ export default class Trip extends Component {
     this._element.removeEventListener(`click`, this._onPointClick);
   }
 
+  update(data) {
+    this._title = data.title;
+    this._price = data.price;
+    this._day = data.day;
+    this._time = data.time;
+    this._offers = data.offers;
+  }
+
   _getOffer() {
-    return this._offers.map((offer) => `<li>
-        <button class="trip-point__offer">${offer[0]} +&euro;&nbsp;${offer[1]}</button>
-      </li>`).join(``);
+    let htmlOffers = ``;
+    this._offers.map((offer) => {
+      if (offer[2]) {
+        htmlOffers += `<li>
+          <button class="trip-point__offer">${offer[0]} +&euro;&nbsp;${offer[1]}</button>
+          </li>`;
+      }
+    });
+    return htmlOffers;
   }
 
   getDuration() {
-    let stroke = new Date(this._timeStop - this._timeStart);
-    let hours = `${stroke.toLocaleString(`en-US`, {hour: `2-digit`, hour12: false})}H `;
-    let minutes = `${stroke.toLocaleString(`en-US`, {minute: `2-digit`})}M`;
-    return hours + minutes;
+    const dateStart = moment(this._timeStart);
+    const dateEnd = moment(this._timeStop);
+    const duration = moment.duration(dateEnd.diff(dateStart));
+    const hours = duration.hours();
+    const minutes = duration.minutes();
+    return `${hours}H:${minutes}M`;
   }
 
   get template() {
@@ -54,17 +72,12 @@ export default class Trip extends Component {
                 <i class="trip-icon">${this._type[1]}</i>
                 <h3 class="trip-point__title">${this._type[0]} ${this._title}</h3>
                 <p class="trip-point__schedule">
-                  <span class="trip-point__timetable">${this.getTime(this._timeStart)}&nbsp;&mdash; ${this.getTime(this._timeStop)}</span>
+                  <span class="trip-point__timetable">${this._time}</span>
                   <span class="trip-point__duration">${this.getDuration(this._timeStop, this._timeStart)}</span>
                 </p>
                 <p class="trip-point__price">&euro;&nbsp;${this._price}</p>
                 <ul class="trip-point__offers">
-                  <li>
-                    <button class="trip-point__offer">${this._offers[0][0]} +&euro;&nbsp;${this._offers[0][1]}</button>
-                  </li>
-                  <li>
-                    <button class="trip-point__offer">${this._offers[1][0]} +&euro;&nbsp;${this._offers[1][1]}</button>
-                  </li>
+                  ${this._getOffer()}
                 </ul>
               </article>`.trim();
   }
