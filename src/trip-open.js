@@ -99,11 +99,11 @@ export default class TripOpen extends Component {
     this._state.time = this._time;
   }
 
-  _onChangeType(evt) {
-    if (evt.target.classList[0] === `travel-way__select-label`) {
-      let typeName = evt.target.previousElementSibling.value;
-      let typeIcon = evt.target.textContent;
-      let typeAdd = evt.target.parentElement.dataset[`add`];
+  _onChangeType({target}) {
+    if (target.classList[0] === `travel-way__select-label`) {
+      let typeName = target.previousElementSibling.value;
+      let typeIcon = target.textContent;
+      let typeAdd = target.parentElement.dataset[`add`];
       typeName = typeName[0].toUpperCase() + typeName.slice(1) + ` ` + typeAdd;
       typeIcon = typeIcon.split(` `, 1);
       this._type[0] = typeName;
@@ -113,12 +113,12 @@ export default class TripOpen extends Component {
     this._partialUpdate();
   }
 
-  _onChangeDestination(evt) {
-    this._state.title = evt.target.value;
+  _onChangeDestination({target}) {
+    this._state.title = target.value;
   }
 
-  _onChangePrice(evt) {
-    this._state.price = evt.target.value;
+  _onChangePrice({target}) {
+    this._state.price = target.value;
   }
 
   _replaceOffer(strFind, strPrice, flagOffer) {
@@ -134,10 +134,10 @@ export default class TripOpen extends Component {
     }
   }
 
-  _onChangeOffers(evt) {
-    const price = evt.target.nextElementSibling.querySelector(`.point__offer-price`).textContent;
-    const str = evt.target.value;
-    if (evt.target.checked) {
+  _onChangeOffers({target}) {
+    const price = target.nextElementSibling.querySelector(`.point__offer-price`).textContent;
+    const str = target.value;
+    if (target.checked) {
       this._replaceOffer(str, price, true);
     } else {
       this._replaceOffer(str, price, false);
@@ -246,7 +246,7 @@ export default class TripOpen extends Component {
                     </div>
 
                     <div class="point__destination-wrap">
-                      <label class="point__destination-label" for="destination">${(this._type[0])}</label>
+                      <label class="point__destination-label" for="destination">${(this._type[0])} ${(this._type[2])}</label>
                       <input class="point__destination-input" list="destination-select" id="destination" value="${this._title}" name="destination">
                       <datalist id="destination-select">
                         <option value="airport"></option>

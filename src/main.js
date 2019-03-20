@@ -1,14 +1,37 @@
-import {NumConst, NAME_FILTERS, getRandomInRange} from './utils/index.js';
+import {NumConst, NAME_FILTERS} from './utils/index.js';
 import {eventTrip} from './data.js';
 import Trip from './trip.js';
 import TripOpen from './trip-open.js';
-import {renderFilters, formFilter} from './create-filter.js';
+import Filter from './filter.js';
 
 export const boardEvents = document.querySelector(`.trip-day__items`);
+export const formFilter = document.querySelector(`.trip-filter`);
 
-const toggleFilter = (event) => {
+const renderFilters = (arrFilters) => {
+  return arrFilters.map((element) => {
+    const filter = new Filter(element);
+    formFilter.appendChild(filter.render());
+  });
+};
+
+const toggleFilter = (target) => {
   formFilter.querySelector(`input:checked`).checked = false;
-  event.target.checked = true;
+  target.checked = true;
+};
+
+const filterEvents = (events, filterName) => {
+  let arrResult = [];
+  switch (filterName) {
+    case `filter-everything`:
+      arrResult = arrPoints;
+      break;
+    case `filter-future`:
+      arrResult = arrPoints.filter((it) => it.day > Date.now());
+      break;
+    case `filter-past`:
+      arrResult = arrPoints.filter((it) => it.day < Date.now());
+  }
+  return arrResult;
 };
 
 const createData = (amount) => {
@@ -19,10 +42,22 @@ const createData = (amount) => {
   return array;
 };
 
+const updatePoint = (points, pointToUpdate, newPoint) => {
+  const index = points.findIndex((it) => it === pointToUpdate);
+  points[index] = Object.assign({}, pointToUpdate, newPoint);
+  return points[index];
+};
+
+const deletePoint = (points, pointToDelete) => {
+  const index = points.findIndex((it) => it === pointToDelete);
+  points.splice(index, 1);
+  return points;
+};
+
 const renderEvents = (dist, arr) => {
-  for (let i = 0; i < arr.length; i += 1) {
-    let point = new Trip(arr[i]);
-    let pointOpen = new TripOpen(arr[i]);
+  for (const obPoint of arr) {
+    const point = new Trip(obPoint);
+    const pointOpen = new TripOpen(obPoint);
     dist.appendChild(point.render());
     point.onClick = () => {
       pointOpen.render();
@@ -30,21 +65,18 @@ const renderEvents = (dist, arr) => {
       point.unrender();
     };
     pointOpen.onSubmit = (newObject) => {
-      const data = arr[i];
-      data.title = newObject.title;
-      data.price = newObject.price;
-      data.time = newObject.time;
-      data.offers = newObject.offers;
+      const updatedPoint = updatePoint(arr, obPoint, newObject);
 
-      point.update(data);
+      point.update(updatedPoint);
 
       point.render();
       dist.replaceChild(point.element, pointOpen.element);
       pointOpen.unrender();
     };
     pointOpen.onDelete = () => {
+      deletePoint(arr, obPoint);
+      dist.removeChild(pointOpen.element);
       pointOpen.unrender();
-      arr.splice(i, 1);
     };
     pointOpen.onKeyEsc = () => {
       point.render();
@@ -58,11 +90,12 @@ renderFilters(NAME_FILTERS);
 const arrPoints = createData(NumConst.START_EVENTS);
 renderEvents(boardEvents, arrPoints);
 
-formFilter.onclick = (event) => {
-  if (event.target.className === `trip-filter__item` && !event.target.previousElementSibling.disabled) {
-    toggleFilter(event);
+formFilter.onclick = ({target}) => {
+  if (target.className === `trip-filter__item` && !target.previousElementSibling.disabled) {
+    const filterName = target.previousElementSibling.id;
+    toggleFilter(target);
     boardEvents.innerHTML = ``;
-    const arr = createData(getRandomInRange(0, NumConst.MAX_EVENT_IN_FILTER));
-    renderEvents(boardEvents, arr);
+    const filteredEvents = filterEvents(arrPoints, filterName);
+    renderEvents(boardEvents, filteredEvents);
   }
 };

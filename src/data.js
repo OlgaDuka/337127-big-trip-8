@@ -3,14 +3,13 @@ import {getRandomInRange,
   getRandomIndexArr,
   getRandomDate,
   getArrFromSet,
+  getOffersFromSet,
   getRandomPhoto,
   getRandomNamePoint,
   getTimeStr,
   EVENT_TYPES, OFFER_NAMES, DESCRIPTIONS} from './utils/index.js';
 
-const DEF_MIN_OFFERS = 2;
 const DEF_MIN_DESCRIPTIONS = 1;
-const DEF_MAX_OFFERS = 5;
 const DEF_MAX_DESCRIPTIONS = 3;
 const DEF_MIN_PHOTO = 3;
 const DEF_MAX_PHOTO = 8;
@@ -35,8 +34,8 @@ export const eventTrip = () => {
     timeStop: time2,
     time: getTimeStr(time1, time2),
     picture: getRandomPhoto(getRandomInRange(DEF_MIN_PHOTO, DEF_MAX_PHOTO)),
-    offers: getArrFromSet(OFFER_NAMES, DEF_MIN_OFFERS, DEF_MAX_OFFERS),
-    description: getArrFromSet(DESCRIPTIONS, DEF_MIN_DESCRIPTIONS, DEF_MAX_DESCRIPTIONS),
+    offers: getOffersFromSet(OFFER_NAMES, typePoint[2]),
+    description: getArrFromSet(DESCRIPTIONS, DEF_MIN_DESCRIPTIONS, DEF_MAX_DESCRIPTIONS, ``),
     isFavorite: getRandomBoolean(),
     isCollapse: true
   };
