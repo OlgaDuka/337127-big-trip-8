@@ -92,7 +92,6 @@ formFilter.onclick = ({target}) => {
   if (target.className === `trip-filter__item` && !target.previousElementSibling.disabled) {
     const filterName = target.previousElementSibling.id;
     boardEvents.innerHTML = ``;
-    const filteredEvents = filterEvents(arrPoints, filterName);
-    renderEvents(boardEvents, filteredEvents);
+    renderEvents(boardEvents, filterEvents(arrPoints, filterName));
   }
 };

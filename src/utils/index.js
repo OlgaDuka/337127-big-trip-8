@@ -1,7 +1,7 @@
 import moment from 'moment';
 export const NumConst = {
   MAX_EVENT_IN_FILTER: 5,
-  START_EVENTS: 4,
+  START_EVENTS: 7,
 };
 const MIN_PRICE_OFFER = 10;
 const MAX_PRICE_OFFER = 100;
