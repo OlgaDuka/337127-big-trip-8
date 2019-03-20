@@ -11,12 +11,10 @@ const renderFilters = (arrFilters) => {
   return arrFilters.map((element) => {
     const filter = new Filter(element);
     formFilter.appendChild(filter.render());
+    filter.onFilter = () => {
+      filter.checked = !filter.checked;
+    };
   });
-};
-
-const toggleFilter = (target) => {
-  formFilter.querySelector(`input:checked`).checked = false;
-  target.checked = true;
 };
 
 const filterEvents = (events, filterName) => {
@@ -93,7 +91,6 @@ renderEvents(boardEvents, arrPoints);
 formFilter.onclick = ({target}) => {
   if (target.className === `trip-filter__item` && !target.previousElementSibling.disabled) {
     const filterName = target.previousElementSibling.id;
-    toggleFilter(target);
     boardEvents.innerHTML = ``;
     const filteredEvents = filterEvents(arrPoints, filterName);
     renderEvents(boardEvents, filteredEvents);

@@ -35,7 +35,7 @@ export default class Filter extends Component {
   }
 
   get template() {
-    return `<input type="radio" id="filter-${this._name}" name="filter" value="${this._name}" checked>
+    return `<input type="radio" id="filter-${this._name}" name="filter" value="${this._name}" ${(this._name === `everything`) ? `checked` : ``}>
             <label class="trip-filter__item" for="filter-${this._name}">${this._name}</label>`;
   }
 }
