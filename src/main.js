@@ -1,11 +1,19 @@
-import {NumConst, NAME_FILTERS} from './utils/index.js';
-import {eventTrip} from './data.js';
-import Trip from './trip.js';
-import TripOpen from './trip-open.js';
-import Filter from './filter.js';
+import {NumConst, NAME_FILTERS} from './utils/index';
+import {arrTripEvents} from './data';
+import Trip from './trip';
+import TripOpen from './trip-open';
+import Filter from './filter';
+import {moneyStat} from './money-stat';
+import {transportStat} from './transport-stat';
 
-export const boardEvents = document.querySelector(`.trip-day__items`);
-export const formFilter = document.querySelector(`.trip-filter`);
+const controls = document.querySelector(`.trip-controls`);
+export const formFilter = controls.querySelector(`.trip-filter`);
+const buttonTable = controls.querySelector(`a[href*=table]`);
+const buttonStat = controls.querySelector(`a[href*=stats]`);
+const boardTable = document.querySelector(`#table`);
+const boardStat = document.querySelector(`#stats`);
+export const boardEvents = boardTable.querySelector(`.trip-day__items`);
+
 
 const renderFilters = (arrFilters) => {
   return arrFilters.map((element) => {
@@ -32,13 +40,31 @@ const filterEvents = (events, filterName) => {
   return arrResult;
 };
 
-const createData = (amount) => {
-  const array = new Array(amount);
-  for (let i = 0; i < amount; i += 1) {
-    array[i] = eventTrip();
+formFilter.addEventListener(`click`, ({target}) => {
+  if (target.className === `trip-filter__item` && !target.previousElementSibling.disabled) {
+    const filterName = target.previousElementSibling.id;
+    boardEvents.innerHTML = ``;
+    renderEvents(boardEvents, filterEvents(arrPoints, filterName));
   }
-  return array;
-};
+});
+
+buttonTable.addEventListener(`click`, ({target}) => {
+  if (!target.classList.contains(`view-switch__item--active`)) {
+    target.classList.add(`view-switch__item--active`);
+    buttonStat.classList.remove(`view-switch__item--active`);
+    boardStat.classList.add(`visually-hidden`);
+    boardTable.classList.remove(`visually-hidden`);
+  }
+});
+
+buttonStat.addEventListener(`click`, ({target}) => {
+  if (!target.classList.contains(`view-switch__item--active`)) {
+    target.classList.add(`view-switch__item--active`);
+    buttonTable.classList.remove(`view-switch__item--active`);
+    boardStat.classList.remove(`visually-hidden`);
+    boardTable.classList.add(`visually-hidden`);
+  }
+});
 
 const updatePoint = (points, pointToUpdate, newPoint) => {
   const index = points.findIndex((it) => it === pointToUpdate);
@@ -85,13 +111,8 @@ const renderEvents = (dist, arr) => {
 };
 
 renderFilters(NAME_FILTERS);
-const arrPoints = createData(NumConst.START_EVENTS);
+const arrPoints = arrTripEvents;
 renderEvents(boardEvents, arrPoints);
 
-formFilter.onclick = ({target}) => {
-  if (target.className === `trip-filter__item` && !target.previousElementSibling.disabled) {
-    const filterName = target.previousElementSibling.id;
-    boardEvents.innerHTML = ``;
-    renderEvents(boardEvents, filterEvents(arrPoints, filterName));
-  }
-};
+moneyStat.render();
+transportStat.render();

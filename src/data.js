@@ -1,13 +1,4 @@
-import {getRandomInRange,
-  getRandomBoolean,
-  getRandomIndexArr,
-  getRandomDate,
-  getArrFromSet,
-  getOffersFromSet,
-  getRandomPhoto,
-  getRandomNamePoint,
-  getTimeStr,
-  EVENT_TYPES, OFFER_NAMES, DESCRIPTIONS} from './utils/index.js';
+import * as util from './utils/index';
 
 const DEF_MIN_DESCRIPTIONS = 1;
 const DEF_MAX_DESCRIPTIONS = 3;
@@ -22,21 +13,33 @@ const Price = {
 };
 
 export const eventTrip = () => {
-  const time1 = getRandomDate(DAY);
-  const time2 = time1 + getRandomInRange(TIME_START, TIME_STOP);
-  const typePoint = getRandomIndexArr(EVENT_TYPES[0]);
+  const time1 = util.getRandomDate(DAY);
+  const time2 = time1 + util.getRandomInRange(TIME_START, TIME_STOP);
+  const typePoint = util.getRandomIndexArr(util.EVENT_TYPES[0]);
   return {
     type: typePoint,
-    title: getRandomNamePoint(),
-    price: getRandomInRange(Price.MIN_PRICE_EVENT, Price.MAX_PRICE_EVENT),
+    title: util.getRandomNamePoint(),
+    price: util.getRandomInRange(Price.MIN_PRICE_EVENT, Price.MAX_PRICE_EVENT),
     day: new Date(time1),
     timeStart: time1,
     timeStop: time2,
-    time: getTimeStr(time1, time2),
-    picture: getRandomPhoto(getRandomInRange(DEF_MIN_PHOTO, DEF_MAX_PHOTO)),
-    offers: getOffersFromSet(OFFER_NAMES, typePoint[2]),
-    description: getArrFromSet(DESCRIPTIONS, DEF_MIN_DESCRIPTIONS, DEF_MAX_DESCRIPTIONS, ``),
-    isFavorite: getRandomBoolean(),
+    time: util.getTimeStr(time1, time2),
+    picture: util.getRandomPhoto(util.getRandomInRange(DEF_MIN_PHOTO, DEF_MAX_PHOTO)),
+    offers: util.getOffersFromSet(util.OFFER_NAMES, typePoint[2]),
+    description: util.getArrFromSet(util.DESCRIPTIONS, DEF_MIN_DESCRIPTIONS, DEF_MAX_DESCRIPTIONS, ``),
+    isFavorite: util.getRandomBoolean(),
     isCollapse: true
   };
 };
+
+// export const arrTripEvents = (amount) => {
+//  const array = new Array(amount);
+//  for (let i = 0; i < amount; i += 1) {
+//    array[i] = eventTrip();
+//  }
+//  return array;
+// };
+
+export const arrTripEvents = new Array(util.NumConst.START_EVENTS)
+  .fill(``)
+  .map(() => eventTrip());
