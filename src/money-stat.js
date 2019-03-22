@@ -8,9 +8,39 @@ const numPoints = arrTripEvents.length;
 const BAR_HEIGHT = 55;
 moneyCtx.height = BAR_HEIGHT * numPoints;
 
+const getPriceOffers = (item) => {
+  let price = 0;
+  arrTripEvents[item].offers.forEach((elem) => {
+    if (elem[2]) {
+      price += parseInt(elem[1], 10);
+    }
+  });
+  return price;
+};
+
+const getPoints = () => {
+  const arrType = [];
+  const arrPrice = [];
+  arrTripEvents.forEach((elem, i) => {
+    let item = arrType.indexOf(elem.type);
+    if (item === -1) {
+      arrType.push(elem.type);
+      arrPrice.push(elem.price + getPriceOffers(i));
+    } else {
+      arrPrice[item] += (elem.price + getPriceOffers(i));
+    }
+  });
+  return {
+    labels: arrType,
+    data: arrPrice
+  };
+};
+
+const arrPoints = getPoints();
+
 const moneyStatData = {
-  labels: arrTripEvents.map(({type}) => `${type[1]} ${type[0].toUpperCase()}`),
-  data: arrTripEvents.map((item) => item.price)
+  labels: arrPoints.labels.map((elem) => `${elem[1]} ${elem[0].toUpperCase()}`),
+  data: arrPoints.data
 };
 
 export const moneyStat = new Chart(moneyCtx, {

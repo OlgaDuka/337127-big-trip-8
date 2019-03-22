@@ -8,13 +8,38 @@ const numPoints = arrTripEvents.length;
 const BAR_HEIGHT = 55;
 transportCtx.height = BAR_HEIGHT * numPoints;
 
+const getPoints = () => {
+  const arrType = [];
+  const arrNum = [];
+  arrTripEvents.forEach((elem) => {
+    let item = arrType.indexOf(elem.type);
+    if ((item === -1) && (elem.type[2] === `to`)) {
+      arrType.push(elem.type);
+      arrNum.push(1);
+    } else {
+      arrNum[item] += 1;
+    }
+  });
+  return {
+    labels: arrType,
+    data: arrNum
+  };
+};
+
+const arrPoints = getPoints();
+
+const transportStatData = {
+  labels: arrPoints.labels.map((elem) => `${elem[1]} ${elem[0].toUpperCase()}`),
+  data: arrPoints.data
+};
+
 export const transportStat = new Chart(transportCtx, {
   plugins: [ChartDataLabels],
   type: `horizontalBar`,
   data: {
-    labels: [`🚗 DRIVE`, `🚕 RIDE`, `✈️ FLY`, `🛳️ SAIL`],
+    labels: transportStatData.labels,
     datasets: [{
-      data: [4, 3, 2, 1],
+      data: transportStatData.data,
       backgroundColor: `#ffffff`,
       hoverBackgroundColor: `#ffffff`,
       anchor: `start`

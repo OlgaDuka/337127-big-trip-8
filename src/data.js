@@ -32,14 +32,6 @@ export const eventTrip = () => {
   };
 };
 
-// export const arrTripEvents = (amount) => {
-//  const array = new Array(amount);
-//  for (let i = 0; i < amount; i += 1) {
-//    array[i] = eventTrip();
-//  }
-//  return array;
-// };
-
 export const arrTripEvents = new Array(util.NumConst.START_EVENTS)
   .fill(``)
   .map(() => eventTrip());

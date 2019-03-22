@@ -1,4 +1,4 @@
-import {NumConst, NAME_FILTERS} from './utils/index';
+import {NAME_FILTERS} from './utils/index';
 import {arrTripEvents} from './data';
 import Trip from './trip';
 import TripOpen from './trip-open';
