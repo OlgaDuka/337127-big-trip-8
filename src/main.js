@@ -3,8 +3,8 @@ import {arrTripEvents} from './data';
 import Trip from './trip';
 import TripOpen from './trip-open';
 import Filter from './filter';
-import {moneyStat} from './money-stat';
-import {transportStat} from './transport-stat';
+import MoneyStat from './money-stat';
+import TransportStat from './transport-stat';
 
 const controls = document.querySelector(`.trip-controls`);
 export const formFilter = controls.querySelector(`.trip-filter`);
@@ -25,7 +25,7 @@ const renderFilters = (arrFilters) => {
   });
 };
 
-const filterEvents = (events, filterName) => {
+const filterEvents = (filterName) => {
   let arrResult = [];
   switch (filterName) {
     case `filter-everything`:
@@ -44,7 +44,10 @@ formFilter.addEventListener(`click`, ({target}) => {
   if (target.className === `trip-filter__item` && !target.previousElementSibling.disabled) {
     const filterName = target.previousElementSibling.id;
     boardEvents.innerHTML = ``;
-    renderEvents(boardEvents, filterEvents(arrPoints, filterName));
+    const arr = filterEvents(filterName);
+    renderEvents(boardEvents, arr);
+    transportStat.update(arr);
+    moneyStat.update(arr);
   }
 });
 
@@ -114,5 +117,7 @@ renderFilters(NAME_FILTERS);
 const arrPoints = arrTripEvents;
 renderEvents(boardEvents, arrPoints);
 
+const moneyStat = new MoneyStat(arrTripEvents);
 moneyStat.render();
+const transportStat = new TransportStat(arrTripEvents);
 transportStat.render();
