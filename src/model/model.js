@@ -1,41 +1,10 @@
 import * as util from '../utils/index';
-
-const DEF_MIN_DESCRIPTIONS = 1;
-const DEF_MAX_DESCRIPTIONS = 3;
-const DEF_MIN_PHOTO = 3;
-const DEF_MAX_PHOTO = 8;
-const DAY = 7;
-const TIME_START = 0;
-const TIME_STOP = 43200000; // кол-во милисекунд в половине суток
-const Price = {
-  MIN_PRICE_EVENT: 100,
-  MAX_PRICE_EVENT: 300,
-};
+import * as cnt from '../constants';
 
 export default class Model {
   constructor() {
-    this.events = new Array(util.NumConst.START_EVENTS).fill(``).map(() => this.getEvent());
+    this.events = new Array(cnt.NumConst.START_EVENTS).fill(``).map(() => util.createEvent());
     this.filters = util.NAME_FILTERS;
     this.stat = util.StatData;
-  }
-
-  getEvent() {
-    const time1 = util.getRandomDate(DAY);
-    const time2 = time1 + util.getRandomInRange(TIME_START, TIME_STOP);
-    const typePoint = util.getRandomIndexArr(util.EVENT_TYPES[0]);
-    return {
-      type: typePoint,
-      title: util.getRandomNamePoint(),
-      price: util.getRandomInRange(Price.MIN_PRICE_EVENT, Price.MAX_PRICE_EVENT),
-      day: new Date(time1),
-      timeStart: time1,
-      timeStop: time2,
-      time: util.getTimeStr(time1, time2),
-      picture: util.getRandomPhoto(util.getRandomInRange(DEF_MIN_PHOTO, DEF_MAX_PHOTO)),
-      offers: util.getOffersFromSet(util.OFFER_NAMES, typePoint[2]),
-      description: util.getArrFromSet(util.DESCRIPTIONS, DEF_MIN_DESCRIPTIONS, DEF_MAX_DESCRIPTIONS, ``),
-      isFavorite: util.getRandomBoolean(),
-      isCollapse: true
-    };
   }
 }

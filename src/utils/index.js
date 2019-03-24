@@ -1,14 +1,7 @@
+import * as cnt from '../constants';
 import moment from 'moment';
-export const NumConst = {
-  MAX_EVENT_IN_FILTER: 5,
-  START_EVENTS: 7,
-};
-const MIN_PRICE_OFFER = 10;
-const MAX_PRICE_OFFER = 100;
 
-const TIME = 86400000; // количество милисекунд в сутках
-
-export const EVENT_TYPES = new Array([
+export const EVENT_TYPES = [
   [`Taxi`, `🚕`, `to`],
   [`Bus`, `🚌`, `to`],
   [`Train`, `🚂`, `to`],
@@ -19,7 +12,7 @@ export const EVENT_TYPES = new Array([
   [`Check`, `🏨`, `in`],
   [`Sightseeing`, `🏛️`, `in`],
   [`Restaurant`, `🍴`, `in`]
-]);
+];
 
 export const OFFER_NAMES = new Set([
   [`Add luggage`, `0`, false, `in`],
@@ -46,7 +39,7 @@ export const DESCRIPTIONS = new Set([
   `In rutrum ac purus sit amet tempus.`
 ]);
 
-export const StatData = [{selector: `.statistic__money`, title: `MONEY`, unit: ``, method: `getPointsMoney`},
+export const StatData = [{selector: `.statistic__money`, title: `MONEY`, unit: `€`, method: `getPointsMoney`},
   {selector: `.statistic__transport`, title: `TRANSPORT`, unit: `x`, method: `getPointsTransport`},
   {selector: `.statistic__time-spend`, title: `TIME-SPEND`, unit: `H`, method: `getPointsTimeSpend`}];
 
@@ -64,7 +57,7 @@ export const getTimeStr = (time1, time2) => {
 export const getRandomInRange = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
 export const getRandomBoolean = () => Boolean(Math.round(Math.random()));
 export const getRandomIndexArr = (arr) => arr[Math.floor(Math.random() * arr.length)];
-export const getRandomDate = (day) => Date.now() + Math.floor(Math.random() * day) * TIME;
+export const getRandomDate = (day) => Date.now() + Math.floor(Math.random() * day) * cnt.TIME;
 
 export const getRandomNamePoint = () => {
   const arrName = document.querySelector(`.trip__points`).textContent.split(`— `);
@@ -106,7 +99,7 @@ export const getOffersFromSet = (originalSet, type) => {
     let num = getRandomInRange(0, originalSet.size - 1);
     let arrTemp = [...originalSet][num];
     if ((arrNumber.indexOf(num) === -1) && ((arrTemp[3] === type) || (arrTemp[3] === `all`))) {
-      arrTemp[1] = `${getRandomInRange(MIN_PRICE_OFFER, MAX_PRICE_OFFER)}`;
+      arrTemp[1] = `${getRandomInRange(cnt.MIN_PRICE_OFFER, cnt.MAX_PRICE_OFFER)}`;
       if (flagChoice < 2) {
         arrTemp[2] = true;
         flagChoice += 1;
@@ -128,4 +121,24 @@ export const createFilter = (template) => {
   const newElement = document.createElement(`div`);
   newElement.innerHTML = template;
   return newElement;
+};
+
+export const createEvent = () => {
+  const time1 = getRandomDate(cnt.DAY);
+  const time2 = time1 + getRandomInRange(cnt.TIME_START, cnt.TIME_STOP);
+  const typePoint = getRandomIndexArr(EVENT_TYPES);
+  return {
+    type: typePoint,
+    title: getRandomNamePoint(),
+    price: getRandomInRange(cnt.Price.MIN_PRICE_EVENT, cnt.Price.MAX_PRICE_EVENT),
+    day: new Date(time1),
+    timeStart: time1,
+    timeStop: time2,
+    time: getTimeStr(time1, time2),
+    picture: getRandomPhoto(getRandomInRange(cnt.DEF_MIN_PHOTO, cnt.DEF_MAX_PHOTO)),
+    offers: getOffersFromSet(OFFER_NAMES, typePoint[2]),
+    description: getArrFromSet(DESCRIPTIONS, cnt.DEF_MIN_DESCRIPTIONS, cnt.DEF_MAX_DESCRIPTIONS, ``),
+    isFavorite: getRandomBoolean(),
+    isCollapse: true
+  };
 };
