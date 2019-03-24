@@ -13,10 +13,6 @@ export default class Stat {
     this._numPoints = data.events.length;
     this._ctx.height = BAR_HEIGHT * this._numPoints;
     this._arrPoints = this[data.stat[numProp].method](data.events);
-    this._statData = {
-      labels: this._arrPoints.labels,
-      data: this._arrPoints.data
-    };
   }
 
   _getPriceOffers(arr, item) {
@@ -92,12 +88,8 @@ export default class Stat {
 
   update(data, numProp) {
     this._arrPoints = this[data.stat[numProp].method](data.events);
-    this._statData = {
-      labels: this._arrPoints.labels,
-      data: this._arrPoints.data
-    };
-    this._element.data.labels = this._statData.labels;
-    this._element.data.datasets.data = this._statData.data;
+    this._element.data.labels = this._arrPoints.labels;
+    this._element.data.datasets.data = this._arrPoints.data;
     this._element.update();
   }
 
@@ -106,13 +98,18 @@ export default class Stat {
   }
 
   render() {
-    this._element = new Chart(this._ctx, {
+    this._element = new Chart(this._ctx, this.configChart);
+    return this._element;
+  }
+
+  get configChart() {
+    return {
       plugins: [ChartDataLabels],
       type: `horizontalBar`,
       data: {
-        labels: this._statData.labels,
+        labels: this._arrPoints.labels,
         datasets: [{
-          data: this._statData.data,
+          data: this._arrPoints.data,
           backgroundColor: `#ffffff`,
           hoverBackgroundColor: `#ffffff`,
           anchor: `start`
@@ -169,7 +166,6 @@ export default class Stat {
           enabled: false,
         }
       }
-    });
-    return this._element;
+    };
   }
 }
