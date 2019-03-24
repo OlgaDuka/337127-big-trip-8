@@ -1,5 +1,5 @@
 import Component from './component.js';
-import {createFilter} from './utils/index.js';
+import {createFilter} from '../utils/index.js';
 
 export default class Filter extends Component {
   constructor(data) {

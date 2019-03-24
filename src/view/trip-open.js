@@ -233,14 +233,26 @@ export default class TripOpen extends Component {
 
                           <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-flight" name="travel-way" value="flight">
                           <label class="travel-way__select-label" for="travel-way-flight">✈️ flight</label>
+
+                          <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-ship" name="travel-way" value="ship">
+                          <label class="travel-way__select-label" for="travel-way-ship">🛳️ ship</label>
+
+                          <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-drive" name="travel-way" value="drive">
+                          <label class="travel-way__select-label" for="travel-way-ship">🚗 drive</label>
+
+                          <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-transport" name="travel-way" value="transport">
+                          <label class="travel-way__select-label" for="travel-way-transport">🚊 transport</label>
                         </div>
 
                         <div class="travel-way__select-group" data-add="in">
                           <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-check-in" name="travel-way" value="check-in">
                           <label class="travel-way__select-label" for="travel-way-check-in">🏨 check-in</label>
 
+                          <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-restaurant" name="travel-way" value="restaurant">
+                          <label class="travel-way__select-label" for="travel-way-restaurant">🍴 restaurant</label>
+
                           <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-sightseeing" name="travel-way" value="sight-seeing">
-                          <label class="travel-way__select-label" for="travel-way-sightseeing">🏛 sightseeing</label>
+                          <label class="travel-way__select-label" for="travel-way-sightseeing">🏛️ sightseeing</label>
                         </div>
                       </div>
                     </div>

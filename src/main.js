@@ -1,10 +1,12 @@
-import {NAME_FILTERS} from './utils/index';
-import {arrTripEvents} from './data';
-import Trip from './trip';
-import TripOpen from './trip-open';
-import Filter from './filter';
-import MoneyStat from './money-stat';
-import TransportStat from './transport-stat';
+import Model from './model/model';
+// import Controller from './controller';
+import Trip from './view/trip';
+import TripOpen from './view/trip-open';
+import Filter from './view/filter';
+import Stat from './view/stat';
+
+const model = new Model();
+// const app = new Controller();
 
 const controls = document.querySelector(`.trip-controls`);
 export const formFilter = controls.querySelector(`.trip-filter`);
@@ -46,8 +48,6 @@ formFilter.addEventListener(`click`, ({target}) => {
     boardEvents.innerHTML = ``;
     const arr = filterEvents(filterName);
     renderEvents(boardEvents, arr);
-    transportStat.update(arr);
-    moneyStat.update(arr);
   }
 });
 
@@ -67,6 +67,9 @@ buttonStat.addEventListener(`click`, ({target}) => {
     boardStat.classList.remove(`visually-hidden`);
     boardTable.classList.add(`visually-hidden`);
   }
+  moneyStat.update(model.events, 0);
+  transportStat.update(model.events, 1);
+  timeSpendStat.update(model.events, 2);
 });
 
 const updatePoint = (points, pointToUpdate, newPoint) => {
@@ -113,11 +116,13 @@ const renderEvents = (dist, arr) => {
   }
 };
 
-renderFilters(NAME_FILTERS);
-const arrPoints = arrTripEvents;
+renderFilters(model.filters);
+const arrPoints = model.events;
 renderEvents(boardEvents, arrPoints);
 
-const moneyStat = new MoneyStat(arrTripEvents);
+const moneyStat = new Stat(model.events, 0);
 moneyStat.render();
-const transportStat = new TransportStat(arrTripEvents);
+const transportStat = new Stat(model.events, 1);
 transportStat.render();
+const timeSpendStat = new Stat(model.events, 2);
+timeSpendStat.render();
