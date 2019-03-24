@@ -67,9 +67,9 @@ buttonStat.addEventListener(`click`, ({target}) => {
     boardStat.classList.remove(`visually-hidden`);
     boardTable.classList.add(`visually-hidden`);
   }
-  moneyStat.update(model.events, 0);
-  transportStat.update(model.events, 1);
-  timeSpendStat.update(model.events, 2);
+  moneyStat.update(model, 0);
+  transportStat.update(model, 1);
+  timeSpendStat.update(model, 2);
 });
 
 const updatePoint = (points, pointToUpdate, newPoint) => {
@@ -120,9 +120,9 @@ renderFilters(model.filters);
 const arrPoints = model.events;
 renderEvents(boardEvents, arrPoints);
 
-const moneyStat = new Stat(model.events, 0);
+const moneyStat = new Stat(model, 0);
 moneyStat.render();
-const transportStat = new Stat(model.events, 1);
+const transportStat = new Stat(model, 1);
 transportStat.render();
-const timeSpendStat = new Stat(model.events, 2);
+const timeSpendStat = new Stat(model, 2);
 timeSpendStat.render();

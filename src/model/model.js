@@ -16,6 +16,7 @@ export default class Model {
   constructor() {
     this.events = new Array(util.NumConst.START_EVENTS).fill(``).map(() => this.getEvent());
     this.filters = util.NAME_FILTERS;
+    this.stat = util.StatData;
   }
 
   getEvent() {

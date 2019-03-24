@@ -3,19 +3,16 @@ import Chart from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 const BAR_HEIGHT = 55;
-const StatData = [{selector: `.statistic__money`, title: `MONEY`, unit: ``, method: `getPointsMoney`},
-  {selector: `.statistic__transport`, title: `TRANSPORT`, unit: `x`, method: `getPointsTransport`},
-  {selector: `.statistic__time-spend`, title: `TIME-SPEND`, unit: `H`, method: `getPointsTimeSpend`}];
 
 export default class Stat {
   constructor(data, numProp) {
     this._element = null;
-    this._ctx = document.querySelector(StatData[numProp].selector);
-    this._title = StatData[numProp].title;
-    this._unit = StatData[numProp].unit;
-    this._numPoints = data.length;
+    this._ctx = document.querySelector(data.stat[numProp].selector);
+    this._title = data.stat[numProp].title;
+    this._unit = data.stat[numProp].unit;
+    this._numPoints = data.events.length;
     this._ctx.height = BAR_HEIGHT * this._numPoints;
-    this._arrPoints = this[StatData[numProp].method](data);
+    this._arrPoints = this[data.stat[numProp].method](data.events);
     this._statData = {
       labels: this._arrPoints.labels,
       data: this._arrPoints.data
@@ -95,7 +92,7 @@ export default class Stat {
 
   update(data, numProp) {
     this.unrender();
-    this._arrPoints = this[StatData[numProp].method](data);
+    this._arrPoints = this[data.stat[numProp].method](data.events);
     this._statData = {
       labels: this._arrPoints.labels,
       data: this._arrPoints.data
