@@ -91,13 +91,14 @@ export default class Stat {
   }
 
   update(data, numProp) {
-    this.unrender();
     this._arrPoints = this[data.stat[numProp].method](data.events);
     this._statData = {
       labels: this._arrPoints.labels,
       data: this._arrPoints.data
     };
-    this.render();
+    this._element.data.labels = this._statData.labels;
+    this._element.data.datasets.data = this._statData.data;
+    this._element.update();
   }
 
   unrender() {

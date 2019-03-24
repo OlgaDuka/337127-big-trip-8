@@ -120,6 +120,9 @@ renderFilters(model.filters);
 const arrPoints = model.events;
 renderEvents(boardEvents, arrPoints);
 
+// const stat = new Stat(model);
+// stat.render();
+
 const moneyStat = new Stat(model, 0);
 moneyStat.render();
 const transportStat = new Stat(model, 1);
