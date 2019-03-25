@@ -84,11 +84,16 @@ export default class TripOpen extends Component {
   }
 
   update(data) {
+    this._type = data.type;
     this._title = data.title;
     this._price = data.price;
     this._day = data.day;
+    this._timeStart = data.timeStart;
+    this._timeStop = data.timeStop;
     this._time = data.time;
     this._offers = data.offers;
+    this._description = data.description;
+    this._picture = data.picture;
   }
 
   _onCloseFlatpickr(selectedDates, dateStr) {
@@ -198,6 +203,15 @@ export default class TripOpen extends Component {
     });
   }
 
+  get price() {
+    const offersTotalPrice = this._offers.filter((offer) => offer[2] === true).reduce((acc, offer) => acc + parseInt(offer[1], 10), 0);
+    return this._price + offersTotalPrice;
+  }
+
+  updatePrice() {
+    this._element.querySelector(`.point__input[name="price"]`).value = this.price;
+  }
+
   _getOffers() {
     return this._offers.map((offer) => `<input class="point__offers-input visually-hidden" type="checkbox" id="${offer[0]}" name="offer" value="${offer[0]}" ${(offer[2] === true) ? `checked` : ``}>
     <label for="${offer[0]}" class="point__offers-label">
@@ -267,7 +281,7 @@ export default class TripOpen extends Component {
                     <label class="point__price">
                       write price
                       <span class="point__price-currency">€</span>
-                      <input class="point__input" type="text" value="${this._price}" name="price">
+                      <input class="point__input" type="text" value="${this.price}" name="price">
                     </label>
 
                     <div class="point__buttons">

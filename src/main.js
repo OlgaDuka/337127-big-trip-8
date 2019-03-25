@@ -27,27 +27,39 @@ const renderFilters = (arrFilters) => {
   });
 };
 
-const filterEvents = (filterName) => {
-  let arrResult = [];
-  switch (filterName) {
-    case `filter-everything`:
-      arrResult = arrPoints;
-      break;
-    case `filter-future`:
-      arrResult = arrPoints.filter((it) => it.day > Date.now());
-      break;
-    case `filter-past`:
-      arrResult = arrPoints.filter((it) => it.day < Date.now());
+const renderEvents = (dist, arr) => {
+  for (const obPoint of arr) {
+    const point = new Trip(obPoint);
+    const pointOpen = new TripOpen(obPoint);
+    dist.appendChild(point.render());
+    point.onClick = () => {
+      pointOpen.render();
+      dist.replaceChild(pointOpen.element, point.element);
+      point.unrender();
+    };
+    pointOpen.onSubmit = (newObject) => {
+      point.update(model.updatePoint(obPoint, newObject));
+      point.render();
+      dist.replaceChild(point.element, pointOpen.element);
+      pointOpen.unrender();
+    };
+    pointOpen.onDelete = () => {
+      model.deletePoint(obPoint);
+      dist.removeChild(pointOpen.element);
+      pointOpen.unrender();
+    };
+    pointOpen.onKeyEsc = () => {
+      point.render();
+      dist.replaceChild(point.element, pointOpen.element);
+      pointOpen.unrender();
+    };
   }
-  return arrResult;
 };
 
 formFilter.addEventListener(`click`, ({target}) => {
   if (target.className === `trip-filter__item` && !target.previousElementSibling.disabled) {
-    const filterName = target.previousElementSibling.id;
     boardEvents.innerHTML = ``;
-    const arr = filterEvents(filterName);
-    renderEvents(boardEvents, arr);
+    renderEvents(boardEvents, model.getFilterEvents(target.previousElementSibling.id));
   }
 });
 
@@ -72,56 +84,8 @@ buttonStat.addEventListener(`click`, ({target}) => {
   timeSpendStat.update(model, 2);
 });
 
-const updatePoint = (points, pointToUpdate, newPoint) => {
-  const index = points.findIndex((it) => it === pointToUpdate);
-  points[index] = Object.assign({}, pointToUpdate, newPoint);
-  return points[index];
-};
-
-const deletePoint = (points, pointToDelete) => {
-  const index = points.findIndex((it) => it === pointToDelete);
-  points.splice(index, 1);
-  return points;
-};
-
-const renderEvents = (dist, arr) => {
-  for (const obPoint of arr) {
-    const point = new Trip(obPoint);
-    const pointOpen = new TripOpen(obPoint);
-    dist.appendChild(point.render());
-    point.onClick = () => {
-      pointOpen.render();
-      dist.replaceChild(pointOpen.element, point.element);
-      point.unrender();
-    };
-    pointOpen.onSubmit = (newObject) => {
-      const updatedPoint = updatePoint(arr, obPoint, newObject);
-
-      point.update(updatedPoint);
-
-      point.render();
-      dist.replaceChild(point.element, pointOpen.element);
-      pointOpen.unrender();
-    };
-    pointOpen.onDelete = () => {
-      deletePoint(arr, obPoint);
-      dist.removeChild(pointOpen.element);
-      pointOpen.unrender();
-    };
-    pointOpen.onKeyEsc = () => {
-      point.render();
-      dist.replaceChild(point.element, pointOpen.element);
-      pointOpen.unrender();
-    };
-  }
-};
-
 renderFilters(model.filters);
-const arrPoints = model.events;
-renderEvents(boardEvents, arrPoints);
-
-// const stat = new Stat(model);
-// stat.render();
+renderEvents(boardEvents, model.events);
 
 const moneyStat = new Stat(model, 0);
 moneyStat.render();

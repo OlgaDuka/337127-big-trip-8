@@ -39,12 +39,23 @@ export default class Trip extends Component {
   }
 
   update(data) {
+    this._type = data.type;
     this._title = data.title;
     this._price = data.price;
     this._day = data.day;
+    this._timeStart = data.timeStart;
+    this._timeStop = data.timeStop;
     this._time = data.time;
     this._offers = data.offers;
+    this._description = data.description;
+    this._picture = data.picture;
   }
+
+  get price() {
+    const offersTotalPrice = this._offers.filter((offer) => offer[2] === true).reduce((acc, offer) => acc + parseInt(offer[1], 10), 0);
+    return this._price + offersTotalPrice;
+  }
+
 
   _getOffer() {
     let htmlOffers = ``;
@@ -75,7 +86,7 @@ export default class Trip extends Component {
                   <span class="trip-point__timetable">${this._time}</span>
                   <span class="trip-point__duration">${this.getDuration(this._timeStop, this._timeStart)}</span>
                 </p>
-                <p class="trip-point__price">&euro;&nbsp;${this._price}</p>
+                <p class="trip-point__price">&euro;&nbsp;${this.price}</p>
                 <ul class="trip-point__offers">
                   ${this._getOffer()}
                 </ul>
