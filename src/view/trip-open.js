@@ -1,3 +1,4 @@
+import {EVENT_TYPES} from '../utils/index';
 import moment from 'moment';
 import flatpickr from 'flatpickr';
 import Component from './component.js';
@@ -83,27 +84,32 @@ export default class TripOpen extends Component {
   }
 
   update(data) {
+    this._type = data.type;
     this._title = data.title;
     this._price = data.price;
     this._day = data.day;
+    this._timeStart = data.timeStart;
+    this._timeStop = data.timeStop;
     this._time = data.time;
     this._offers = data.offers;
+    this._description = data.description;
+    this._picture = data.picture;
   }
 
   _onCloseFlatpickr(selectedDates, dateStr) {
     this._timeStart = moment(selectedDates[0]).format(`LT`);
     this._timeStop = moment(selectedDates[1]).format(`LT`);
-    this._time = dateStr.replace(`to`, `—`);
+    this._time = dateStr;
     this._state.timeStart = this._timeStart;
     this._state.timeStop = this._timeStop;
     this._state.time = this._time;
   }
 
-  _onChangeType(evt) {
-    if (evt.target.classList[0] === `travel-way__select-label`) {
-      let typeName = evt.target.previousElementSibling.value;
-      let typeIcon = evt.target.textContent;
-      let typeAdd = evt.target.parentElement.dataset[`add`];
+  _onChangeType({target}) {
+    if (target.classList[0] === `travel-way__select-label`) {
+      let typeName = target.previousElementSibling.value;
+      let typeIcon = target.textContent;
+      let typeAdd = target.parentElement.dataset[`add`];
       typeName = typeName[0].toUpperCase() + typeName.slice(1) + ` ` + typeAdd;
       typeIcon = typeIcon.split(` `, 1);
       this._type[0] = typeName;
@@ -113,12 +119,12 @@ export default class TripOpen extends Component {
     this._partialUpdate();
   }
 
-  _onChangeDestination(evt) {
-    this._state.title = evt.target.value;
+  _onChangeDestination({target}) {
+    this._state.title = target.value;
   }
 
-  _onChangePrice(evt) {
-    this._state.price = evt.target.value;
+  _onChangePrice({target}) {
+    this._state.price = target.value;
   }
 
   _replaceOffer(strFind, strPrice, flagOffer) {
@@ -134,10 +140,10 @@ export default class TripOpen extends Component {
     }
   }
 
-  _onChangeOffers(evt) {
-    const price = evt.target.nextElementSibling.querySelector(`.point__offer-price`).textContent;
-    const str = evt.target.value;
-    if (evt.target.checked) {
+  _onChangeOffers({target}) {
+    const price = target.nextElementSibling.querySelector(`.point__offer-price`).textContent;
+    const str = target.value;
+    if (target.checked) {
       this._replaceOffer(str, price, true);
     } else {
       this._replaceOffer(str, price, false);
@@ -165,10 +171,13 @@ export default class TripOpen extends Component {
 
     flatpickr(this._element.querySelector(`input[name="time"]`), {
       mode: `range`,
-      time24hr: true,
+      [`time_24hr`]: true,
       minDate: `today`,
       defaultDate: [this._timeStart, this._timeStop],
       enableTime: true,
+      locale: {
+        rangeSeparator: ` — `,
+      },
       dateFormat: `H:i`,
       onClose: this._onCloseFlatpickr
     });
@@ -194,6 +203,15 @@ export default class TripOpen extends Component {
     });
   }
 
+  get price() {
+    const offersTotalPrice = this._offers.filter((offer) => offer[2] === true).reduce((acc, offer) => acc + parseInt(offer[1], 10), 0);
+    return this._price + offersTotalPrice;
+  }
+
+  updatePrice() {
+    this._element.querySelector(`.point__input[name="price"]`).value = this.price;
+  }
+
   _getOffers() {
     return this._offers.map((offer) => `<input class="point__offers-input visually-hidden" type="checkbox" id="${offer[0]}" name="offer" value="${offer[0]}" ${(offer[2] === true) ? `checked` : ``}>
     <label for="${offer[0]}" class="point__offers-label">
@@ -204,6 +222,18 @@ export default class TripOpen extends Component {
   _getPictures() {
     return this._picture.map((picture) =>
       `<img src="http:${picture}" alt="picture from place" class="point__destination-image">`).join(``);
+  }
+
+  _getTravelWay(typeTravel) {
+    const arrResult = [];
+    EVENT_TYPES.forEach((elem) => {
+      if (elem[2] === typeTravel) {
+        arrResult.push(elem);
+      }
+    });
+    return arrResult.map((type) =>
+      `<input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-${type[0].toLowerCase()}" name="travel-way" value="${type[0].toLowerCase()}">
+      <label class="travel-way__select-label" for="travel-way-${type[0].toLowerCase()}">${type[1]} ${type[0].toLowerCase()}</label>`).join(``);
   }
 
   get template() {
@@ -222,31 +252,16 @@ export default class TripOpen extends Component {
 
                       <div class="travel-way__select">
                         <div class="travel-way__select-group" data-add="to">
-                          <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-taxi" name="travel-way" value="taxi">
-                          <label class="travel-way__select-label" for="travel-way-taxi">🚕 taxi</label>
-
-                          <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-bus" name="travel-way" value="bus">
-                          <label class="travel-way__select-label" for="travel-way-bus">🚌 bus</label>
-
-                          <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-train" name="travel-way" value="train">
-                          <label class="travel-way__select-label" for="travel-way-train">🚂 train</label>
-
-                          <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-flight" name="travel-way" value="flight">
-                          <label class="travel-way__select-label" for="travel-way-flight">✈️ flight</label>
+                          ${this._getTravelWay(`to`)}
                         </div>
-
                         <div class="travel-way__select-group" data-add="in">
-                          <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-check-in" name="travel-way" value="check-in">
-                          <label class="travel-way__select-label" for="travel-way-check-in">🏨 check-in</label>
-
-                          <input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-sightseeing" name="travel-way" value="sight-seeing">
-                          <label class="travel-way__select-label" for="travel-way-sightseeing">🏛 sightseeing</label>
+                          ${this._getTravelWay(`in`)}
                         </div>
                       </div>
                     </div>
 
                     <div class="point__destination-wrap">
-                      <label class="point__destination-label" for="destination">${(this._type[0])}</label>
+                      <label class="point__destination-label" for="destination">${(this._type[0])} ${(this._type[2])}</label>
                       <input class="point__destination-input" list="destination-select" id="destination" value="${this._title}" name="destination">
                       <datalist id="destination-select">
                         <option value="airport"></option>
@@ -266,7 +281,7 @@ export default class TripOpen extends Component {
                     <label class="point__price">
                       write price
                       <span class="point__price-currency">€</span>
-                      <input class="point__input" type="text" value="${this._price}" name="price">
+                      <input class="point__input" type="text" value="${this.price}" name="price">
                     </label>
 
                     <div class="point__buttons">

@@ -1,5 +1,5 @@
 import moment from 'moment';
-import {createElement} from './utils/index.js';
+import {createElement} from '../utils/index.js';
 
 export default class Component {
   constructor() {

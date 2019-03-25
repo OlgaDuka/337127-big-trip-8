@@ -1,35 +1,28 @@
+import * as cnt from '../constants';
 import moment from 'moment';
-export const NumConst = {
-  MAX_EVENT_IN_FILTER: 5,
-  START_EVENTS: 4,
-};
-const MIN_PRICE_OFFER = 10;
-const MAX_PRICE_OFFER = 100;
 
-const TIME = 86400000; // количество милисекунд в сутках
-
-export const EVENT_TYPES = new Array([
-  [`Taxi to`, `🚕`],
-  [`Bus to`, `🚌`],
-  [`Train to`, `🚂`],
-  [`Ship to`, `🛳️`],
-  [`Transport to`, `🚊`],
-  [`Drive to`, `🚗`],
-  [`Flight to`, `✈️`],
-  [`Check in`, `🏨`],
-  [`Sightseeing in`, `🏛️`],
-  [`Restaurant in`, `🍴`]
-]);
+export const EVENT_TYPES = [
+  [`Taxi`, `🚕`, `to`],
+  [`Bus`, `🚌`, `to`],
+  [`Train`, `🚂`, `to`],
+  [`Ship`, `🛳️`, `to`],
+  [`Transport`, `🚊`, `to`],
+  [`Drive`, `🚗`, `to`],
+  [`Flight`, `✈️`, `to`],
+  [`Check`, `🏨`, `in`],
+  [`Sightseeing`, `🏛️`, `in`],
+  [`Restaurant`, `🍴`, `in`]
+];
 
 export const OFFER_NAMES = new Set([
-  [`Add luggage`, `0`, false],
-  [`Switch to comfort class`, `0`, false],
-  [`Add meal`, `0`, false],
-  [`Choose seats`, `0`, false],
-  [`Get of calling cards`, `0`, false],
-  [`Add insurance`, `0`, false],
-  [`Booking ticket for event`, `0`, false],
-  [`Booking cars`, `0`, false]
+  [`Add luggage`, `0`, false, `in`],
+  [`Switch to comfort class`, `0`, false, `to`],
+  [`Add meal`, `0`, false, `all`],
+  [`Choose seats`, `0`, false, `to`],
+  [`Get of calling cards`, `0`, false, `in`],
+  [`Add insurance`, `0`, false, `all`],
+  [`Booking ticket for event`, `0`, false, `in`],
+  [`Booking cars`, `0`, false, `in`]
 ]);
 
 export const DESCRIPTIONS = new Set([
@@ -46,6 +39,10 @@ export const DESCRIPTIONS = new Set([
   `In rutrum ac purus sit amet tempus.`
 ]);
 
+export const StatData = [{selector: `.statistic__money`, title: `MONEY`, unit: `€`, method: `getPointsMoney`},
+  {selector: `.statistic__transport`, title: `TRANSPORT`, unit: `x`, method: `getPointsTransport`},
+  {selector: `.statistic__time-spend`, title: `TIME-SPEND`, unit: `H`, method: `getPointsTimeSpend`}];
+
 export const CITY_NAMES = [`Singapore`, `Kuala-Lumpur`, `Manila`, `Karachi`, `Kolombo`, `Muli`, `Lima`, `Hong Kong`, `Macau`, `Dubai`, `Kathmandu`];
 
 export const NAME_FILTERS = [`everything`, `future`, `past`];
@@ -54,13 +51,13 @@ export const getTimeStr = (time1, time2) => {
   moment.locale(`en-gb`);
   const str1 = moment(time1).format(`LT`);
   const str2 = moment(time2).format(`LT`);
-  return `${str1} - ${str2}`;
+  return `${str1} — ${str2}`;
 };
 
 export const getRandomInRange = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
 export const getRandomBoolean = () => Boolean(Math.round(Math.random()));
 export const getRandomIndexArr = (arr) => arr[Math.floor(Math.random() * arr.length)];
-export const getRandomDate = (day) => Date.now() + Math.floor(Math.random() * day) * TIME;
+export const getRandomDate = (day) => Date.now() + Math.floor(Math.random() * day) * cnt.TIME;
 
 export const getRandomNamePoint = () => {
   const arrName = document.querySelector(`.trip__points`).textContent.split(`— `);
@@ -79,7 +76,6 @@ export const getRandomPhoto = (amount) => {
 export const getArrFromSet = (originalSet, min, max) => {
   const arrResult = [];
   const arrNumber = [];
-  let flagChoice = 0;
   let i = 0;
   const j = getRandomInRange(min, max);
   if (j > 0) {
@@ -87,16 +83,29 @@ export const getArrFromSet = (originalSet, min, max) => {
       let num = getRandomInRange(0, originalSet.size - 1);
       if (arrNumber.indexOf(num) === -1) {
         arrResult[i] = [...originalSet][num];
-        if (arrResult[i].length === 3) {
-          arrResult[i][1] = `${getRandomInRange(MIN_PRICE_OFFER, MAX_PRICE_OFFER)}`;
-          if (flagChoice < 2) {
-            arrResult[i][2] = true;
-            flagChoice += 1;
-          }
-        }
         arrNumber[i] = num;
         i += 1;
       }
+    }
+  }
+  return arrResult;
+};
+
+export const getOffersFromSet = (originalSet, type) => {
+  const arrResult = [];
+  const arrNumber = [];
+  let flagChoice = 0;
+  for (let i = 0; i < originalSet.size - 1; i += 1) {
+    let num = getRandomInRange(0, originalSet.size - 1);
+    let arrTemp = [...originalSet][num];
+    if ((arrNumber.indexOf(num) === -1) && ((arrTemp[3] === type) || (arrTemp[3] === `all`))) {
+      arrTemp[1] = `${getRandomInRange(cnt.MIN_PRICE_OFFER, cnt.MAX_PRICE_OFFER)}`;
+      if (flagChoice < 2) {
+        arrTemp[2] = true;
+        flagChoice += 1;
+      }
+      arrResult.push(arrTemp);
+      arrNumber.push(num);
     }
   }
   return arrResult;
@@ -106,4 +115,30 @@ export const createElement = (template) => {
   const newElement = document.createElement(`div`);
   newElement.innerHTML = template;
   return newElement.firstChild;
+};
+
+export const createFilter = (template) => {
+  const newElement = document.createElement(`div`);
+  newElement.innerHTML = template;
+  return newElement;
+};
+
+export const createEvent = () => {
+  const time1 = getRandomDate(cnt.DAY);
+  const time2 = time1 + getRandomInRange(cnt.TIME_START, cnt.TIME_STOP);
+  const typePoint = getRandomIndexArr(EVENT_TYPES);
+  return {
+    type: typePoint,
+    title: getRandomNamePoint(),
+    price: getRandomInRange(cnt.Price.MIN_PRICE_EVENT, cnt.Price.MAX_PRICE_EVENT),
+    day: new Date(time1),
+    timeStart: time1,
+    timeStop: time2,
+    time: getTimeStr(time1, time2),
+    picture: getRandomPhoto(getRandomInRange(cnt.DEF_MIN_PHOTO, cnt.DEF_MAX_PHOTO)),
+    offers: getOffersFromSet(OFFER_NAMES, typePoint[2]),
+    description: getArrFromSet(DESCRIPTIONS, cnt.DEF_MIN_DESCRIPTIONS, cnt.DEF_MAX_DESCRIPTIONS, ``),
+    isFavorite: getRandomBoolean(),
+    isCollapse: true
+  };
 };
