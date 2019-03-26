@@ -139,6 +139,6 @@ export const createEvent = () => {
     offers: getOffersFromSet(OFFER_NAMES, typePoint[2]),
     description: getArrFromSet(DESCRIPTIONS, cnt.DEF_MIN_DESCRIPTIONS, cnt.DEF_MAX_DESCRIPTIONS, ``),
     isFavorite: getRandomBoolean(),
-    isCollapse: true
+    isDeleted: false
   };
 };

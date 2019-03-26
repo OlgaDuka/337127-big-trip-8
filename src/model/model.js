@@ -31,7 +31,13 @@ export default class Model {
 
   deletePoint(pointToDelete) {
     const index = this.events.findIndex((it) => it === pointToDelete);
-    this.events.splice(index, 1);
+    this.events[index].isDeleted = true;
     return this.events;
+  }
+
+  insertPoint(pointToInsert) {
+    this.events.push(pointToInsert);
+    const index = this.events.size - 1;
+    return this.events[index];
   }
 }
