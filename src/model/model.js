@@ -11,13 +11,13 @@ export default class Model {
   getFilterEvents(filterName) {
     const fnFilter = {
       [`filter-everything`]: () => {
-        return this.events;
+        return this.events.filter((it) => !it.isDeleted);
       },
       [`filter-future`]: () => {
-        return this.events.filter((it) => it.day > Date.now());
+        return this.events.filter((it) => (it.day > Date.now()) && !it.isDeleted);
       },
       [`filter-past`]: () => {
-        return this.events.filter((it) => it.day < Date.now());
+        return this.events.filter((it) => (it.day < Date.now()) && !it.isDeleted);
       }
     };
     return fnFilter[filterName]();
@@ -31,7 +31,13 @@ export default class Model {
 
   deletePoint(pointToDelete) {
     const index = this.events.findIndex((it) => it === pointToDelete);
-    this.events.splice(index, 1);
+    this.events[index].isDeleted = true;
     return this.events;
+  }
+
+  insertPoint(pointToInsert) {
+    this.events.push(pointToInsert);
+    const index = this.events.size - 1;
+    return this.events[index];
   }
 }

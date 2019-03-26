@@ -205,7 +205,7 @@ export default class TripOpen extends Component {
 
   get price() {
     const offersTotalPrice = this._offers.filter((offer) => offer[2] === true).reduce((acc, offer) => acc + parseInt(offer[1], 10), 0);
-    return this._price + offersTotalPrice;
+    return +this._price + offersTotalPrice;
   }
 
   updatePrice() {
