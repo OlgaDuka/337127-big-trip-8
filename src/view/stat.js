@@ -87,7 +87,8 @@ export default class Stat {
   }
 
   update(data, numProp) {
-    this._arrPoints = this[data.stat[numProp].method](data.events);
+    const arr = data.events.filter((it) => !it.isDeleted);
+    this._arrPoints = this[data.stat[numProp].method](arr);
     this._element.data.labels = this._arrPoints.labels;
     this._element.data.datasets.data = this._arrPoints.data;
     this._element.update();

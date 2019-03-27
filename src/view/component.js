@@ -30,7 +30,7 @@ export default class Component {
   unbind() {}
 
   render() {
-    this._element = createElement(this.template);
+    this._element = createElement(this.template, `div`);
     this.bind();
 
     return this._element;

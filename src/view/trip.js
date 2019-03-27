@@ -10,7 +10,6 @@ export default class Trip extends Component {
     this._day = data.day;
     this._timeStart = data.timeStart;
     this._timeStop = data.timeStop;
-    this._time = data.time;
     this._picture = data.picture;
     this._offers = data.offers;
     this._description = data.description;
@@ -45,7 +44,6 @@ export default class Trip extends Component {
     this._day = data.day;
     this._timeStart = data.timeStart;
     this._timeStop = data.timeStop;
-    this._time = data.time;
     this._offers = data.offers;
     this._description = data.description;
     this._picture = data.picture;
@@ -70,12 +68,12 @@ export default class Trip extends Component {
   }
 
   getDuration() {
-    const dateStart = moment(this._timeStart);
-    const dateEnd = moment(this._timeStop);
-    const duration = moment.duration(dateEnd.diff(dateStart));
-    const hours = duration.hours();
-    const minutes = duration.minutes();
-    return `${hours}H:${minutes}M`;
+    const duration = moment.duration(moment(this._timeStop).diff(moment(this._timeStart)));
+    return `${duration.hours()}H:${duration.minutes()}M`;
+  }
+
+  getTimeStr() {
+    return `${moment(this._timeStart).format(`H:mm`)}&nbsp;&mdash;&nbsp;${moment(this._timeStop).format(`H:mm`)}`;
   }
 
   get template() {
@@ -83,8 +81,8 @@ export default class Trip extends Component {
                 <i class="trip-icon">${this._type[1]}</i>
                 <h3 class="trip-point__title">${this._type[0]} ${this._type[2]} ${this._title}</h3>
                 <p class="trip-point__schedule">
-                  <span class="trip-point__timetable">${this._time}</span>
-                  <span class="trip-point__duration">${this.getDuration(this._timeStop, this._timeStart)}</span>
+                  <span class="trip-point__timetable">${this.getTimeStr()}</span>
+                  <span class="trip-point__duration">${this.getDuration()}</span>
                 </p>
                 <p class="trip-point__price">&euro;&nbsp;${this.price}</p>
                 <ul class="trip-point__offers">

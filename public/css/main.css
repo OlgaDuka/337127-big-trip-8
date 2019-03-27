@@ -139,7 +139,7 @@ a.view-switch__item--active:link {
 .trip-filter {
   margin-top: 8px;
   margin-bottom: 16px;
-  display: flex; 
+  display: flex;
 }
 
 .trip-filter input[type=radio] {

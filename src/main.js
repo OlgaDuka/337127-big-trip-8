@@ -1,5 +1,6 @@
 import Model from './model/model';
 // import Controller from './controller';
+import API from './api';
 import Trip from './view/trip';
 import TripOpen from './view/trip-open';
 import Filter from './view/filter';
@@ -7,6 +8,10 @@ import Stat from './view/stat';
 
 const model = new Model();
 // const app = new Controller();
+
+const AUTHORIZATION = `Basic dXNlckBwYXNzd29yZAo=${Math.random()}`;
+const END_POINT = `https://es8-demo-srv.appspot.com/big-trip`;
+const api = new API({endPoint: END_POINT, authorization: AUTHORIZATION});
 
 const controls = document.querySelector(`.trip-controls`);
 export const formFilter = controls.querySelector(`.trip-filter`);
@@ -27,34 +32,49 @@ const renderFilters = (arrFilters) => {
   });
 };
 
-const renderEvents = (dist, arr) => {
-  for (const obPoint of arr) {
+const renderEvents = (points) => {
+  boardTable.innerHTML = ``;
+  for (const obPoint of points) {
     const point = new Trip(obPoint);
     const pointOpen = new TripOpen(obPoint);
-    dist.appendChild(point.render());
+
+    boardTable.appendChild(point.render());
+
     point.onClick = () => {
       pointOpen.render();
-      dist.replaceChild(pointOpen.element, point.element);
+      boardTable.replaceChild(pointOpen.element, point.element);
       point.unrender();
     };
     pointOpen.onSubmit = (newObject) => {
-      point.update(model.updatePoint(obPoint, newObject));
-      point.render();
-      dist.replaceChild(point.element, pointOpen.element);
-      pointOpen.unrender();
+      model.updatePoint(obPoint, newObject);
+
+      api.updatePoint({id: obPoint.id, data: obPoint.toRAW()})
+        .then((newPoint) => {
+          point.update(newPoint);
+          point.render();
+          boardTable.replaceChild(point.element, pointOpen.element);
+          pointOpen.unrender();
+        });
     };
-    pointOpen.onDelete = () => {
-      model.deletePoint(obPoint);
-      dist.removeChild(pointOpen.element);
-      pointOpen.unrender();
-    };
+    pointOpen.onDelete(({id}) => {
+      api.deletePoint({id})
+        .then(() => api.getPoints())
+        .then(renderEvents)
+        .catch(alert);
+    });
     pointOpen.onKeyEsc = () => {
       point.render();
-      dist.replaceChild(point.element, pointOpen.element);
+      boardTable.replaceChild(point.element, pointOpen.element);
       pointOpen.unrender();
     };
   }
 };
+
+api.getPoints()
+  .then((points) => {
+    renderEvents(points);
+  });
+
 
 formFilter.addEventListener(`click`, ({target}) => {
   if (target.className === `trip-filter__item` && !target.previousElementSibling.disabled) {
@@ -85,7 +105,7 @@ buttonStat.addEventListener(`click`, ({target}) => {
 });
 
 renderFilters(model.filters);
-renderEvents(boardEvents, model.events);
+// renderEvents(model.events);
 
 const moneyStat = new Stat(model, 0);
 moneyStat.render();

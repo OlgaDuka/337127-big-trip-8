@@ -6,32 +6,31 @@ import Component from './component.js';
 export default class TripOpen extends Component {
   constructor(data) {
     super();
+    this._id = data.id;
     this._type = data.type;
     this._title = data.title;
     this._price = data.price;
     this._day = data.day;
     this._timeStart = data.timeStart;
     this._timeStop = data.timeStop;
-    this._time = data.time;
     this._picture = data.picture;
     this._offers = data.offers;
     this._description = data.description;
     this._isFavorite = data.isFavorite;
-    this._isCollapse = data.isCollapse;
+    this._isDeleted = data.isDeleted;
 
     this._state = {
+      id: data.id,
       type: data.type,
       title: data.title,
       price: data.price,
       day: data.day,
       timeStart: data.timeStart,
       timeStop: data.timeStop,
-      time: data.time,
       picture: data.picture,
       offers: data.offers,
       description: data.description,
       isFavorite: data.isFavorite,
-      isCollapse: data.isCollapse
     };
 
     this._onSubmit = null;
@@ -41,11 +40,10 @@ export default class TripOpen extends Component {
     this._onSubmitButtonClick = this._onSubmitButtonClick.bind(this);
     this._onDeleteButtonClick = this._onDeleteButtonClick.bind(this);
     this._onKeydownEsc = this._onKeydownEsc.bind(this);
-    this._onCloseFlatpickr = this._onCloseFlatpickr.bind(this);
-    this._onChangeType = this._onChangeType.bind(this);
-    this._onChangeDestination = this._onChangeDestination.bind(this);
-    this._onChangePrice = this._onChangePrice.bind(this);
-    this._onChangeOffers = this._onChangeOffers.bind(this);
+    this._onTypeChange = this._onTypeChange.bind(this);
+    this._onDestinationChange = this._onDestinationChange.bind(this);
+    this._onPriceChange = this._onPriceChange.bind(this);
+    this._onOffersChange = this._onOffersChange.bind(this);
   }
 
   _onSubmitButtonClick(evt) {
@@ -61,7 +59,7 @@ export default class TripOpen extends Component {
   }
 
   _onDeleteButtonClick() {
-    return (typeof this._onDelete === `function`) && this._onDelete();
+    return (typeof this._onDelete === `function`) && this._onDelete({id: this._id});
   }
 
   set onDelete(fn) {
@@ -83,29 +81,19 @@ export default class TripOpen extends Component {
     oldElement.parentNode.replaceChild(this._element, oldElement);
   }
 
-  update(data) {
-    this._type = data.type;
-    this._title = data.title;
-    this._price = data.price;
-    this._day = data.day;
-    this._timeStart = data.timeStart;
-    this._timeStop = data.timeStop;
-    this._time = data.time;
-    this._offers = data.offers;
-    this._description = data.description;
-    this._picture = data.picture;
+  update(dataFromState) {
+    this._type = dataFromState.type;
+    this._title = dataFromState.title;
+    this._price = dataFromState.price;
+    this._day = dataFromState.day;
+    this._timeStart = dataFromState.timeStart;
+    this._timeStop = dataFromState.timeStop;
+    this._offers = dataFromState.offers;
+    this._description = dataFromState.description;
+    this._picture = dataFromState.picture;
   }
 
-  _onCloseFlatpickr(selectedDates, dateStr) {
-    this._timeStart = moment(selectedDates[0]).format(`LT`);
-    this._timeStop = moment(selectedDates[1]).format(`LT`);
-    this._time = dateStr;
-    this._state.timeStart = this._timeStart;
-    this._state.timeStop = this._timeStop;
-    this._state.time = this._time;
-  }
-
-  _onChangeType({target}) {
+  _onTypeChange({target}) {
     if (target.classList[0] === `travel-way__select-label`) {
       let typeName = target.previousElementSibling.value;
       let typeIcon = target.textContent;
@@ -119,11 +107,11 @@ export default class TripOpen extends Component {
     this._partialUpdate();
   }
 
-  _onChangeDestination({target}) {
+  _onDestinationChange({target}) {
     this._state.title = target.value;
   }
 
-  _onChangePrice({target}) {
+  _onPriceChange({target}) {
     this._state.price = target.value;
   }
 
@@ -140,7 +128,7 @@ export default class TripOpen extends Component {
     }
   }
 
-  _onChangeOffers({target}) {
+  _onOffersChange({target}) {
     const price = target.nextElementSibling.querySelector(`.point__offer-price`).textContent;
     const str = target.value;
     if (target.checked) {
@@ -158,28 +146,47 @@ export default class TripOpen extends Component {
     document.addEventListener(`keydown`, this._onKeydownEsc);
 
     this._element.querySelector(`.travel-way__select`)
-      .addEventListener(`click`, this._onChangeType);
+      .addEventListener(`click`, this._onTypeChange);
     this._element.querySelector(`input[name="destination"]`)
-      .addEventListener(`change`, this._onChangeDestination);
+      .addEventListener(`change`, this._onDestinationChange);
     this._element.querySelector(`input[name="price"]`)
-      .addEventListener(`change`, this._onChangePrice);
+      .addEventListener(`change`, this._onPriceChange);
 
     const offers = this._element.querySelectorAll(`.point__offers-input`);
     [].forEach.call(offers, (element) => {
-      element.addEventListener(`click`, this._onChangeOffers);
+      element.addEventListener(`click`, this._onOffersChange);
     });
 
-    flatpickr(this._element.querySelector(`input[name="time"]`), {
-      mode: `range`,
+    const dateStart = flatpickr(this._element.querySelector(`input[name="date-start"]`), {
       [`time_24hr`]: true,
-      minDate: `today`,
-      defaultDate: [this._timeStart, this._timeStop],
       enableTime: true,
-      locale: {
-        rangeSeparator: ` — `,
+      altInput: true,
+      dateFormat: `Z`,
+      altFormat: `H:i`,
+      defaultDate: moment(this._timeStart).format(),
+      onClose: (dateStr) => {
+        this._timeStart = Date.parse(dateStr);
+        this._state.timeStart = this._timeStart;
       },
-      dateFormat: `H:i`,
-      onClose: this._onCloseFlatpickr
+      onChange: (selectedDates) => {
+        dateEnd.set(`minDate`, selectedDates[0]);
+      }
+    });
+
+    const dateEnd = flatpickr(this._element.querySelector(`input[name="date-end"]`), {
+      [`time_24hr`]: true,
+      enableTime: true,
+      altInput: true,
+      dateFormat: `Z`,
+      altFormat: `H:i`,
+      defaultDate: moment(this._timeStop).format(),
+      onClose: (dateStr) => {
+        this._timeStop = Date.parse(dateStr);
+        this._state.timeStop = this._timeStop;
+      },
+      onChange: (selectedDates) => {
+        dateStart.set(`maxDate`, selectedDates[0]);
+      }
     });
   }
 
@@ -191,16 +198,19 @@ export default class TripOpen extends Component {
     document.removeEventListener(`keydown`, this._onKeydownEsc);
 
     this._element.querySelector(`.travel-way__select`)
-      .removeEventListener(`click`, this._onChangeType);
+      .removeEventListener(`click`, this._onTypeChange);
     this._element.querySelector(`input[name="destination"]`)
-      .removeEventListener(`change`, this._onChangeDestination);
+      .removeEventListener(`change`, this._onDestinationChange);
     this._element.querySelector(`input[name="price"]`)
-      .removeEventListener(`change`, this._onChangePrice);
+      .removeEventListener(`change`, this._onPriceChange);
 
     const offers = this._element.querySelectorAll(`.point__offers-input`);
     [].forEach.call(offers, (element) => {
-      element.removeEventListener(`click`, this._onChangeOffers);
+      element.removeEventListener(`click`, this._onOffersChange);
     });
+
+    flatpickr(this._element.querySelector(`input[name="date-start"]`)).destroy();
+    flatpickr(this._element.querySelector(`input[name="date-end"]`)).destroy();
   }
 
   get price() {
@@ -271,12 +281,11 @@ export default class TripOpen extends Component {
                       </datalist>
                     </div>
 
-                    <label class="point__time">
+                    <div class="point__time">
                       choose time
-                      <input class="point__input" type="text"
-                      value="${this._time}"
-                      name="time" placeholder="00:00 — 00:00">
-                    </label>
+                      <input class="point__input" type="text" value="" name="date-start" placeholder="19:00">
+                      <input class="point__input" type="text" value="" name="date-end" placeholder="21:00">
+                    </div>
 
                     <label class="point__price">
                       write price
