@@ -25,21 +25,6 @@ export default class Model {
     };
   }
 
-  getFilterEvents(filterName) {
-    const fnFilter = {
-      [`filter-everything`]: () => {
-        return this.events.filter((it) => !it.isDeleted);
-      },
-      [`filter-future`]: () => {
-        return this.events.filter((it) => (it.day > Date.now()) && !it.isDeleted);
-      },
-      [`filter-past`]: () => {
-        return this.events.filter((it) => (it.day < Date.now()) && !it.isDeleted);
-      }
-    };
-    return fnFilter[filterName]();
-  }
-
   updatePoint(pointToUpdate, newPoint) {
     const index = this.events.findIndex((it) => it === pointToUpdate);
     this.events[index] = Object.assign({}, pointToUpdate, newPoint);

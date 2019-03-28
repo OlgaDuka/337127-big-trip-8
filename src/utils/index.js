@@ -133,10 +133,16 @@ export const getOffersFromSet = (originalSet, type) => {
   return arrResult;
 };
 
-export const createElement = (template, teg) => {
-  const newElement = document.createElement(teg);
+export const createElement = (template) => {
+  const newElement = document.createElement(`div`);
   newElement.innerHTML = template;
   return newElement.firstChild;
+};
+
+export const createElementFilter = (template) => {
+  const newElement = document.createElement(`div`);
+  newElement.innerHTML = template;
+  return newElement;
 };
 
 export const createEvent = () => {

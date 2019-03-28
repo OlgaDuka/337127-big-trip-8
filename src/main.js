@@ -22,6 +22,17 @@ const boardTable = document.querySelector(`#table`);
 const boardStat = document.querySelector(`#stats`);
 export const boardEvents = boardTable.querySelector(`.trip-day__items`);
 
+const fnFilter = {
+  'filter-everything': () => {
+    return Model.filter((it) => !it.isDeleted);
+  },
+  'filter-future': () => {
+    return Model.filter((it) => (it.day > Date.now()) && !it.isDeleted);
+  },
+  'filter-past': () => {
+    return Model.filter((it) => (it.day < Date.now()) && !it.isDeleted);
+  }
+};
 
 const renderFilters = (arrFilters) => {
   return arrFilters.map((element) => {
@@ -76,11 +87,10 @@ api.getPoints()
     renderEvents(points);
   });
 
-
 formFilter.addEventListener(`click`, ({target}) => {
   if (target.className === `trip-filter__item` && !target.previousElementSibling.disabled) {
     boardEvents.innerHTML = ``;
-    renderEvents(boardEvents, Model.getFilterEvents(target.previousElementSibling.id));
+    renderEvents(fnFilter[target.previousElementSibling.id]());
   }
 });
 
