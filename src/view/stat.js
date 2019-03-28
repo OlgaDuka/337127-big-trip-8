@@ -1,3 +1,4 @@
+import {StatData} from '../utils/index';
 import moment from 'moment';
 import Chart from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
@@ -7,12 +8,12 @@ const BAR_HEIGHT = 55;
 export default class Stat {
   constructor(data, numProp) {
     this._element = null;
-    this._ctx = document.querySelector(data.stat[numProp].selector);
-    this._title = data.stat[numProp].title;
-    this._unit = data.stat[numProp].unit;
-    this._numPoints = data.events.length;
+    this._ctx = document.querySelector(StatData[numProp].selector);
+    this._destination = StatData[numProp].destination;
+    this._unit = StatData[numProp].unit;
+    this._numPoints = data.length;
     this._ctx.height = BAR_HEIGHT * this._numPoints;
-    this._arrPoints = this[data.stat[numProp].method](data.events);
+    this._arrPoints = this[StatData[numProp].method](data);
   }
 
   _getPriceOffers(arr, item) {
@@ -54,9 +55,9 @@ export default class Stat {
     const arrLabel = [];
     const arrHour = [];
     arr.forEach((elem, i) => {
-      let item = arrLabel.indexOf(`${elem.type[1]} ${elem.title.toUpperCase()}`);
+      let item = arrLabel.indexOf(`${elem.type[1]} ${elem.destination.toUpperCase()}`);
       if (item === -1) {
-        arrLabel.push(`${elem.type[1]} ${elem.title.toUpperCase()}`);
+        arrLabel.push(`${elem.type[1]} ${elem.destination.toUpperCase()}`);
         arrHour.push(this._getDurationHour(arr, i));
       } else {
         arrHour[item] += this._getDurationHour(arr, i);
@@ -88,7 +89,7 @@ export default class Stat {
 
   update(data, numProp) {
     const arr = data.events.filter((it) => !it.isDeleted);
-    this._arrPoints = this[data.stat[numProp].method](arr);
+    this._arrPoints = this[StatData[numProp].method](arr);
     this._element.data.labels = this._arrPoints.labels;
     this._element.data.datasets.data = this._arrPoints.data;
     this._element.update();
@@ -128,9 +129,9 @@ export default class Stat {
             formatter: (val) => `${val}${this._unit}`
           }
         },
-        title: {
+        destination: {
           display: true,
-          text: this._title,
+          text: this._destination,
           fontColor: `#000000`,
           fontSize: 23,
           position: `left`

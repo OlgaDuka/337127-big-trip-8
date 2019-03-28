@@ -1,13 +1,15 @@
 export default class ModelPoint {
   constructor(data) {
-    this._id = data[`id`];
-    this._type = data[`type`];
-    this._price = data[`base_price`] || ``;
-    this._timeStart = data[`date_from`];
-    this._timeStop = data[`date_to`];
-    this._offers = data[`offers`] || [];
-    this._destination = data[`destination`] || [];
-    this._isFavorite = Boolean(data[`is_favorite`]);
+    this.id = data[`id`];
+    this.type = data[`type`];
+    this.price = data[`base_price`] || ``;
+    this.timeStart = data[`date_from`];
+    this.timeStop = data[`date_to`];
+    this.offers = data[`offers`] || [];
+    this.destination = data[`destination`].name || ``;
+    this.description = data[`destination`].description || ``;
+    this.picture = data[`destination`].pictures || [];
+    this.isFavorite = Boolean(data[`is_favorite`]);
   }
 
   toRAW() {
@@ -18,7 +20,7 @@ export default class ModelPoint {
       'date_from': this.timeStart,
       'date_to': this.timeStop,
       'offers': this.offers,
-      'destination': this.destination,
+      'destination': {name: this.destination, description: this.description, pictures: this.picture},
       'is_favorite': this.isFavorite
     };
   }

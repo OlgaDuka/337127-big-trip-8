@@ -1,11 +1,28 @@
-import * as util from '../utils/index';
-import * as constants from '../constants';
-
 export default class Model {
-  constructor() {
-    this.events = new Array(constants.NumConst.START_EVENTS).fill(``).map(() => util.createEvent());
-    this.filters = util.NAME_FILTERS;
-    this.stat = util.StatData;
+  constructor(data) {
+    this.id = data[`id`];
+    this.type = data[`type`];
+    this.price = data[`base_price`] || ``;
+    this.timeStart = data[`date_from`];
+    this.timeStop = data[`date_to`];
+    this.offers = data[`offers`] || [];
+    this.destination = data[`destination`].name || ``;
+    this.description = data[`destination`].description || ``;
+    this.picture = data[`destination`].pictures || [];
+    this.isFavorite = Boolean(data[`is_favorite`]);
+  }
+
+  toRAW() {
+    return {
+      'id': this.id,
+      'type': this.type,
+      'base_price': this.price,
+      'date_from': this.timeStart,
+      'date_to': this.timeStop,
+      'offers': this.offers,
+      'destination': {name: this.destination, description: this.description, pictures: this.picture},
+      'is_favorite': this.isFavorite
+    };
   }
 
   getFilterEvents(filterName) {
@@ -39,5 +56,13 @@ export default class Model {
     this.events.push(pointToInsert);
     const index = this.events.size - 1;
     return this.events[index];
+  }
+
+  static parsePoint(data) {
+    return new Model(data);
+  }
+
+  static parsePoints(data) {
+    return data.map(Model.parsePoint);
   }
 }

@@ -1,17 +1,47 @@
 import * as constants from '../constants';
 
-export const EVENT_TYPES = [
-  [`Taxi`, `🚕`, `to`],
-  [`Bus`, `🚌`, `to`],
-  [`Train`, `🚂`, `to`],
-  [`Ship`, `🛳️`, `to`],
-  [`Transport`, `🚊`, `to`],
-  [`Drive`, `🚗`, `to`],
-  [`Flight`, `✈️`, `to`],
-  [`Check`, `🏨`, `in`],
-  [`Sightseeing`, `🏛️`, `in`],
-  [`Restaurant`, `🍴`, `in`]
-];
+export const EVENT_TYPES = {
+  'taxi': {
+    icon: `🚕`,
+    add: `to`
+  },
+  'bus': {
+    icon: `🚌`,
+    add: `to`
+  },
+  'train': {
+    icon: `🚂`,
+    add: `to`
+  },
+  'ship': {
+    icon: `🛳️`,
+    add: `to`
+  },
+  'transport': {
+    icon: `🚊`,
+    add: `to`
+  },
+  'drive': {
+    icon: `🚗`,
+    add: `to`
+  },
+  'flight': {
+    icon: `✈️`,
+    add: `to`
+  },
+  'check-in': {
+    icon: `🏨`,
+    add: `in`
+  },
+  'sightseeing': {
+    icon: `🏛️`,
+    add: `in`
+  },
+  'restaurant': {
+    icon: `🍴`,
+    add: `in`
+  },
+};
 
 export const OFFER_NAMES = new Set([
   [`Add luggage`, `0`, false, `in`],
@@ -116,7 +146,7 @@ export const createEvent = () => {
   return {
     id: 1,
     type: typePoint,
-    title: getRandomNamePoint(),
+    destination: getRandomNamePoint(),
     price: getRandomInRange(constants.Price.MIN_PRICE_EVENT, constants.Price.MAX_PRICE_EVENT),
     day: new Date(time1),
     timeStart: time1,

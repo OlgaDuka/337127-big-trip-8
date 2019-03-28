@@ -1,14 +1,7 @@
 export default class ModelOffer {
   constructor(data) {
-    this._name = data[`name`] || ``;
-    this._price = data[`price`] || ``;
-  }
-
-  toRAW() {
-    return {
-      'name': this.name,
-      'price': this.price,
-    };
+    this.name = data[`name`] || ``;
+    this.price = data[`price`] || ``;
   }
 
   static parsePoint(data) {

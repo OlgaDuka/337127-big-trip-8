@@ -8,7 +8,7 @@ export default class TripOpen extends Component {
     super();
     this._id = data.id;
     this._type = data.type;
-    this._title = data.title;
+    this._destination = data.destination;
     this._price = data.price;
     this._day = data.day;
     this._timeStart = data.timeStart;
@@ -22,7 +22,7 @@ export default class TripOpen extends Component {
     this._state = {
       id: data.id,
       type: data.type,
-      title: data.title,
+      destination: data.destination,
       price: data.price,
       day: data.day,
       timeStart: data.timeStart,
@@ -83,7 +83,7 @@ export default class TripOpen extends Component {
 
   update(dataFromState) {
     this._type = dataFromState.type;
-    this._title = dataFromState.title;
+    this._destination = dataFromState.destination;
     this._price = dataFromState.price;
     this._day = dataFromState.day;
     this._timeStart = dataFromState.timeStart;
@@ -95,20 +95,14 @@ export default class TripOpen extends Component {
 
   _onTypeChange({target}) {
     if (target.classList[0] === `travel-way__select-label`) {
-      let typeName = target.previousElementSibling.value;
-      let typeIcon = target.textContent;
-      let typeAdd = target.parentElement.dataset[`add`];
-      typeName = typeName[0].toUpperCase() + typeName.slice(1) + ` ` + typeAdd;
-      typeIcon = typeIcon.split(` `, 1);
-      this._type[0] = typeName;
-      this._type[1] = typeIcon;
+      this._type = target.previousElementSibling.value;
       this._state.type = this._type;
     }
     this._partialUpdate();
   }
 
   _onDestinationChange({target}) {
-    this._state.title = target.value;
+    this._state.destination = target.value;
   }
 
   _onPriceChange({target}) {
@@ -214,7 +208,7 @@ export default class TripOpen extends Component {
   }
 
   get price() {
-    const offersTotalPrice = this._offers.filter((offer) => offer[2] === true).reduce((acc, offer) => acc + parseInt(offer[1], 10), 0);
+    const offersTotalPrice = this._offers.filter((offer) => offer.accepted === true).reduce((acc, offer) => acc + parseInt(offer.price, 10), 0);
     return +this._price + offersTotalPrice;
   }
 
@@ -223,27 +217,27 @@ export default class TripOpen extends Component {
   }
 
   _getOffers() {
-    return this._offers.map((offer) => `<input class="point__offers-input visually-hidden" type="checkbox" id="${offer[0]}" name="offer" value="${offer[0]}" ${(offer[2] === true) ? `checked` : ``}>
-    <label for="${offer[0]}" class="point__offers-label">
-      <span class="point__offer-service">${offer[0]}</span> + €<span class="point__offer-price">${offer[1]}</span>
+    return this._offers.map((offer) => `<input class="point__offers-input visually-hidden" type="checkbox" id="${offer.title}" name="offer" value="${offer.title}" ${(offer.accepted === true) ? `checked` : ``}>
+    <label for="${offer.title}" class="point__offers-label">
+      <span class="point__offer-service">${offer.title}</span> + €<span class="point__offer-price">${offer.price}</span>
     </label>`).join(``);
   }
 
   _getPictures() {
     return this._picture.map((picture) =>
-      `<img src="http:${picture}" alt="picture from place" class="point__destination-image">`).join(``);
+      `<img src="${picture.src}" alt="picture from place" class="point__destination-image">`).join(``);
   }
 
   _getTravelWay(typeTravel) {
     const arrResult = [];
-    EVENT_TYPES.forEach((elem) => {
-      if (elem[2] === typeTravel) {
+    [].forEach.call(EVENT_TYPES, (elem) => {
+      if (elem.add === typeTravel) {
         arrResult.push(elem);
       }
     });
-    return arrResult.map((type) =>
-      `<input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-${type[0].toLowerCase()}" name="travel-way" value="${type[0].toLowerCase()}">
-      <label class="travel-way__select-label" for="travel-way-${type[0].toLowerCase()}">${type[1]} ${type[0].toLowerCase()}</label>`).join(``);
+    return arrResult.map((eventType) =>
+      `<input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-${eventType}" name="travel-way" value="${eventType}">
+      <label class="travel-way__select-label" for="travel-way-${eventType}">${eventType.icon} ${eventType}</label>`).join(``);
   }
 
   get template() {
@@ -272,7 +266,7 @@ export default class TripOpen extends Component {
 
                     <div class="point__destination-wrap">
                       <label class="point__destination-label" for="destination">${(this._type[0])} ${(this._type[2])}</label>
-                      <input class="point__destination-input" list="destination-select" id="destination" value="${this._title}" name="destination">
+                      <input class="point__destination-input" list="destination-select" id="destination" value="${this._destination}" name="destination">
                       <datalist id="destination-select">
                         <option value="airport"></option>
                         <option value="Geneva"></option>
@@ -306,7 +300,7 @@ export default class TripOpen extends Component {
 
                   <section class="point__details">
                     <section class="point__offers">
-                      <h3 class="point__details-title">offers</h3>
+                      <h3 class="point__details-destination">offers</h3>
 
                       <div class="point__offers-wrap">
                         ${this._getOffers()}
@@ -314,7 +308,7 @@ export default class TripOpen extends Component {
 
                     </section>
                     <section class="point__destination">
-                      <h3 class="point__details-title">Destination</h3>
+                      <h3 class="point__details-destination">Destination</h3>
                       <p class="point__destination-text">${this._description}</p>
                       <div class="point__destination-images">
                         ${this._getPictures()}

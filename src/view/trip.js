@@ -1,20 +1,20 @@
+import {EVENT_TYPES} from '../utils/index.js';
 import moment from 'moment';
 import Component from './component.js';
 
 export default class Trip extends Component {
   constructor(data) {
     super();
+    this._id = data.id;
     this._type = data.type;
-    this._title = data.title;
+    this._destination = data.destination;
     this._price = data.price;
-    this._day = data.day;
     this._timeStart = data.timeStart;
     this._timeStop = data.timeStop;
     this._picture = data.picture;
     this._offers = data.offers;
     this._description = data.description;
     this._isFavorite = data.isFavorite;
-    this._isCollapse = data.isCollapse;
 
     this._onClick = null;
 
@@ -39,9 +39,8 @@ export default class Trip extends Component {
 
   update(data) {
     this._type = data.type;
-    this._title = data.title;
+    this._destination = data.destination;
     this._price = data.price;
-    this._day = data.day;
     this._timeStart = data.timeStart;
     this._timeStop = data.timeStop;
     this._offers = data.offers;
@@ -50,7 +49,7 @@ export default class Trip extends Component {
   }
 
   get price() {
-    const offersTotalPrice = this._offers.filter((offer) => offer[2] === true).reduce((acc, offer) => acc + parseInt(offer[1], 10), 0);
+    const offersTotalPrice = this._offers.filter((offer) => offer.accept === true).reduce((acc, offer) => acc + parseInt(offer.price, 10), 0);
     return +this._price + offersTotalPrice;
   }
 
@@ -58,9 +57,9 @@ export default class Trip extends Component {
   _getOffer() {
     let htmlOffers = ``;
     this._offers.map((offer) => {
-      if (offer[2]) {
+      if (offer.accepted) {
         htmlOffers += `<li>
-          <button class="trip-point__offer">${offer[0]} +&euro;&nbsp;${offer[1]}</button>
+          <button class="trip-point__offer">${offer.title} +&euro;&nbsp;${offer.price}</button>
           </li>`;
       }
     });
@@ -78,8 +77,8 @@ export default class Trip extends Component {
 
   get template() {
     return `<article class="trip-point">
-                <i class="trip-icon">${this._type[1]}</i>
-                <h3 class="trip-point__title">${this._type[0]} ${this._type[2]} ${this._title}</h3>
+                <i class="trip-icon">${EVENT_TYPES[this._type].icon}</i>
+                <h3 class="trip-point__title">${this._type} ${this._destination}</h3>
                 <p class="trip-point__schedule">
                   <span class="trip-point__timetable">${this.getTimeStr()}</span>
                   <span class="trip-point__duration">${this.getDuration()}</span>

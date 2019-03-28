@@ -1,15 +1,16 @@
+import {NAME_FILTERS} from './utils/index';
 import Model from './model/model';
 // import Controller from './controller';
 import API from './api';
 import Trip from './view/trip';
 import TripOpen from './view/trip-open';
 import Filter from './view/filter';
-import Stat from './view/stat';
+// import Stat from './view/stat';
 
-const model = new Model();
+// const model = new Model();
 // const app = new Controller();
 
-const AUTHORIZATION = `Basic dXNlckBwYXNzd29yZAo=${Math.random()}`;
+const AUTHORIZATION = `Basic dXNfckBgYXuzd27yZAo=${Math.random()}`;
 const END_POINT = `https://es8-demo-srv.appspot.com/big-trip`;
 const api = new API({endPoint: END_POINT, authorization: AUTHORIZATION});
 
@@ -46,7 +47,7 @@ const renderEvents = (points) => {
       point.unrender();
     };
     pointOpen.onSubmit = (newObject) => {
-      model.updatePoint(obPoint, newObject);
+      Model.updatePoint(obPoint, newObject);
 
       api.updatePoint({id: obPoint.id, data: obPoint.toRAW()})
         .then((newPoint) => {
@@ -56,7 +57,7 @@ const renderEvents = (points) => {
           pointOpen.unrender();
         });
     };
-    pointOpen.onDelete(({id}) => {
+    pointOpen.onDelete = (({id}) => {
       api.deletePoint({id})
         .then(() => api.getPoints())
         .then(renderEvents)
@@ -79,7 +80,7 @@ api.getPoints()
 formFilter.addEventListener(`click`, ({target}) => {
   if (target.className === `trip-filter__item` && !target.previousElementSibling.disabled) {
     boardEvents.innerHTML = ``;
-    renderEvents(boardEvents, model.getFilterEvents(target.previousElementSibling.id));
+    renderEvents(boardEvents, Model.getFilterEvents(target.previousElementSibling.id));
   }
 });
 
@@ -99,17 +100,17 @@ buttonStat.addEventListener(`click`, ({target}) => {
     boardStat.classList.remove(`visually-hidden`);
     boardTable.classList.add(`visually-hidden`);
   }
-  moneyStat.update(model, 0);
-  transportStat.update(model, 1);
-  timeSpendStat.update(model, 2);
+  /* moneyStat.update(Model, 0);
+  transportStat.update(Model, 1);
+  timeSpendStat.update(Model, 2); */
 });
 
-renderFilters(model.filters);
+renderFilters(NAME_FILTERS);
 // renderEvents(model.events);
 
-const moneyStat = new Stat(model, 0);
+/* const moneyStat = new Stat(Model, 0);
 moneyStat.render();
-const transportStat = new Stat(model, 1);
+const transportStat = new Stat(Model, 1);
 transportStat.render();
-const timeSpendStat = new Stat(model, 2);
-timeSpendStat.render();
+const timeSpendStat = new Stat(Model, 2);
+timeSpendStat.render(); */
