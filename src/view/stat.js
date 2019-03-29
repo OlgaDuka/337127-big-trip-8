@@ -1,26 +1,57 @@
-import {StatData} from '../utils/index';
+import {EVENT_TYPES} from '../utils/index.js';
 import moment from 'moment';
 import Chart from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 const BAR_HEIGHT = 55;
+const TypeStat = {
+  MONEY: 0,
+  TRANSPORT: 1,
+  TIME_SPEND: 2
+};
 
 export default class Stat {
-  constructor(data, numProp) {
-    this._element = null;
-    this._ctx = document.querySelector(StatData[numProp].selector);
-    this._destination = StatData[numProp].destination;
-    this._unit = StatData[numProp].unit;
-    this._numPoints = data.length;
-    this._ctx.height = BAR_HEIGHT * this._numPoints;
-    this._arrPoints = this[StatData[numProp].method](data);
+  constructor() {
+    this._element = [];
+    this._config = [];
+    this._ctx = [];
+  }
+
+  set money(data) {
+    this._ctx[TypeStat.MONEY] = document.querySelector(data.stat[TypeStat.MONEY].selector);
+    this._config[TypeStat.MONEY] = {
+      _title: data.stat[TypeStat.MONEY].title,
+      _unit: data.stat[TypeStat.MONEY].unit,
+      _arrPoints: this[data.stat[TypeStat.MONEY].method](data.events),
+    };
+    this._ctx[TypeStat.MONEY].height = BAR_HEIGHT * this._config[TypeStat.MONEY]._arrPoints.numPoints;
+  }
+
+  set transport(data) {
+    this._ctx[TypeStat.TRANSPORT] = document.querySelector(data.stat[TypeStat.TRANSPORT].selector);
+    this._config[TypeStat.TRANSPORT] = {
+      _title: data.stat[TypeStat.TRANSPORT].title,
+      _unit: data.stat[TypeStat.TRANSPORT].unit,
+      _arrPoints: this[data.stat[TypeStat.TRANSPORT].method](data.events)
+    };
+    this._ctx[TypeStat.TRANSPORT].height = BAR_HEIGHT * this._config[TypeStat.TRANSPORT]._arrPoints.numPoints;
+  }
+
+  set timeSpend(data) {
+    this._ctx[TypeStat.TIME_SPEND] = document.querySelector(data.stat[TypeStat.TIME_SPEND].selector);
+    this._config[TypeStat.TIME_SPEND] = {
+      _title: data.stat[TypeStat.TIME_SPEND].title,
+      _unit: data.stat[TypeStat.TIME_SPEND].unit,
+      _arrPoints: this[data.stat[TypeStat.TIME_SPEND].method](data.events),
+    };
+    this._ctx[TypeStat.TIME_SPEND].height = BAR_HEIGHT * this._config[TypeStat.TIME_SPEND]._arrPoints.numPoints;
   }
 
   _getPriceOffers(arr, item) {
     let price = 0;
     arr[item].offers.forEach((elem) => {
-      if (elem[2]) {
-        price += parseInt(elem[1], 10);
+      if (elem.accepted) {
+        price += parseInt(elem.price, 10);
       }
     });
     return price;
@@ -30,17 +61,19 @@ export default class Stat {
     const arrType = [];
     const arrPrice = [];
     arr.forEach((elem, i) => {
-      let item = arrType.indexOf(`${elem.type[1]} ${elem.type[0].toUpperCase()}`);
+      let item = arrType.indexOf(`${EVENT_TYPES[elem.type].icon} ${elem.type.toUpperCase()}`);
       if (item === -1) {
-        arrType.push(`${elem.type[1]} ${elem.type[0].toUpperCase()}`);
+        arrType.push(`${EVENT_TYPES[elem.type].icon} ${elem.type.toUpperCase()}`);
         arrPrice.push(elem.price + this._getPriceOffers(arr, i));
       } else {
         arrPrice[item] += (elem.price + this._getPriceOffers(arr, i));
       }
     });
+    const count = arrType.length;
     return {
       labels: arrType,
-      data: arrPrice
+      data: arrPrice,
+      numPoints: count
     };
   }
 
@@ -55,17 +88,19 @@ export default class Stat {
     const arrLabel = [];
     const arrHour = [];
     arr.forEach((elem, i) => {
-      let item = arrLabel.indexOf(`${elem.type[1]} ${elem.destination.toUpperCase()}`);
+      let item = arrLabel.indexOf(`${EVENT_TYPES[elem.type].icon} ${elem.type.toUpperCase()}`);
       if (item === -1) {
-        arrLabel.push(`${elem.type[1]} ${elem.destination.toUpperCase()}`);
+        arrLabel.push(`${EVENT_TYPES[elem.type].icon} ${elem.type.toUpperCase()}`);
         arrHour.push(this._getDurationHour(arr, i));
       } else {
         arrHour[item] += this._getDurationHour(arr, i);
       }
     });
+    const count = arrLabel.length;
     return {
       labels: arrLabel,
-      data: arrHour
+      data: arrHour,
+      numPoints: count
     };
   }
 
@@ -73,26 +108,29 @@ export default class Stat {
     const arrType = [];
     const arrNum = [];
     arr.forEach((elem) => {
-      let item = arrType.indexOf(`${elem.type[1]} ${elem.type[0].toUpperCase()}`);
-      if ((item === -1) && (elem.type[2] === `to`)) {
-        arrType.push(`${elem.type[1]} ${elem.type[0].toUpperCase()}`);
+      let item = arrType.indexOf(`${EVENT_TYPES[elem.type].icon} ${elem.type.toUpperCase()}`);
+      if ((item === -1) && (EVENT_TYPES[elem.type].add === `to`)) {
+        arrType.push(`${EVENT_TYPES[elem.type].icon} ${elem.type.toUpperCase()}`);
         arrNum.push(1);
       } else {
         arrNum[item] += 1;
       }
     });
+    const count = arrType.length;
     return {
       labels: arrType,
-      data: arrNum
+      data: arrNum,
+      numPoints: count
     };
   }
 
-  update(data, numProp) {
-    const arr = data.events.filter((it) => !it.isDeleted);
-    this._arrPoints = this[StatData[numProp].method](arr);
-    this._element.data.labels = this._arrPoints.labels;
-    this._element.data.datasets.data = this._arrPoints.data;
-    this._element.update();
+  update(dataEvent, dataStat) {
+    this._config.forEach((elem, i) => {
+      elem._arrPoints = this[dataStat[i].method](dataEvent);
+      this._element[i].data.labels = elem._arrPoints.labels;
+      this._element[i].data.datasets.data = elem._arrPoints.data;
+      this._element[i].update();
+    });
   }
 
   unrender() {
@@ -100,18 +138,20 @@ export default class Stat {
   }
 
   render() {
-    this._element = new Chart(this._ctx, this.configChart);
+    this._element[TypeStat.MONEY] = new Chart(this._ctx[TypeStat.MONEY], this.configChart(TypeStat.MONEY));
+    this._element[TypeStat.TRANSPORT] = new Chart(this._ctx[TypeStat.TRANSPORT], this.configChart(TypeStat.TRANSPORT));
+    this._element[TypeStat.TIME_SPEND] = new Chart(this._ctx[TypeStat.TIME_SPEND], this.configChart(TypeStat.TIME_SPEND));
     return this._element;
   }
 
-  get configChart() {
+  configChart(typeStat) {
     return {
       plugins: [ChartDataLabels],
       type: `horizontalBar`,
       data: {
-        labels: this._arrPoints.labels,
+        labels: this._config[typeStat]._arrPoints.labels,
         datasets: [{
-          data: this._arrPoints.data,
+          data: this._config[typeStat]._arrPoints.data,
           backgroundColor: `#ffffff`,
           hoverBackgroundColor: `#ffffff`,
           anchor: `start`
@@ -126,12 +166,12 @@ export default class Stat {
             color: `#000000`,
             anchor: `end`,
             align: `start`,
-            formatter: (val) => `${val}${this._unit}`
+            formatter: (val) => `${val}${this._config[typeStat]._unit}`
           }
         },
         destination: {
           display: true,
-          text: this._destination,
+          text: this._config[typeStat]._title,
           fontColor: `#000000`,
           fontSize: 23,
           position: `left`

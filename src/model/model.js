@@ -1,28 +1,51 @@
+import * as util from '../utils/index';
+
 export default class Model {
-  constructor(data) {
-    this.id = data[`id`];
-    this.type = data[`type`];
-    this.price = data[`base_price`] || ``;
-    this.timeStart = data[`date_from`];
-    this.timeStop = data[`date_to`];
-    this.offers = data[`offers`] || [];
-    this.destination = data[`destination`].name || ``;
-    this.description = data[`destination`].description || ``;
-    this.picture = data[`destination`].pictures || [];
-    this.isFavorite = Boolean(data[`is_favorite`]);
+  constructor() {
+    this._events = [];
+    this._destinations = [];
+    this._offers = [];
+    this.filters = util.NAME_FILTERS;
+    this.stat = util.StatData;
   }
 
-  toRAW() {
-    return {
-      'id': this.id,
-      'type': this.type,
-      'base_price': this.price,
-      'date_from': this.timeStart,
-      'date_to': this.timeStop,
-      'offers': this.offers,
-      'destination': {name: this.destination, description: this.description, pictures: this.picture},
-      'is_favorite': this.isFavorite
+  set eventsData(data) {
+    this._events = data;
+  }
+
+  set destinationsData(data) {
+    this._destinations = data;
+  }
+
+  set offersData(data) {
+    this._offers = data;
+  }
+
+  get events() {
+    return this._events;
+  }
+
+  get destinations() {
+    return this._destinations;
+  }
+
+  get offers() {
+    return this._offers;
+  }
+
+  getFilterEvents(filterName) {
+    const fnFilter = {
+      'filter-everything': () => {
+        return this.events;
+      },
+      'filter-future': () => {
+        return this.events.filter((it) => it.timeStart > Date.now());
+      },
+      'filter-past': () => {
+        return this.events.filter((it) => it.timeStop < Date.now());
+      }
     };
+    return fnFilter[filterName]();
   }
 
   updatePoint(pointToUpdate, newPoint) {
@@ -41,13 +64,5 @@ export default class Model {
     this.events.push(pointToInsert);
     const index = this.events.size - 1;
     return this.events[index];
-  }
-
-  static parsePoint(data) {
-    return new Model(data);
-  }
-
-  static parsePoints(data) {
-    return data.map(Model.parsePoint);
   }
 }

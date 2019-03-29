@@ -1,18 +1,17 @@
-import {NAME_FILTERS} from './utils/index';
 import Model from './model/model';
 // import Controller from './controller';
-import API from './api';
+import LoaderData from './loader-data';
 import Trip from './view/trip';
 import TripOpen from './view/trip-open';
 import Filter from './view/filter';
-// import Stat from './view/stat';
+import Stat from './view/stat';
 
-// const model = new Model();
+const model = new Model();
 // const app = new Controller();
-
-const AUTHORIZATION = `Basic dXNfckBgYXuzd27yZAo=${Math.random()}`;
-const END_POINT = `https://es8-demo-srv.appspot.com/big-trip`;
-const api = new API({endPoint: END_POINT, authorization: AUTHORIZATION});
+const stat = new Stat();
+// const transportStat = new Stat();
+// const timeSpendStat = new Stat();
+const loaderData = new LoaderData();
 
 const controls = document.querySelector(`.trip-controls`);
 export const formFilter = controls.querySelector(`.trip-filter`);
@@ -21,18 +20,6 @@ const buttonStat = controls.querySelector(`a[href*=stats]`);
 const boardTable = document.querySelector(`#table`);
 const boardStat = document.querySelector(`#stats`);
 export const boardEvents = boardTable.querySelector(`.trip-day__items`);
-
-const fnFilter = {
-  'filter-everything': () => {
-    return Model.filter((it) => !it.isDeleted);
-  },
-  'filter-future': () => {
-    return Model.filter((it) => (it.day > Date.now()) && !it.isDeleted);
-  },
-  'filter-past': () => {
-    return Model.filter((it) => (it.day < Date.now()) && !it.isDeleted);
-  }
-};
 
 const renderFilters = (arrFilters) => {
   return arrFilters.map((element) => {
@@ -44,9 +31,9 @@ const renderFilters = (arrFilters) => {
   });
 };
 
-const renderEvents = (points) => {
+const renderEvents = (arr) => {
   boardTable.innerHTML = ``;
-  for (const obPoint of points) {
+  for (const obPoint of arr) {
     const point = new Trip(obPoint);
     const pointOpen = new TripOpen(obPoint);
 
@@ -58,9 +45,9 @@ const renderEvents = (points) => {
       point.unrender();
     };
     pointOpen.onSubmit = (newObject) => {
-      Model.updatePoint(obPoint, newObject);
+      model.updatePoint(obPoint, newObject);
 
-      api.updatePoint({id: obPoint.id, data: obPoint.toRAW()})
+      loaderData.updatePoint({id: obPoint.id, data: obPoint.toRAW()})
         .then((newPoint) => {
           point.update(newPoint);
           point.render();
@@ -69,8 +56,8 @@ const renderEvents = (points) => {
         });
     };
     pointOpen.onDelete = (({id}) => {
-      api.deletePoint({id})
-        .then(() => api.getPoints())
+      loaderData.deletePoint({id})
+        .then(() => loaderData.getPoints())
         .then(renderEvents)
         .catch(alert);
     });
@@ -82,15 +69,10 @@ const renderEvents = (points) => {
   }
 };
 
-api.getPoints()
-  .then((points) => {
-    renderEvents(points);
-  });
-
 formFilter.addEventListener(`click`, ({target}) => {
   if (target.className === `trip-filter__item` && !target.previousElementSibling.disabled) {
     boardEvents.innerHTML = ``;
-    renderEvents(fnFilter[target.previousElementSibling.id]());
+    renderEvents(model.getFilterEvents(target.previousElementSibling.id));
   }
 });
 
@@ -110,17 +92,18 @@ buttonStat.addEventListener(`click`, ({target}) => {
     boardStat.classList.remove(`visually-hidden`);
     boardTable.classList.add(`visually-hidden`);
   }
-  /* moneyStat.update(Model, 0);
-  transportStat.update(Model, 1);
-  timeSpendStat.update(Model, 2); */
+  stat.update(model.events, model.stat);
 });
 
-renderFilters(NAME_FILTERS);
-// renderEvents(model.events);
-
-/* const moneyStat = new Stat(Model, 0);
-moneyStat.render();
-const transportStat = new Stat(Model, 1);
-transportStat.render();
-const timeSpendStat = new Stat(Model, 2);
-timeSpendStat.render(); */
+loaderData.getPoints()
+  .then((points) => {
+    model.eventsData = points;
+    stat.money = model;
+    stat.transport = model;
+    stat.timeSpend = model;
+  })
+  .then(() => {
+    renderFilters(model.filters);
+    renderEvents(model.events);
+    stat.render();
+  });

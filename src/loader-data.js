@@ -1,7 +1,6 @@
-import Model from './model/model';
-// import ModelPoint from './model/model-point';
-// import ModelDestination from './model/model-destination';
-// import ModelOffer from './model/model-offer';
+import ModelPoint from './model/model-point';
+import ModelDestination from './model/model-destination';
+import ModelOffer from './model/model-offer';
 
 const Method = {
   GET: `GET`,
@@ -9,6 +8,9 @@ const Method = {
   PUT: `PUT`,
   DELETE: `DELETE`
 };
+
+const AUTHORIZATION = `Basic dXNfckBgYXuzd27yZAo=${Math.random()}`;
+const END_POINT = `https://es8-demo-srv.appspot.com/big-trip`;
 
 const checkStatus = (response) => {
   if (response.status >= 200 && response.status < 300) {
@@ -22,19 +24,19 @@ const toJSON = (response) => {
   return response.json();
 };
 
-export default class API {
-  constructor({endPoint, authorization}) {
-    this._endPoint = endPoint;
-    this._authorization = authorization;
+export default class LoaderData {
+  constructor() {
+    this._endPoint = END_POINT;
+    this._authorization = AUTHORIZATION;
   }
 
   getPoints() {
     return this._load({url: `points`})
       .then(toJSON)
-      .then(Model.parsePoints);
+      .then(ModelPoint.parsePoints);
   }
 
-  /*  getDestinations() {
+  getDestinations() {
     return this._load({url: `destinations`})
       .then(toJSON)
       .then(ModelDestination.parsePoints);
@@ -44,7 +46,7 @@ export default class API {
     return this._load({url: `offers`})
       .then(toJSON)
       .then(ModelOffer.parsePoints);
-  } */
+  }
 
   createPoint({point}) {
     return this._load({
@@ -54,7 +56,7 @@ export default class API {
       headers: new Headers({'Content-Type': `application/json`})
     })
       .then(toJSON)
-      .then(Model.parsePoint);
+      .then(ModelPoint.parsePoint);
   }
 
   updatePoint({id, data}) {
@@ -65,7 +67,7 @@ export default class API {
       headers: new Headers({'Content-Type': `application/json`})
     })
       .then(toJSON)
-      .then(Model.parsePoint);
+      .then(ModelPoint.parsePoint);
   }
 
   deletePoint({id}) {
