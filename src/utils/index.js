@@ -1,5 +1,3 @@
-import * as constants from '../constants';
-
 export const EVENT_TYPES = {
   'taxi': {
     icon: `🚕`,

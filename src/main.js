@@ -98,9 +98,7 @@ buttonStat.addEventListener(`click`, ({target}) => {
 loaderData.getPoints()
   .then((points) => {
     model.eventsData = points;
-    stat.money = model;
-    stat.transport = model;
-    stat.timeSpend = model;
+    stat.config = model;
   })
   .then(() => {
     renderFilters(model.filters);
