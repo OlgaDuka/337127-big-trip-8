@@ -230,14 +230,14 @@ export default class TripOpen extends Component {
 
   _getTravelWay(typeTravel) {
     const arrResult = [];
-    [].forEach.call(EVENT_TYPES, (elem) => {
-      if (elem.add === typeTravel) {
-        arrResult.push(elem);
+    for (let key in EVENT_TYPES) {
+      if (EVENT_TYPES[key].add === typeTravel) {
+        arrResult.push({type: key, icon: EVENT_TYPES[key].icon});
       }
-    });
-    return arrResult.map((eventType) =>
-      `<input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-${eventType}" name="travel-way" value="${eventType}">
-      <label class="travel-way__select-label" for="travel-way-${eventType}">${eventType.icon} ${eventType}</label>`).join(``);
+    }
+    return arrResult.map((item) =>
+      `<input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-${item.type}" name="travel-way" value="${item.type}">
+      <label class="travel-way__select-label" for="travel-way-${item.type}">${item.icon} ${item.type}</label>`).join(``);
   }
 
   get template() {
@@ -250,7 +250,7 @@ export default class TripOpen extends Component {
                     </label>
 
                     <div class="travel-way">
-                      <label class="travel-way__label" for="travel-way__toggle">${this._type[1]}</label>
+                      <label class="travel-way__label" for="travel-way__toggle">${EVENT_TYPES[this._type].icon}</label>
 
                       <input type="checkbox" class="travel-way__toggle visually-hidden" id="travel-way__toggle">
 
@@ -265,7 +265,7 @@ export default class TripOpen extends Component {
                     </div>
 
                     <div class="point__destination-wrap">
-                      <label class="point__destination-label" for="destination">${(this._type[0])} ${(this._type[2])}</label>
+                      <label class="point__destination-label" for="destination">${(this._type)} ${EVENT_TYPES[this._type].add}</label>
                       <input class="point__destination-input" list="destination-select" id="destination" value="${this._destination}" name="destination">
                       <datalist id="destination-select">
                         <option value="airport"></option>

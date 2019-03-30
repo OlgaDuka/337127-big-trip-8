@@ -9,8 +9,6 @@ import Stat from './view/stat';
 const model = new Model();
 // const app = new Controller();
 const stat = new Stat();
-// const transportStat = new Stat();
-// const timeSpendStat = new Stat();
 const loaderData = new LoaderData();
 
 const controls = document.querySelector(`.trip-controls`);

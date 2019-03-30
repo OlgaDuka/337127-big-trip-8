@@ -78,7 +78,7 @@ export default class Trip extends Component {
   get template() {
     return `<article class="trip-point">
                 <i class="trip-icon">${EVENT_TYPES[this._type].icon}</i>
-                <h3 class="trip-point__title">${this._type} ${this._destination}</h3>
+                <h3 class="trip-point__title">${this._type} ${EVENT_TYPES[this._type].add} ${this._destination}</h3>
                 <p class="trip-point__schedule">
                   <span class="trip-point__timetable">${this.getTimeStr()}</span>
                   <span class="trip-point__duration">${this.getDuration()}</span>

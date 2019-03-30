@@ -1,44 +1,14 @@
 export const EVENT_TYPES = {
-  'taxi': {
-    icon: `🚕`,
-    add: `to`
-  },
-  'bus': {
-    icon: `🚌`,
-    add: `to`
-  },
-  'train': {
-    icon: `🚂`,
-    add: `to`
-  },
-  'ship': {
-    icon: `🛳️`,
-    add: `to`
-  },
-  'transport': {
-    icon: `🚊`,
-    add: `to`
-  },
-  'drive': {
-    icon: `🚗`,
-    add: `to`
-  },
-  'flight': {
-    icon: `✈️`,
-    add: `to`
-  },
-  'check-in': {
-    icon: `🏨`,
-    add: `in`
-  },
-  'sightseeing': {
-    icon: `🏛️`,
-    add: `in`
-  },
-  'restaurant': {
-    icon: `🍴`,
-    add: `in`
-  },
+  'taxi': {icon: `🚕`, add: `to`},
+  'bus': {icon: `🚌`, add: `to`},
+  'train': {icon: `🚂`, add: `to`},
+  'ship': {icon: `🛳️`, add: `to`},
+  'transport': {icon: `🚊`, add: `to`},
+  'drive': {icon: `🚗`, add: `to`},
+  'flight': {icon: `✈️`, add: `to`},
+  'check-in': {icon: `🏨`, add: `in`},
+  'sightseeing': {icon: `🏛️`, add: `in`},
+  'restaurant': {icon: `🍴`, add: `in`},
 };
 
 export const StatData = [{selector: `.statistic__money`, title: `MONEY`, unit: `€`, method: `getPointsMoney`},
