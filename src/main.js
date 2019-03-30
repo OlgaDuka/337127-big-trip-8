@@ -30,16 +30,16 @@ const renderFilters = (arrFilters) => {
 };
 
 const renderEvents = (arr) => {
-  boardTable.innerHTML = ``;
+  boardEvents.innerHTML = ``;
   for (const obPoint of arr) {
     const point = new Trip(obPoint);
     const pointOpen = new TripOpen(obPoint);
 
-    boardTable.appendChild(point.render());
+    boardEvents.appendChild(point.render());
 
     point.onClick = () => {
       pointOpen.render();
-      boardTable.replaceChild(pointOpen.element, point.element);
+      boardEvents.replaceChild(pointOpen.element, point.element);
       point.unrender();
     };
     pointOpen.onSubmit = (newObject) => {
@@ -49,7 +49,7 @@ const renderEvents = (arr) => {
         .then((newPoint) => {
           point.update(newPoint);
           point.render();
-          boardTable.replaceChild(point.element, pointOpen.element);
+          boardEvents.replaceChild(point.element, pointOpen.element);
           pointOpen.unrender();
         });
     };
@@ -61,7 +61,7 @@ const renderEvents = (arr) => {
     });
     pointOpen.onKeyEsc = () => {
       point.render();
-      boardTable.replaceChild(point.element, pointOpen.element);
+      boardEvents.replaceChild(point.element, pointOpen.element);
       pointOpen.unrender();
     };
   }
@@ -93,6 +93,25 @@ buttonStat.addEventListener(`click`, ({target}) => {
   stat.update(model.events, model.stat);
 });
 
+/* loaderData.getOffers()
+  .then((offers) => {
+    model.offersData = offers;
+    loaderData.getDestinations()
+      .then((destinations) => {
+        model.destinationsData = destinations;
+        loaderData.getPoints()
+          .then((points) => {
+            model.eventsData = points;
+            stat.config = model;
+          })
+          .then(() => {
+            renderFilters(model.filters);
+            renderEvents(model.events);
+            stat.render();
+          });
+      });
+  });
+
 loaderData.getPoints()
   .then((points) => {
     model.eventsData = points;
@@ -102,4 +121,43 @@ loaderData.getPoints()
     renderFilters(model.filters);
     renderEvents(model.events);
     stat.render();
+  })
+  .then(() => {
+    loaderData.getOffers()
+      .then((offers) => {
+        model.offersData = offers;
+      })
+    .then(() => {
+      loaderData.getDestinations()
+        .then((destinations) => {
+          model.destinationsData = destinations;
+        });
+    });
   });
+
+/* loaderData.getPoints()
+  .then((points) => {
+    model.eventsData = points;
+    stat.config = model;
+  })
+  .then(() => {
+    renderFilters(model.filters);
+    renderEvents(model.events);
+    stat.render();
+  }); */
+
+const renderApp = () => {
+  stat.config = model;
+  renderFilters(model.filters);
+  renderEvents(model.events);
+  stat.render();
+};
+
+const makeRequest = async () => {
+  model.offersData = await loaderData.getOffers();
+  model.destinationsData = await loaderData.getDestinations();
+  model.eventsData = await loaderData.getPoints();
+  await renderApp();
+};
+
+makeRequest();
