@@ -62,9 +62,9 @@ export default class Stat {
     const arrLabel = [];
     const arrHour = [];
     arr.forEach((elem, i) => {
-      let item = arrLabel.indexOf(`${EVENT_TYPES[elem.type].icon} ${elem.type.toUpperCase()}`);
+      let item = arrLabel.indexOf(`${EVENT_TYPES[elem.type].icon} ${elem.destination.toUpperCase()}`);
       if (item === -1) {
-        arrLabel.push(`${EVENT_TYPES[elem.type].icon} ${elem.type.toUpperCase()}`);
+        arrLabel.push(`${EVENT_TYPES[elem.type].icon} ${elem.destination.toUpperCase()}`);
         arrHour.push(this._getDurationHour(arr, i));
       } else {
         arrHour[item] += this._getDurationHour(arr, i);

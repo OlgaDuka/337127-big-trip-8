@@ -11,7 +11,7 @@ export default class Trip extends Component {
     this._price = data.price;
     this._timeStart = data.timeStart;
     this._timeStop = data.timeStop;
-    this._picture = data.picture;
+    this._pictures = data.pictures;
     this._offers = data.offers;
     this._description = data.description;
     this._isFavorite = data.isFavorite;
@@ -45,7 +45,7 @@ export default class Trip extends Component {
     this._timeStop = data.timeStop;
     this._offers = data.offers;
     this._description = data.description;
-    this._picture = data.picture;
+    this._pictures = data.pictures;
   }
 
   get price() {
@@ -56,13 +56,14 @@ export default class Trip extends Component {
 
   _getOffer() {
     let htmlOffers = ``;
-    this._offers.map((offer) => {
-      if (offer.accepted) {
-        htmlOffers += `<li>
-          <button class="trip-point__offer">${offer.title} +&euro;&nbsp;${offer.price}</button>
-          </li>`;
+    const num = this._offers.length > 3 ? 3 : this._offers.length;
+    if (num > 0) {
+      for (let i = 0; i < num; i += 1) {
+        if (!this._offers[i].accepted) {
+          htmlOffers += `<li><button class="trip-point__offer">${this._offers[i].title} +&euro;&nbsp;${this._offers[i].price}</button></li>`;
+        }
       }
-    });
+    }
     return htmlOffers;
   }
 

@@ -1,6 +1,4 @@
-import ModelPoint from './model/model-point';
-import ModelDestination from './model/model-destination';
-import ModelOffer from './model/model-offer';
+import AdapterPoint from './adapter-point';
 
 const Method = {
   GET: `GET`,
@@ -33,19 +31,17 @@ export default class LoaderData {
   getPoints() {
     return this._load({url: `points`})
       .then(toJSON)
-      .then(ModelPoint.parsePoints);
+      .then(AdapterPoint.parsePoints);
   }
 
   getDestinations() {
     return this._load({url: `destinations`})
-      .then(toJSON)
-      .then(ModelDestination.parsePoints);
+      .then(toJSON);
   }
 
   getOffers() {
     return this._load({url: `offers`})
-      .then(toJSON)
-      .then(ModelOffer.parsePoints);
+      .then(toJSON);
   }
 
   createPoint({point}) {
@@ -56,7 +52,7 @@ export default class LoaderData {
       headers: new Headers({'Content-Type': `application/json`})
     })
       .then(toJSON)
-      .then(ModelPoint.parsePoint);
+      .then(AdapterPoint.parsePoint);
   }
 
   updatePoint({id, data}) {
@@ -67,7 +63,7 @@ export default class LoaderData {
       headers: new Headers({'Content-Type': `application/json`})
     })
       .then(toJSON)
-      .then(ModelPoint.parsePoint);
+      .then(AdapterPoint.parsePoint);
   }
 
   deletePoint({id}) {

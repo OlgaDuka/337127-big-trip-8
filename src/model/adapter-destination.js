@@ -1,8 +1,8 @@
 export default class ModelDestination {
   constructor(data) {
-    this.title = data[`name`] || ``;
+    this.destination = data[`name`] || ``;
     this.description = data[`description`] || ``;
-    this.picture = data[`pictures`].src || [];
+    this.pictures = data[`pictures`] || [];
   }
 
   static parseDestination(data) {

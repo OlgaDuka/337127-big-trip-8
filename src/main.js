@@ -1,10 +1,11 @@
 import Model from './model/model';
 // import Controller from './controller';
-import LoaderData from './loader-data';
+import LoaderData from './model/loader-data';
 import Trip from './view/trip';
 import TripOpen from './view/trip-open';
 import Filter from './view/filter';
 import Stat from './view/stat';
+import AdapterPoint from './model/adapter-point';
 
 const model = new Model();
 // const app = new Controller();
@@ -31,9 +32,11 @@ const renderFilters = (arrFilters) => {
 
 const renderEvents = (arr) => {
   boardEvents.innerHTML = ``;
-  for (const obPoint of arr) {
+  for (let obPoint of arr.events) {
     const point = new Trip(obPoint);
     const pointOpen = new TripOpen(obPoint);
+    pointOpen.referenceOffers = arr.offers;
+    pointOpen.referenceDestinations = arr.destinations;
 
     boardEvents.appendChild(point.render());
 
@@ -43,14 +46,15 @@ const renderEvents = (arr) => {
       point.unrender();
     };
     pointOpen.onSubmit = (newObject) => {
-      model.updatePoint(obPoint, newObject);
-
-      loaderData.updatePoint({id: obPoint.id, data: obPoint.toRAW()})
+      loaderData.updatePoint({id: obPoint.id, data: AdapterPoint.toRAW(newObject)})
         .then((newPoint) => {
           point.update(newPoint);
           point.render();
           boardEvents.replaceChild(point.element, pointOpen.element);
           pointOpen.unrender();
+        })
+        .then(() => {
+          model.updatePoint(obPoint, newObject);
         });
     };
     pointOpen.onDelete = (({id}) => {
@@ -149,7 +153,7 @@ loaderData.getPoints()
 const renderApp = () => {
   stat.config = model;
   renderFilters(model.filters);
-  renderEvents(model.events);
+  renderEvents(model);
   stat.render();
 };
 

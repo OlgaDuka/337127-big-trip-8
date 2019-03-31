@@ -13,11 +13,12 @@ export default class TripOpen extends Component {
     this._day = data.day;
     this._timeStart = data.timeStart;
     this._timeStop = data.timeStop;
-    this._picture = data.picture;
+    this._pictures = data.pictures;
     this._offers = data.offers;
     this._description = data.description;
     this._isFavorite = data.isFavorite;
-    this._isDeleted = data.isDeleted;
+    this._referenceOffers = [];
+    this._referenceDestinations = [];
 
     this._state = {
       id: data.id,
@@ -27,7 +28,7 @@ export default class TripOpen extends Component {
       day: data.day,
       timeStart: data.timeStart,
       timeStop: data.timeStop,
-      picture: data.picture,
+      pictures: data.pictures,
       offers: data.offers,
       description: data.description,
       isFavorite: data.isFavorite,
@@ -45,6 +46,16 @@ export default class TripOpen extends Component {
     this._onPriceChange = this._onPriceChange.bind(this);
     this._onOffersChange = this._onOffersChange.bind(this);
   }
+
+  /* set referenceOffers(data) {
+    for (const offer of data) {
+      this._referenceOffers.push({title: offer.name, price: offer.price, accepted: false});
+    }
+  }
+
+  set referenceDestinations(data) {
+    this._referenceDestinations = data;
+  } */
 
   _onSubmitButtonClick(evt) {
     evt.preventDefault();
@@ -90,13 +101,14 @@ export default class TripOpen extends Component {
     this._timeStop = dataFromState.timeStop;
     this._offers = dataFromState.offers;
     this._description = dataFromState.description;
-    this._picture = dataFromState.picture;
+    this._pictures = dataFromState.pictures;
   }
 
   _onTypeChange({target}) {
     if (target.classList[0] === `travel-way__select-label`) {
-      this._type = target.previousElementSibling.value;
-      this._state.type = this._type;
+      this._state.type = target.previousElementSibling.value;
+      this._type = this._state.type;
+    //  this._offers = this._referenceOffers[this._type];
     }
     this._partialUpdate();
   }
@@ -109,26 +121,13 @@ export default class TripOpen extends Component {
     this._state.price = target.value;
   }
 
-  _replaceOffer(strFind, strPrice, flagOffer) {
-    let num = -1;
-    for (let i = 0; i < this._state.offers.length; i += 1) {
-      if (this._state.offers[i][0] === strFind) {
-        num = i;
+  _onOffersChange({target}) {
+    for (const offer of this._state.offers) {
+      if (offer.title === target.value) {
+        offer.accepted = target.checked;
+        // тут будет функция пересчета общей стоимости путешествия
         break;
       }
-    }
-    if (num !== -1) {
-      this._state.offers.splice(num, 1, [strFind, strPrice, flagOffer]);
-    }
-  }
-
-  _onOffersChange({target}) {
-    const price = target.nextElementSibling.querySelector(`.point__offer-price`).textContent;
-    const str = target.value;
-    if (target.checked) {
-      this._replaceOffer(str, price, true);
-    } else {
-      this._replaceOffer(str, price, false);
     }
   }
 
@@ -224,7 +223,7 @@ export default class TripOpen extends Component {
   }
 
   _getPictures() {
-    return this._picture.map((picture) =>
+    return this._pictures.map((picture) =>
       `<img src="${picture.src}" alt="picture from place" class="point__destination-image">`).join(``);
   }
 
