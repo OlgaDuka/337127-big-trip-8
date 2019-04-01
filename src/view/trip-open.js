@@ -75,6 +75,16 @@ export default class TripOpen extends Component {
     this._onKeyEsc = fn;
   }
 
+  shake() {
+    const ANIMATION_TIMEOUT = 600;
+    this._element.style.animation = `shake ${ANIMATION_TIMEOUT / 1000}s`;
+
+    setTimeout(() => {
+      this._element.style.animation = ``;
+    }, ANIMATION_TIMEOUT);
+  }
+
+
   _partialUpdate() {
     this.unbind();
     const oldElement = this._element;
@@ -94,14 +104,45 @@ export default class TripOpen extends Component {
     this._pictures = dataFromState.pictures;
   }
 
+  blockToDelete() {
+    const btnDelete = this._element.querySelector(`.point__button-delete`);
+    btnDelete.disabled = true;
+    btnDelete.textContent = `Deleting...`;
+    this._element.querySelector(`.point__button-save`).disabled = true;
+  }
+
+  unblockToDelete() {
+    const btnDelete = this._element.querySelector(`.point__button-delete`);
+    btnDelete.disabled = false;
+    btnDelete.textContent = `Delete`;
+    this._element.querySelector(`.point__button-save`).disabled = false;
+  }
+
+  blockToSave() {
+    const btnSave = this._element.querySelector(`.point__button-save`);
+    btnSave.disabled = true;
+    btnSave.textContent = `Saving...`;
+    this._element.querySelector(`.point__button-delete`).disabled = true;
+  }
+
+  unblockToSave() {
+    const btnSave = this._element.querySelector(`.point__button-save`);
+    btnSave.disabled = false;
+    btnSave.textContent = `Save`;
+    this._element.querySelector(`.point__button-delete`).disabled = false;
+  }
+
   _onTypeChange({target}) {
     if (target.classList[0] === `travel-way__select-label`) {
       this._state.type = target.previousElementSibling.value;
       this._type = this._state.type;
       this._offers = [];
-      let arrOffers = this._referenceOffers.filter((item) => item.type === this._type)[0].offers;
-      for (const refOffer of arrOffers) {
-        this._offers.push({title: refOffer.name, price: refOffer.price, accepted: false});
+      const type = this._referenceOffers.filter((item) => item.type === this._type);
+      if (type.length !== 0) {
+        const arrOffers = type[0].offers;
+        for (const refOffer of arrOffers) {
+          this._offers.push({title: refOffer.name, price: refOffer.price, accepted: false});
+        }
       }
       this._state.offers = this._offers;
     }
@@ -110,6 +151,21 @@ export default class TripOpen extends Component {
 
   _onDestinationChange({target}) {
     this._state.destination = target.value;
+    this._destination = this._state.destination;
+    const name = this._referenceDestinations.filter((item) => item.name === this._destination);
+    if (name.length !== 0) {
+      this._state.description = name[0].description;
+      this._state.pictures = name[0].pictures;
+      this._description = this._state.description;
+      this._pictures = this._state.pictures;
+    } else {
+      this._state.description = ``;
+      this._state.pictures = [];
+      this._description = ``;
+      this._pictures = [];
+
+    }
+    this._partialUpdate();
   }
 
   _onPriceChange({target}) {
@@ -234,6 +290,12 @@ export default class TripOpen extends Component {
       <label class="travel-way__select-label" for="travel-way-${item.type}">${item.icon} ${item.type}</label>`).join(``);
   }
 
+  _getDestination() {
+    const arrResult = [];
+    this._referenceDestinations.map((item) => arrResult.push(item.name));
+    return arrResult.map((item) => `<option value="${item}"></option>`).join(``);
+  }
+
   get template() {
     return `<article class="point">
                 <form action="" method="get" class="point__form">
@@ -262,10 +324,7 @@ export default class TripOpen extends Component {
                       <label class="point__destination-label" for="destination">${(this._type)} ${EVENT_TYPES[this._type].add}</label>
                       <input class="point__destination-input" list="destination-select" id="destination" value="${this._destination}" name="destination">
                       <datalist id="destination-select">
-                        <option value="airport"></option>
-                        <option value="Geneva"></option>
-                        <option value="Chamonix"></option>
-                        <option value="hotel"></option>
+                        ${this._getDestination()}
                       </datalist>
                     </div>
 

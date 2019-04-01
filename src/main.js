@@ -44,6 +44,7 @@ const renderEvents = (arr) => {
       point.unrender();
     };
     pointOpen.onSubmit = (newObject) => {
+      pointOpen.blockToSave();
       loaderData.updatePoint({id: obPoint.id, data: AdapterPoint.toRAW(newObject)})
         .then((newPoint) => {
           point.update(newPoint);
@@ -53,13 +54,28 @@ const renderEvents = (arr) => {
         })
         .then(() => {
           model.updatePoint(obPoint, newObject);
+        })
+        .catch(() => {
+          pointOpen.element.style.border = `2px solid #FF0000`;
+          pointOpen.shake();
+        })
+        .then(() => {
+          pointOpen.unblockToSave();
+          pointOpen.element.style.border = ``;
         });
     };
     pointOpen.onDelete = (({id}) => {
+      pointOpen.blockToDelete();
       loaderData.deletePoint({id})
         .then(() => loaderData.getPoints())
         .then(renderEvents)
-        .catch(alert);
+        .catch(() => {
+          pointOpen.shake();
+        })
+        .then(() => {
+          pointOpen.unblockToDelete();
+          pointOpen.element.style.border = ``;
+        });
     });
     pointOpen.onKeyEsc = () => {
       point.render();
@@ -135,17 +151,6 @@ loaderData.getPoints()
           model.destinationsData = destinations;
         });
     });
-  });
-
-/* loaderData.getPoints()
-  .then((points) => {
-    model.eventsData = points;
-    stat.config = model;
-  })
-  .then(() => {
-    renderFilters(model.filters);
-    renderEvents(model.events);
-    stat.render();
   }); */
 
 const renderApp = () => {
@@ -156,6 +161,7 @@ const renderApp = () => {
 };
 
 const makeRequest = async () => {
+  boardEvents.innerHTML = `Loading route...`;
   model.offersData = await loaderData.getOffers();
   model.destinationsData = await loaderData.getDestinations();
   model.eventsData = await loaderData.getPoints();

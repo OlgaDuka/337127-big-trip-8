@@ -20,7 +20,7 @@ export default class AdapterPoint {
       'date_from': data.timeStart,
       'date_to': data.timeStop,
       'offers': data.offers,
-      'destination': {name: data.destination, description: data.description, pictures: data.picture},
+      'destination': {name: data.destination, description: data.description, pictures: data.pictures},
       'is_favorite': data.isFavorite
     };
   }
