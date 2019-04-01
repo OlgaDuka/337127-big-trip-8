@@ -4,7 +4,7 @@ import flatpickr from 'flatpickr';
 import Component from './component.js';
 
 export default class TripOpen extends Component {
-  constructor(data) {
+  constructor(data, offers, destinations) {
     super();
     this._id = data.id;
     this._type = data.type;
@@ -17,8 +17,8 @@ export default class TripOpen extends Component {
     this._offers = data.offers;
     this._description = data.description;
     this._isFavorite = data.isFavorite;
-    this._referenceOffers = [];
-    this._referenceDestinations = [];
+    this._referenceOffers = offers;
+    this._referenceDestinations = destinations;
 
     this._state = {
       id: data.id,
@@ -46,16 +46,6 @@ export default class TripOpen extends Component {
     this._onPriceChange = this._onPriceChange.bind(this);
     this._onOffersChange = this._onOffersChange.bind(this);
   }
-
-  /* set referenceOffers(data) {
-    for (const offer of data) {
-      this._referenceOffers.push({title: offer.name, price: offer.price, accepted: false});
-    }
-  }
-
-  set referenceDestinations(data) {
-    this._referenceDestinations = data;
-  } */
 
   _onSubmitButtonClick(evt) {
     evt.preventDefault();
@@ -108,7 +98,12 @@ export default class TripOpen extends Component {
     if (target.classList[0] === `travel-way__select-label`) {
       this._state.type = target.previousElementSibling.value;
       this._type = this._state.type;
-    //  this._offers = this._referenceOffers[this._type];
+      this._offers = [];
+      let arrOffers = this._referenceOffers.filter((item) => item.type === this._type)[0].offers;
+      for (const refOffer of arrOffers) {
+        this._offers.push({title: refOffer.name, price: refOffer.price, accepted: false});
+      }
+      this._state.offers = this._offers;
     }
     this._partialUpdate();
   }

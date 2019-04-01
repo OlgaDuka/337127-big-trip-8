@@ -32,11 +32,9 @@ const renderFilters = (arrFilters) => {
 
 const renderEvents = (arr) => {
   boardEvents.innerHTML = ``;
-  for (let obPoint of arr.events) {
+  for (let obPoint of arr) {
     const point = new Trip(obPoint);
-    const pointOpen = new TripOpen(obPoint);
-    pointOpen.referenceOffers = arr.offers;
-    pointOpen.referenceDestinations = arr.destinations;
+    const pointOpen = new TripOpen(obPoint, model.offers, model.destinations);
 
     boardEvents.appendChild(point.render());
 
@@ -153,7 +151,7 @@ loaderData.getPoints()
 const renderApp = () => {
   stat.config = model;
   renderFilters(model.filters);
-  renderEvents(model);
+  renderEvents(model.events);
   stat.render();
 };
 
