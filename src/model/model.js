@@ -49,20 +49,20 @@ export default class Model {
   }
 
   updatePoint(pointToUpdate, newPoint) {
-    const index = this.events.findIndex((it) => it === pointToUpdate);
-    this.events[index] = Object.assign({}, pointToUpdate, newPoint);
-    return this.events[index];
+    const index = this._events.findIndex((it) => it === pointToUpdate);
+    this._events[index] = Object.assign({}, pointToUpdate, newPoint);
+    return this._events;
   }
 
   deletePoint(pointToDelete) {
-    const index = this.events.findIndex((it) => it === pointToDelete);
-    this.events[index].isDeleted = true;
-    return this.events;
+    const index = this._events.findIndex((it) => it === pointToDelete);
+    this._events.splice(index, 1);
+    return this._events;
   }
 
   insertPoint(pointToInsert) {
-    this.events.push(pointToInsert);
-    const index = this.events.size - 1;
-    return this.events[index];
+    this._events.push(pointToInsert);
+    const index = this._events.size - 1;
+    return this._events[index];
   }
 }

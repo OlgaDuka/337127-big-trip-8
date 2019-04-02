@@ -3,25 +3,28 @@ import moment from 'moment';
 import Chart from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
-const BAR_HEIGHT = 55;
+const BAR_HEIGHT = 60;
 const COUNT_STAT = 3;
 
 export default class Stat {
   constructor() {
     this._element = [];
     this._config = [];
+    this._container = [];
     this._ctx = [];
   }
 
   set config(data) {
     for (let i = 0; i < COUNT_STAT; i += 1) {
-      this._ctx[i] = document.querySelector(data.stat[i].selector);
+      this._container[i] = document.querySelector(data.stat[i].selectorParent);
+      this._ctx[i] = this._container[i].querySelector(data.stat[i].selector);
       this._config[i] = {
         _title: data.stat[i].title,
         _unit: data.stat[i].unit,
         _arrPoints: this[data.stat[i].method](data.events),
       };
       this._ctx[i].height = BAR_HEIGHT * this._config[i]._arrPoints.numPoints;
+      this._container[i].style = `height: ${this._ctx[i].height}px`;
     }
   }
 
@@ -90,13 +93,15 @@ export default class Stat {
     return {labels: arrType, data: arrNum, numPoints: count};
   }
 
-  update(dataEvent, dataStat) {
-    this._config.forEach((elem, i) => {
-      elem._arrPoints = this[dataStat[i].method](dataEvent);
-      this._element[i].data.labels = elem._arrPoints.labels;
-      this._element[i].data.datasets.data = elem._arrPoints.data;
-      this._element[i].update();
-    });
+  update(data) {
+    for (let i = 0; i < COUNT_STAT; i += 1) {
+      this._config[i]._arrPoints = this[data.stat[i].method](data.events);
+      this._element[i].config.data.labels = this._config[i]._arrPoints.labels;
+      this._element[i].config.data.datasets[0].data = this._config[i]._arrPoints.data;
+      this._element[i].chart.update();
+      this._ctx[i].height = BAR_HEIGHT * this._config[i]._arrPoints.numPoints;
+      this._container[i].style = `height: ${this._ctx[i].height}px`;
+    }
   }
 
   unrender() {
@@ -124,6 +129,8 @@ export default class Stat {
         }]
       },
       options: {
+        maintainAspectRatio: false,
+        responsive: true,
         plugins: {
           datalabels: {
             font: {

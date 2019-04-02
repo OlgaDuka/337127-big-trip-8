@@ -1,4 +1,4 @@
-import AdapterPoint from './adapter-point';
+import Adapter from './adapter';
 
 const Method = {
   GET: `GET`,
@@ -31,7 +31,7 @@ export default class LoaderData {
   getPoints() {
     return this._load({url: `points`})
       .then(toJSON)
-      .then(AdapterPoint.parsePoints);
+      .then(Adapter.parsePoints);
   }
 
   getDestinations() {
@@ -52,7 +52,7 @@ export default class LoaderData {
       headers: new Headers({'Content-Type': `application/json`})
     })
       .then(toJSON)
-      .then(AdapterPoint.parsePoint);
+      .then(Adapter.parsePoint);
   }
 
   updatePoint({id, data}) {
@@ -63,7 +63,7 @@ export default class LoaderData {
       headers: new Headers({'Content-Type': `application/json`})
     })
       .then(toJSON)
-      .then(AdapterPoint.parsePoint);
+      .then(Adapter.parsePoint);
   }
 
   deletePoint({id}) {

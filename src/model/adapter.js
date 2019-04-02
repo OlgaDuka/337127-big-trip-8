@@ -1,4 +1,4 @@
-export default class AdapterPoint {
+export default class Adapter {
   constructor(data) {
     this.id = data[`id`];
     this.type = data[`type`];
@@ -26,10 +26,10 @@ export default class AdapterPoint {
   }
 
   static parsePoint(data) {
-    return new AdapterPoint(data);
+    return new Adapter(data);
   }
 
   static parsePoints(data) {
-    return data.map(AdapterPoint.parsePoint);
+    return data.map(Adapter.parsePoint);
   }
 }

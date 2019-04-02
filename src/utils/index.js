@@ -11,9 +11,9 @@ export const EVENT_TYPES = {
   'restaurant': {icon: `🍴`, add: `in`},
 };
 
-export const StatData = [{selector: `.statistic__money`, title: `MONEY`, unit: `€`, method: `getPointsMoney`},
-  {selector: `.statistic__transport`, title: `TRANSPORT`, unit: `x`, method: `getPointsTransport`},
-  {selector: `.statistic__time-spend`, title: `TIME-SPEND`, unit: `H`, method: `getPointsTimeSpend`}];
+export const StatData = [{selector: `.statistic__money`, selectorParent: `.statistic__item--money`, title: `MONEY`, unit: `€`, method: `getPointsMoney`},
+  {selector: `.statistic__transport`, selectorParent: `.statistic__item--transport`, title: `TRANSPORT`, unit: `x`, method: `getPointsTransport`},
+  {selector: `.statistic__time-spend`, selectorParent: `.statistic__item--time-spend`, title: `TIME-SPEND`, unit: `H`, method: `getPointsTimeSpend`}];
 
 export const NAME_FILTERS = [`everything`, `future`, `past`];
 

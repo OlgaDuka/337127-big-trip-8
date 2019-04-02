@@ -5,7 +5,7 @@ import Trip from './view/trip';
 import TripOpen from './view/trip-open';
 import Filter from './view/filter';
 import Stat from './view/stat';
-import AdapterPoint from './model/adapter-point';
+import Adapter from './model/adapter';
 
 const model = new Model();
 // const app = new Controller();
@@ -45,36 +45,34 @@ const renderEvents = (arr) => {
     };
     pointOpen.onSubmit = (newObject) => {
       pointOpen.blockToSave();
-      loaderData.updatePoint({id: obPoint.id, data: AdapterPoint.toRAW(newObject)})
+      loaderData.updatePoint({id: obPoint.id, data: Adapter.toRAW(newObject)})
         .then((newPoint) => {
+          model.updatePoint(obPoint, newPoint);
+          pointOpen.unblockToSave();
+          pointOpen.element.style.border = ``;
           point.update(newPoint);
           point.render();
+          // stat.update(model);
           boardEvents.replaceChild(point.element, pointOpen.element);
           pointOpen.unrender();
-        })
-        .then(() => {
-          model.updatePoint(obPoint, newObject);
         })
         .catch(() => {
           pointOpen.element.style.border = `2px solid #FF0000`;
           pointOpen.shake();
-        })
-        .then(() => {
-          pointOpen.unblockToSave();
-          pointOpen.element.style.border = ``;
         });
     };
     pointOpen.onDelete = (({id}) => {
       pointOpen.blockToDelete();
       loaderData.deletePoint({id})
         .then(() => loaderData.getPoints())
-        .then(renderEvents)
-        .catch(() => {
-          pointOpen.shake();
-        })
         .then(() => {
           pointOpen.unblockToDelete();
           pointOpen.element.style.border = ``;
+          // stat.update(model);
+        })
+        .then(renderEvents)
+        .catch(() => {
+          pointOpen.shake();
         });
     });
     pointOpen.onKeyEsc = () => {
@@ -108,7 +106,7 @@ buttonStat.addEventListener(`click`, ({target}) => {
     boardStat.classList.remove(`visually-hidden`);
     boardTable.classList.add(`visually-hidden`);
   }
-  stat.update(model.events, model.stat);
+  stat.update(model);
 });
 
 /* loaderData.getOffers()
