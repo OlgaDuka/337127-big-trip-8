@@ -34,7 +34,7 @@ const renderEvents = (arr) => {
   boardEvents.innerHTML = ``;
   for (let obPoint of arr) {
     const point = new Trip(obPoint);
-    const pointOpen = new TripOpen(obPoint, model.offers, model.destinations);
+    let pointOpen = new TripOpen(obPoint, model.offers, model.destinations);
 
     boardEvents.appendChild(point.render());
 
@@ -47,32 +47,32 @@ const renderEvents = (arr) => {
       pointOpen.blockToSave();
       loaderData.updatePoint({id: obPoint.id, data: Adapter.toRAW(newObject)})
         .then((newPoint) => {
-          model.updatePoint(obPoint, newPoint);
-          pointOpen.unblockToSave();
           pointOpen.element.style.border = ``;
           point.update(newPoint);
           point.render();
-          // stat.update(model);
           boardEvents.replaceChild(point.element, pointOpen.element);
           pointOpen.unrender();
+          model.updatePoint(obPoint, newPoint);
         })
         .catch(() => {
           pointOpen.element.style.border = `2px solid #FF0000`;
           pointOpen.shake();
+          pointOpen.unblockToSave();
         });
     };
     pointOpen.onDelete = (({id}) => {
       pointOpen.blockToDelete();
       loaderData.deletePoint({id})
         .then(() => loaderData.getPoints())
-        .then(() => {
-          pointOpen.unblockToDelete();
+        .then((newArrPoints) => {
           pointOpen.element.style.border = ``;
-          // stat.update(model);
+          renderEvents(newArrPoints);
+          model.eventsData = newArrPoints;
         })
-        .then(renderEvents)
         .catch(() => {
+          pointOpen.element.style.border = `2px solid #FF0000`;
           pointOpen.shake();
+          pointOpen.unblockToDelete();
         });
     });
     pointOpen.onKeyEsc = () => {
@@ -151,19 +151,36 @@ loaderData.getPoints()
     });
   }); */
 
-const renderApp = () => {
+const initialApp = () => {
+  boardEvents.textContent = ``;
   stat.config = model;
   renderFilters(model.filters);
   renderEvents(model.events);
   stat.render();
 };
 
+/* const makeRequest = async () => {
+  boardEvents.textContent = `Loading route...`;
+  try {
+    model.offersData = await loaderData.getOffers();
+    model.destinationsData = await loaderData.getDestinations();
+    model.eventsData = await loaderData.getPoints();
+    await initialApp();
+  } catch (err) {
+    boardEvents.textContent = `Something went wrong while loading your route info. Check your connection or try again later`;
+  }
+}; */
+
+
 const makeRequest = async () => {
-  boardEvents.innerHTML = `Loading route...`;
-  model.offersData = await loaderData.getOffers();
-  model.destinationsData = await loaderData.getDestinations();
-  model.eventsData = await loaderData.getPoints();
-  await renderApp();
+  boardEvents.textContent = `Loading route...`;
+  try {
+    [model.offersData, model.destinationsData, model.eventsData] =
+    await Promise.all([loaderData.getOffers(), loaderData.getDestinations(), loaderData.getPoints()]);
+    await initialApp();
+  } catch (err) {
+    boardEvents.textContent = `Something went wrong while loading your route info. Check your connection or try again later`;
+  }
 };
 
 makeRequest();

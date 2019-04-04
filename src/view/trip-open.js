@@ -52,7 +52,7 @@ export default class TripOpen extends Component {
     if (typeof this._onSubmit === `function`) {
       this._onSubmit(this._state);
     }
-    this.update(this._state);
+    // this.update(this._state);
   }
 
   set onSubmit(fn) {
