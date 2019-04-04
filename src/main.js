@@ -1,12 +1,16 @@
 import Model from './model/model';
 // import Controller from './controller';
+import LoaderData from './model/loader-data';
 import Trip from './view/trip';
 import TripOpen from './view/trip-open';
 import Filter from './view/filter';
 import Stat from './view/stat';
+import Adapter from './model/adapter';
 
 const model = new Model();
 // const app = new Controller();
+const stat = new Stat();
+const loaderData = new LoaderData();
 
 const controls = document.querySelector(`.trip-controls`);
 export const formFilter = controls.querySelector(`.trip-filter`);
@@ -15,7 +19,6 @@ const buttonStat = controls.querySelector(`a[href*=stats]`);
 const boardTable = document.querySelector(`#table`);
 const boardStat = document.querySelector(`#stats`);
 export const boardEvents = boardTable.querySelector(`.trip-day__items`);
-
 
 const renderFilters = (arrFilters) => {
   return arrFilters.map((element) => {
@@ -27,30 +30,54 @@ const renderFilters = (arrFilters) => {
   });
 };
 
-const renderEvents = (dist, arr) => {
-  for (const obPoint of arr) {
+const renderEvents = (arr) => {
+  boardEvents.innerHTML = ``;
+  for (let obPoint of arr) {
     const point = new Trip(obPoint);
-    const pointOpen = new TripOpen(obPoint);
-    dist.appendChild(point.render());
+    let pointOpen = new TripOpen(obPoint, model.offers, model.destinations);
+
+    boardEvents.appendChild(point.render());
+
     point.onClick = () => {
       pointOpen.render();
-      dist.replaceChild(pointOpen.element, point.element);
+      boardEvents.replaceChild(pointOpen.element, point.element);
       point.unrender();
     };
     pointOpen.onSubmit = (newObject) => {
-      point.update(model.updatePoint(obPoint, newObject));
-      point.render();
-      dist.replaceChild(point.element, pointOpen.element);
-      pointOpen.unrender();
+      pointOpen.blockToSave();
+      loaderData.updatePoint({id: obPoint.id, data: Adapter.toRAW(newObject)})
+        .then((newPoint) => {
+          pointOpen.element.style.border = ``;
+          point.update(newPoint);
+          point.render();
+          boardEvents.replaceChild(point.element, pointOpen.element);
+          pointOpen.unrender();
+          model.updatePoint(obPoint, newPoint);
+        })
+        .catch(() => {
+          pointOpen.element.style.border = `2px solid #FF0000`;
+          pointOpen.shake();
+          pointOpen.unblockToSave();
+        });
     };
-    pointOpen.onDelete = () => {
-      model.deletePoint(obPoint);
-      dist.removeChild(pointOpen.element);
-      pointOpen.unrender();
-    };
+    pointOpen.onDelete = (({id}) => {
+      pointOpen.blockToDelete();
+      loaderData.deletePoint({id})
+        .then(() => loaderData.getPoints())
+        .then((newArrPoints) => {
+          pointOpen.element.style.border = ``;
+          renderEvents(newArrPoints);
+          model.eventsData = newArrPoints;
+        })
+        .catch(() => {
+          pointOpen.element.style.border = `2px solid #FF0000`;
+          pointOpen.shake();
+          pointOpen.unblockToDelete();
+        });
+    });
     pointOpen.onKeyEsc = () => {
       point.render();
-      dist.replaceChild(point.element, pointOpen.element);
+      boardEvents.replaceChild(point.element, pointOpen.element);
       pointOpen.unrender();
     };
   }
@@ -59,7 +86,7 @@ const renderEvents = (dist, arr) => {
 formFilter.addEventListener(`click`, ({target}) => {
   if (target.className === `trip-filter__item` && !target.previousElementSibling.disabled) {
     boardEvents.innerHTML = ``;
-    renderEvents(boardEvents, model.getFilterEvents(target.previousElementSibling.id));
+    renderEvents(model.getFilterEvents(target.previousElementSibling.id));
   }
 });
 
@@ -79,17 +106,81 @@ buttonStat.addEventListener(`click`, ({target}) => {
     boardStat.classList.remove(`visually-hidden`);
     boardTable.classList.add(`visually-hidden`);
   }
-  moneyStat.update(model, 0);
-  transportStat.update(model, 1);
-  timeSpendStat.update(model, 2);
+  stat.update(model);
 });
 
-renderFilters(model.filters);
-renderEvents(boardEvents, model.events);
+/* loaderData.getOffers()
+  .then((offers) => {
+    model.offersData = offers;
+    loaderData.getDestinations()
+      .then((destinations) => {
+        model.destinationsData = destinations;
+        loaderData.getPoints()
+          .then((points) => {
+            model.eventsData = points;
+            stat.config = model;
+          })
+          .then(() => {
+            renderFilters(model.filters);
+            renderEvents(model.events);
+            stat.render();
+          });
+      });
+  });
 
-const moneyStat = new Stat(model, 0);
-moneyStat.render();
-const transportStat = new Stat(model, 1);
-transportStat.render();
-const timeSpendStat = new Stat(model, 2);
-timeSpendStat.render();
+loaderData.getPoints()
+  .then((points) => {
+    model.eventsData = points;
+    stat.config = model;
+  })
+  .then(() => {
+    renderFilters(model.filters);
+    renderEvents(model.events);
+    stat.render();
+  })
+  .then(() => {
+    loaderData.getOffers()
+      .then((offers) => {
+        model.offersData = offers;
+      })
+    .then(() => {
+      loaderData.getDestinations()
+        .then((destinations) => {
+          model.destinationsData = destinations;
+        });
+    });
+  }); */
+
+const initialApp = () => {
+  boardEvents.textContent = ``;
+  stat.config = model;
+  renderFilters(model.filters);
+  renderEvents(model.events);
+  stat.render();
+};
+
+/* const makeRequest = async () => {
+  boardEvents.textContent = `Loading route...`;
+  try {
+    model.offersData = await loaderData.getOffers();
+    model.destinationsData = await loaderData.getDestinations();
+    model.eventsData = await loaderData.getPoints();
+    await initialApp();
+  } catch (err) {
+    boardEvents.textContent = `Something went wrong while loading your route info. Check your connection or try again later`;
+  }
+}; */
+
+
+const makeRequest = async () => {
+  boardEvents.textContent = `Loading route...`;
+  try {
+    [model.offersData, model.destinationsData, model.eventsData] =
+    await Promise.all([loaderData.getOffers(), loaderData.getDestinations(), loaderData.getPoints()]);
+    await initialApp();
+  } catch (err) {
+    boardEvents.textContent = `Something went wrong while loading your route info. Check your connection or try again later`;
+  }
+};
+
+makeRequest();

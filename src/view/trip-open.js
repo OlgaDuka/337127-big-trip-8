@@ -4,34 +4,34 @@ import flatpickr from 'flatpickr';
 import Component from './component.js';
 
 export default class TripOpen extends Component {
-  constructor(data) {
+  constructor(data, offers, destinations) {
     super();
+    this._id = data.id;
     this._type = data.type;
-    this._title = data.title;
+    this._destination = data.destination;
     this._price = data.price;
     this._day = data.day;
     this._timeStart = data.timeStart;
     this._timeStop = data.timeStop;
-    this._time = data.time;
-    this._picture = data.picture;
+    this._pictures = data.pictures;
     this._offers = data.offers;
     this._description = data.description;
     this._isFavorite = data.isFavorite;
-    this._isCollapse = data.isCollapse;
+    this._referenceOffers = offers;
+    this._referenceDestinations = destinations;
 
     this._state = {
+      id: data.id,
       type: data.type,
-      title: data.title,
+      destination: data.destination,
       price: data.price,
       day: data.day,
       timeStart: data.timeStart,
       timeStop: data.timeStop,
-      time: data.time,
-      picture: data.picture,
+      pictures: data.pictures,
       offers: data.offers,
       description: data.description,
       isFavorite: data.isFavorite,
-      isCollapse: data.isCollapse
     };
 
     this._onSubmit = null;
@@ -41,11 +41,10 @@ export default class TripOpen extends Component {
     this._onSubmitButtonClick = this._onSubmitButtonClick.bind(this);
     this._onDeleteButtonClick = this._onDeleteButtonClick.bind(this);
     this._onKeydownEsc = this._onKeydownEsc.bind(this);
-    this._onCloseFlatpickr = this._onCloseFlatpickr.bind(this);
-    this._onChangeType = this._onChangeType.bind(this);
-    this._onChangeDestination = this._onChangeDestination.bind(this);
-    this._onChangePrice = this._onChangePrice.bind(this);
-    this._onChangeOffers = this._onChangeOffers.bind(this);
+    this._onTypeChange = this._onTypeChange.bind(this);
+    this._onDestinationChange = this._onDestinationChange.bind(this);
+    this._onPriceChange = this._onPriceChange.bind(this);
+    this._onOffersChange = this._onOffersChange.bind(this);
   }
 
   _onSubmitButtonClick(evt) {
@@ -53,7 +52,7 @@ export default class TripOpen extends Component {
     if (typeof this._onSubmit === `function`) {
       this._onSubmit(this._state);
     }
-    this.update(this._state);
+    // this.update(this._state);
   }
 
   set onSubmit(fn) {
@@ -61,7 +60,7 @@ export default class TripOpen extends Component {
   }
 
   _onDeleteButtonClick() {
-    return (typeof this._onDelete === `function`) && this._onDelete();
+    return (typeof this._onDelete === `function`) && this._onDelete({id: this._id});
   }
 
   set onDelete(fn) {
@@ -76,6 +75,16 @@ export default class TripOpen extends Component {
     this._onKeyEsc = fn;
   }
 
+  shake() {
+    const ANIMATION_TIMEOUT = 600;
+    this._element.style.animation = `shake ${ANIMATION_TIMEOUT / 1000}s`;
+
+    setTimeout(() => {
+      this._element.style.animation = ``;
+    }, ANIMATION_TIMEOUT);
+  }
+
+
   _partialUpdate() {
     this.unbind();
     const oldElement = this._element;
@@ -83,70 +92,93 @@ export default class TripOpen extends Component {
     oldElement.parentNode.replaceChild(this._element, oldElement);
   }
 
-  update(data) {
-    this._type = data.type;
-    this._title = data.title;
-    this._price = data.price;
-    this._day = data.day;
-    this._timeStart = data.timeStart;
-    this._timeStop = data.timeStop;
-    this._time = data.time;
-    this._offers = data.offers;
-    this._description = data.description;
-    this._picture = data.picture;
+  update(dataFromState) {
+    this._type = dataFromState.type;
+    this._destination = dataFromState.destination;
+    this._price = dataFromState.price;
+    this._day = dataFromState.day;
+    this._timeStart = dataFromState.timeStart;
+    this._timeStop = dataFromState.timeStop;
+    this._offers = dataFromState.offers;
+    this._description = dataFromState.description;
+    this._pictures = dataFromState.pictures;
   }
 
-  _onCloseFlatpickr(selectedDates, dateStr) {
-    this._timeStart = moment(selectedDates[0]).format(`LT`);
-    this._timeStop = moment(selectedDates[1]).format(`LT`);
-    this._time = dateStr;
-    this._state.timeStart = this._timeStart;
-    this._state.timeStop = this._timeStop;
-    this._state.time = this._time;
+  blockToDelete() {
+    const btnDelete = this._element.querySelector(`.point__button-delete`);
+    btnDelete.disabled = true;
+    btnDelete.textContent = `Deleting...`;
+    this._element.querySelector(`.point__button-save`).disabled = true;
   }
 
-  _onChangeType({target}) {
+  unblockToDelete() {
+    const btnDelete = this._element.querySelector(`.point__button-delete`);
+    btnDelete.disabled = false;
+    btnDelete.textContent = `Delete`;
+    this._element.querySelector(`.point__button-save`).disabled = false;
+  }
+
+  blockToSave() {
+    const btnSave = this._element.querySelector(`.point__button-save`);
+    btnSave.disabled = true;
+    btnSave.textContent = `Saving...`;
+    this._element.querySelector(`.point__button-delete`).disabled = true;
+  }
+
+  unblockToSave() {
+    const btnSave = this._element.querySelector(`.point__button-save`);
+    btnSave.disabled = false;
+    btnSave.textContent = `Save`;
+    this._element.querySelector(`.point__button-delete`).disabled = false;
+  }
+
+  _onTypeChange({target}) {
     if (target.classList[0] === `travel-way__select-label`) {
-      let typeName = target.previousElementSibling.value;
-      let typeIcon = target.textContent;
-      let typeAdd = target.parentElement.dataset[`add`];
-      typeName = typeName[0].toUpperCase() + typeName.slice(1) + ` ` + typeAdd;
-      typeIcon = typeIcon.split(` `, 1);
-      this._type[0] = typeName;
-      this._type[1] = typeIcon;
-      this._state.type = this._type;
+      this._state.type = target.previousElementSibling.value;
+      this._type = this._state.type;
+      this._offers = [];
+      const type = this._referenceOffers.filter((item) => item.type === this._type);
+      if (type.length !== 0) {
+        const arrOffers = type[0].offers;
+        for (const refOffer of arrOffers) {
+          this._offers.push({title: refOffer.name, price: refOffer.price, accepted: false});
+        }
+      }
+      this._state.offers = this._offers;
     }
     this._partialUpdate();
   }
 
-  _onChangeDestination({target}) {
-    this._state.title = target.value;
+  _onDestinationChange({target}) {
+    this._state.destination = target.value;
+    this._destination = this._state.destination;
+    const name = this._referenceDestinations.filter((item) => item.name === this._destination);
+    if (name.length !== 0) {
+      this._state.description = name[0].description;
+      this._state.pictures = name[0].pictures;
+      this._description = this._state.description;
+      this._pictures = this._state.pictures;
+    } else {
+      this._state.description = ``;
+      this._state.pictures = [];
+      this._description = ``;
+      this._pictures = [];
+
+    }
+    this._partialUpdate();
   }
 
-  _onChangePrice({target}) {
+  _onPriceChange({target}) {
     this._state.price = target.value;
   }
 
-  _replaceOffer(strFind, strPrice, flagOffer) {
-    let num = -1;
-    for (let i = 0; i < this._state.offers.length; i += 1) {
-      if (this._state.offers[i][0] === strFind) {
-        num = i;
+  _onOffersChange({target}) {
+    for (const offer of this._state.offers) {
+      if (offer.title === target.value) {
+        offer.accepted = target.checked;
+        // тут будет функция пересчета общей стоимости путешествия
         break;
       }
-    }
-    if (num !== -1) {
-      this._state.offers.splice(num, 1, [strFind, strPrice, flagOffer]);
-    }
-  }
-
-  _onChangeOffers({target}) {
-    const price = target.nextElementSibling.querySelector(`.point__offer-price`).textContent;
-    const str = target.value;
-    if (target.checked) {
-      this._replaceOffer(str, price, true);
-    } else {
-      this._replaceOffer(str, price, false);
     }
   }
 
@@ -158,28 +190,47 @@ export default class TripOpen extends Component {
     document.addEventListener(`keydown`, this._onKeydownEsc);
 
     this._element.querySelector(`.travel-way__select`)
-      .addEventListener(`click`, this._onChangeType);
+      .addEventListener(`click`, this._onTypeChange);
     this._element.querySelector(`input[name="destination"]`)
-      .addEventListener(`change`, this._onChangeDestination);
+      .addEventListener(`change`, this._onDestinationChange);
     this._element.querySelector(`input[name="price"]`)
-      .addEventListener(`change`, this._onChangePrice);
+      .addEventListener(`change`, this._onPriceChange);
 
     const offers = this._element.querySelectorAll(`.point__offers-input`);
     [].forEach.call(offers, (element) => {
-      element.addEventListener(`click`, this._onChangeOffers);
+      element.addEventListener(`click`, this._onOffersChange);
     });
 
-    flatpickr(this._element.querySelector(`input[name="time"]`), {
-      mode: `range`,
+    const dateStart = flatpickr(this._element.querySelector(`input[name="date-start"]`), {
       [`time_24hr`]: true,
-      minDate: `today`,
-      defaultDate: [this._timeStart, this._timeStop],
       enableTime: true,
-      locale: {
-        rangeSeparator: ` — `,
+      altInput: true,
+      dateFormat: `Z`,
+      altFormat: `H:i`,
+      defaultDate: moment(this._timeStart).format(),
+      onClose: (dateStr) => {
+        this._timeStart = Date.parse(dateStr);
+        this._state.timeStart = this._timeStart;
       },
-      dateFormat: `H:i`,
-      onClose: this._onCloseFlatpickr
+      onChange: (selectedDates) => {
+        dateEnd.set(`minDate`, selectedDates[0]);
+      }
+    });
+
+    const dateEnd = flatpickr(this._element.querySelector(`input[name="date-end"]`), {
+      [`time_24hr`]: true,
+      enableTime: true,
+      altInput: true,
+      dateFormat: `Z`,
+      altFormat: `H:i`,
+      defaultDate: moment(this._timeStop).format(),
+      onClose: (dateStr) => {
+        this._timeStop = Date.parse(dateStr);
+        this._state.timeStop = this._timeStop;
+      },
+      onChange: (selectedDates) => {
+        dateStart.set(`maxDate`, selectedDates[0]);
+      }
     });
   }
 
@@ -191,21 +242,24 @@ export default class TripOpen extends Component {
     document.removeEventListener(`keydown`, this._onKeydownEsc);
 
     this._element.querySelector(`.travel-way__select`)
-      .removeEventListener(`click`, this._onChangeType);
+      .removeEventListener(`click`, this._onTypeChange);
     this._element.querySelector(`input[name="destination"]`)
-      .removeEventListener(`change`, this._onChangeDestination);
+      .removeEventListener(`change`, this._onDestinationChange);
     this._element.querySelector(`input[name="price"]`)
-      .removeEventListener(`change`, this._onChangePrice);
+      .removeEventListener(`change`, this._onPriceChange);
 
     const offers = this._element.querySelectorAll(`.point__offers-input`);
     [].forEach.call(offers, (element) => {
-      element.removeEventListener(`click`, this._onChangeOffers);
+      element.removeEventListener(`click`, this._onOffersChange);
     });
+
+    flatpickr(this._element.querySelector(`input[name="date-start"]`)).destroy();
+    flatpickr(this._element.querySelector(`input[name="date-end"]`)).destroy();
   }
 
   get price() {
-    const offersTotalPrice = this._offers.filter((offer) => offer[2] === true).reduce((acc, offer) => acc + parseInt(offer[1], 10), 0);
-    return this._price + offersTotalPrice;
+    const offersTotalPrice = this._offers.filter((offer) => offer.accepted === true).reduce((acc, offer) => acc + parseInt(offer.price, 10), 0);
+    return +this._price + offersTotalPrice;
   }
 
   updatePrice() {
@@ -213,27 +267,33 @@ export default class TripOpen extends Component {
   }
 
   _getOffers() {
-    return this._offers.map((offer) => `<input class="point__offers-input visually-hidden" type="checkbox" id="${offer[0]}" name="offer" value="${offer[0]}" ${(offer[2] === true) ? `checked` : ``}>
-    <label for="${offer[0]}" class="point__offers-label">
-      <span class="point__offer-service">${offer[0]}</span> + €<span class="point__offer-price">${offer[1]}</span>
+    return this._offers.map((offer) => `<input class="point__offers-input visually-hidden" type="checkbox" id="${offer.title}" name="offer" value="${offer.title}" ${(offer.accepted === true) ? `checked` : ``}>
+    <label for="${offer.title}" class="point__offers-label">
+      <span class="point__offer-service">${offer.title}</span> + €<span class="point__offer-price">${offer.price}</span>
     </label>`).join(``);
   }
 
   _getPictures() {
-    return this._picture.map((picture) =>
-      `<img src="http:${picture}" alt="picture from place" class="point__destination-image">`).join(``);
+    return this._pictures.map((picture) =>
+      `<img src="${picture.src}" alt="picture from place" class="point__destination-image">`).join(``);
   }
 
   _getTravelWay(typeTravel) {
     const arrResult = [];
-    EVENT_TYPES.forEach((elem) => {
-      if (elem[2] === typeTravel) {
-        arrResult.push(elem);
+    for (let key in EVENT_TYPES) {
+      if (EVENT_TYPES[key].add === typeTravel) {
+        arrResult.push({type: key, icon: EVENT_TYPES[key].icon});
       }
-    });
-    return arrResult.map((type) =>
-      `<input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-${type[0].toLowerCase()}" name="travel-way" value="${type[0].toLowerCase()}">
-      <label class="travel-way__select-label" for="travel-way-${type[0].toLowerCase()}">${type[1]} ${type[0].toLowerCase()}</label>`).join(``);
+    }
+    return arrResult.map((item) =>
+      `<input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-${item.type}" name="travel-way" value="${item.type}">
+      <label class="travel-way__select-label" for="travel-way-${item.type}">${item.icon} ${item.type}</label>`).join(``);
+  }
+
+  _getDestination() {
+    const arrResult = [];
+    this._referenceDestinations.map((item) => arrResult.push(item.name));
+    return arrResult.map((item) => `<option value="${item}"></option>`).join(``);
   }
 
   get template() {
@@ -246,7 +306,7 @@ export default class TripOpen extends Component {
                     </label>
 
                     <div class="travel-way">
-                      <label class="travel-way__label" for="travel-way__toggle">${this._type[1]}</label>
+                      <label class="travel-way__label" for="travel-way__toggle">${EVENT_TYPES[this._type].icon}</label>
 
                       <input type="checkbox" class="travel-way__toggle visually-hidden" id="travel-way__toggle">
 
@@ -261,22 +321,18 @@ export default class TripOpen extends Component {
                     </div>
 
                     <div class="point__destination-wrap">
-                      <label class="point__destination-label" for="destination">${(this._type[0])} ${(this._type[2])}</label>
-                      <input class="point__destination-input" list="destination-select" id="destination" value="${this._title}" name="destination">
+                      <label class="point__destination-label" for="destination">${(this._type)} ${EVENT_TYPES[this._type].add}</label>
+                      <input class="point__destination-input" list="destination-select" id="destination" value="${this._destination}" name="destination">
                       <datalist id="destination-select">
-                        <option value="airport"></option>
-                        <option value="Geneva"></option>
-                        <option value="Chamonix"></option>
-                        <option value="hotel"></option>
+                        ${this._getDestination()}
                       </datalist>
                     </div>
 
-                    <label class="point__time">
+                    <div class="point__time">
                       choose time
-                      <input class="point__input" type="text"
-                      value="${this._time}"
-                      name="time" placeholder="00:00 — 00:00">
-                    </label>
+                      <input class="point__input" type="text" value="" name="date-start" placeholder="19:00">
+                      <input class="point__input" type="text" value="" name="date-end" placeholder="21:00">
+                    </div>
 
                     <label class="point__price">
                       write price
@@ -297,7 +353,7 @@ export default class TripOpen extends Component {
 
                   <section class="point__details">
                     <section class="point__offers">
-                      <h3 class="point__details-title">offers</h3>
+                      <h3 class="point__details-destination">offers</h3>
 
                       <div class="point__offers-wrap">
                         ${this._getOffers()}
@@ -305,7 +361,7 @@ export default class TripOpen extends Component {
 
                     </section>
                     <section class="point__destination">
-                      <h3 class="point__details-title">Destination</h3>
+                      <h3 class="point__details-destination">Destination</h3>
                       <p class="point__destination-text">${this._description}</p>
                       <div class="point__destination-images">
                         ${this._getPictures()}
