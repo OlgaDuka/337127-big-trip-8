@@ -69,7 +69,8 @@ export default class Trip extends Component {
 
   getDuration() {
     const duration = moment.duration(moment(this._timeStop).diff(moment(this._timeStart)));
-    return `${duration.hours()}H:${duration.minutes()}M`;
+    const days = duration.days();
+    return days > 0 ? `${days}D:${duration.hours()}H:${duration.minutes()}M` : `${duration.hours()}H:${duration.minutes()}M`;
   }
 
   getTimeStr() {

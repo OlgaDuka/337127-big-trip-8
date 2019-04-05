@@ -1,5 +1,5 @@
 import Component from './component.js';
-import {createElementFilter} from '../utils/index.js';
+import {createElementControl} from '../utils/index.js';
 
 export default class Filter extends Component {
   constructor(data) {
@@ -20,7 +20,7 @@ export default class Filter extends Component {
   }
 
   render() {
-    this._element = createElementFilter(this.template);
+    this._element = createElementControl(this.template);
     this.bind();
 
     return this._element;

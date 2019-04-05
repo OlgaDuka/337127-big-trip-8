@@ -4,6 +4,7 @@ import LoaderData from './model/loader-data';
 import Trip from './view/trip';
 import TripOpen from './view/trip-open';
 import Filter from './view/filter';
+import Sorting from './view/sorting';
 import Stat from './view/stat';
 import Adapter from './model/adapter';
 
@@ -19,6 +20,7 @@ const buttonStat = controls.querySelector(`a[href*=stats]`);
 const boardTable = document.querySelector(`#table`);
 const boardStat = document.querySelector(`#stats`);
 export const boardEvents = boardTable.querySelector(`.trip-day__items`);
+export const formSorting = boardTable.querySelector(`.trip-sorting`);
 
 const renderFilters = (arrFilters) => {
   return arrFilters.map((element) => {
@@ -26,6 +28,16 @@ const renderFilters = (arrFilters) => {
     formFilter.appendChild(filter.render());
     filter.onFilter = () => {
       filter.checked = !filter.checked;
+    };
+  });
+};
+
+const renderSorting = (arrSorting) => {
+  return arrSorting.map((element) => {
+    const sorting = new Sorting(element);
+    formSorting.appendChild(sorting.render());
+    sorting.onSorting = () => {
+      sorting.checked = !sorting.checked;
     };
   });
 };
@@ -87,6 +99,15 @@ formFilter.addEventListener(`click`, ({target}) => {
   if (target.className === `trip-filter__item` && !target.previousElementSibling.disabled) {
     boardEvents.innerHTML = ``;
     renderEvents(model.getFilterEvents(target.previousElementSibling.id));
+  }
+});
+
+formSorting.addEventListener(`click`, ({target}) => {
+  const className = target.className;
+  const numPos = className.indexOf(` `);
+  if (className.substring(0, numPos) === `trip-sorting__item` && !target.previousElementSibling.disabled) {
+    boardEvents.innerHTML = ``;
+    renderEvents(model.getSortingEvents(target.previousElementSibling.id));
   }
 });
 
@@ -155,6 +176,7 @@ const initialApp = () => {
   boardEvents.textContent = ``;
   stat.config = model;
   renderFilters(model.filters);
+  renderSorting(model.sorting);
   renderEvents(model.events);
   stat.render();
 };

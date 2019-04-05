@@ -16,6 +16,7 @@ export const StatData = [{selector: `.statistic__money`, selectorParent: `.stati
   {selector: `.statistic__time-spend`, selectorParent: `.statistic__item--time-spend`, title: `TIME-SPEND`, unit: `H`, method: `getPointsTimeSpend`}];
 
 export const NAME_FILTERS = [`everything`, `future`, `past`];
+export const NAME_SORTING = [`event`, `time`, `price`, `offers`];
 
 export const createElement = (template) => {
   const newElement = document.createElement(`div`);
@@ -23,7 +24,7 @@ export const createElement = (template) => {
   return newElement.firstChild;
 };
 
-export const createElementFilter = (template) => {
+export const createElementControl = (template) => {
   const newElement = document.createElement(`div`);
   newElement.innerHTML = template;
   return newElement;
