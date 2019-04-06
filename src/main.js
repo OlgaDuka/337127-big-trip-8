@@ -1,6 +1,8 @@
+import moment from 'moment';
 import Model from './model/model';
 // import Controller from './controller';
 import LoaderData from './model/loader-data';
+import TripDay from './view/trip-day';
 import Trip from './view/trip';
 import TripOpen from './view/trip-open';
 import Filter from './view/filter';
@@ -17,9 +19,10 @@ const controls = document.querySelector(`.trip-controls`);
 export const formFilter = controls.querySelector(`.trip-filter`);
 const buttonTable = controls.querySelector(`a[href*=table]`);
 const buttonStat = controls.querySelector(`a[href*=stats]`);
+// const buttonNewEvent = controls.querySelector(`.trip-controls__new-event`);
 const boardTable = document.querySelector(`#table`);
 const boardStat = document.querySelector(`#stats`);
-export const boardEvents = boardTable.querySelector(`.trip-day__items`);
+export const boardDays = boardTable.querySelector(`.trip-points`);
 export const formSorting = boardTable.querySelector(`.trip-sorting`);
 
 const renderFilters = (arrFilters) => {
@@ -42,17 +45,17 @@ const renderSorting = (arrSorting) => {
   });
 };
 
-const renderEvents = (arr) => {
-  boardEvents.innerHTML = ``;
+const renderEvents = (arr, dist) => {
+  dist.innerHTML = ``;
   for (let obPoint of arr) {
     const point = new Trip(obPoint);
     let pointOpen = new TripOpen(obPoint, model.offers, model.destinations);
 
-    boardEvents.appendChild(point.render());
+    dist.appendChild(point.render());
 
     point.onClick = () => {
       pointOpen.render();
-      boardEvents.replaceChild(pointOpen.element, point.element);
+      dist.replaceChild(pointOpen.element, point.element);
       point.unrender();
     };
     pointOpen.onSubmit = (newObject) => {
@@ -62,7 +65,7 @@ const renderEvents = (arr) => {
           pointOpen.element.style.border = ``;
           point.update(newPoint);
           point.render();
-          boardEvents.replaceChild(point.element, pointOpen.element);
+          dist.replaceChild(point.element, pointOpen.element);
           pointOpen.unrender();
           model.updatePoint(obPoint, newPoint);
         })
@@ -89,15 +92,33 @@ const renderEvents = (arr) => {
     });
     pointOpen.onKeyEsc = () => {
       point.render();
-      boardEvents.replaceChild(point.element, pointOpen.element);
+      dist.replaceChild(point.element, pointOpen.element);
       pointOpen.unrender();
     };
   }
 };
 
+const renderDays = (arr) => {
+  const arrDays = [];
+  for (let obPoint of arr) {
+    const day = moment(obPoint.timeStart).format(`DD MMMM YY`);
+    if (arrDays.indexOf(day) === -1) {
+      arrDays.push(day);
+    }
+  }
+  for (let day of arrDays) {
+    const obDay = new TripDay(day);
+    const arrResult = arr.filter((it) => moment(it.timeStart).format(`DD MMMM YY`) === day);
+    const boardDay = obDay.render();
+    boardDays.appendChild(boardDay);
+    const distEvents = boardDay.querySelector(`.trip-day__items`);
+    renderEvents(arrResult, distEvents);
+  }
+};
+
 formFilter.addEventListener(`click`, ({target}) => {
   if (target.className === `trip-filter__item` && !target.previousElementSibling.disabled) {
-    boardEvents.innerHTML = ``;
+    boardDays.innerHTML = ``;
     renderEvents(model.getFilterEvents(target.previousElementSibling.id));
   }
 });
@@ -106,7 +127,7 @@ formSorting.addEventListener(`click`, ({target}) => {
   const className = target.className;
   const numPos = className.indexOf(` `);
   if (className.substring(0, numPos) === `trip-sorting__item` && !target.previousElementSibling.disabled) {
-    boardEvents.innerHTML = ``;
+    boardDays.innerHTML = ``;
     renderEvents(model.getSortingEvents(target.previousElementSibling.id));
   }
 });
@@ -130,78 +151,31 @@ buttonStat.addEventListener(`click`, ({target}) => {
   stat.update(model);
 });
 
-/* loaderData.getOffers()
-  .then((offers) => {
-    model.offersData = offers;
-    loaderData.getDestinations()
-      .then((destinations) => {
-        model.destinationsData = destinations;
-        loaderData.getPoints()
-          .then((points) => {
-            model.eventsData = points;
-            stat.config = model;
-          })
-          .then(() => {
-            renderFilters(model.filters);
-            renderEvents(model.events);
-            stat.render();
-          });
-      });
-  });
-
-loaderData.getPoints()
-  .then((points) => {
-    model.eventsData = points;
-    stat.config = model;
-  })
-  .then(() => {
-    renderFilters(model.filters);
-    renderEvents(model.events);
-    stat.render();
-  })
-  .then(() => {
-    loaderData.getOffers()
-      .then((offers) => {
-        model.offersData = offers;
-      })
-    .then(() => {
-      loaderData.getDestinations()
-        .then((destinations) => {
-          model.destinationsData = destinations;
-        });
-    });
-  }); */
+/* buttonNewEvent.addEventListener(`click`, ({target}) => {
+  target.classList.add(`view-switch__item--active`);
+  buttonStat.classList.remove(`view-switch__item--active`);
+  boardStat.classList.add(`visually-hidden`);
+  boardTable.classList.remove(`visually-hidden`);
+}); */
 
 const initialApp = () => {
-  boardEvents.textContent = ``;
+  boardDays.textContent = ``;
   stat.config = model;
   renderFilters(model.filters);
   renderSorting(model.sorting);
-  renderEvents(model.events);
+  renderDays(model.events);
+  // renderEvents(model.events);
   stat.render();
 };
 
-/* const makeRequest = async () => {
-  boardEvents.textContent = `Loading route...`;
-  try {
-    model.offersData = await loaderData.getOffers();
-    model.destinationsData = await loaderData.getDestinations();
-    model.eventsData = await loaderData.getPoints();
-    await initialApp();
-  } catch (err) {
-    boardEvents.textContent = `Something went wrong while loading your route info. Check your connection or try again later`;
-  }
-}; */
-
-
 const makeRequest = async () => {
-  boardEvents.textContent = `Loading route...`;
+  boardDays.textContent = `Loading route...`;
   try {
     [model.offersData, model.destinationsData, model.eventsData] =
     await Promise.all([loaderData.getOffers(), loaderData.getDestinations(), loaderData.getPoints()]);
     await initialApp();
   } catch (err) {
-    boardEvents.textContent = `Something went wrong while loading your route info. Check your connection or try again later`;
+    boardDays.textContent = `Something went wrong while loading your route info. Check your connection or try again later`;
   }
 };
 
