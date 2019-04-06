@@ -1,3 +1,16 @@
+export const POINT_DEFAULT = {
+  id: null,
+  type: `taxi`,
+  destination: [],
+  price: 0,
+  timeStart: new Date(),
+  timeStop: new Date(),
+  pictures: [],
+  offers: [],
+  description: ``,
+  isFavorite: false,
+};
+
 export const EVENT_TYPES = {
   'taxi': {icon: `🚕`, add: `to`},
   'bus': {icon: `🚌`, add: `to`},

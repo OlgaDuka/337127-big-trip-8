@@ -2,9 +2,9 @@ export default class Adapter {
   constructor(data) {
     this.id = data[`id`];
     this.type = data[`type`];
-    this.price = data[`base_price`] || ``;
     this.timeStart = data[`date_from`];
     this.timeStop = data[`date_to`];
+    this.price = data[`base_price`] || ``;
     this.offers = data[`offers`] || [];
     this.destination = data[`destination`].name || ``;
     this.description = data[`destination`].description || ``;
@@ -16,12 +16,12 @@ export default class Adapter {
     return {
       'id': data.id,
       'type': data.type,
-      'base_price': data.price,
       'date_from': data.timeStart,
       'date_to': data.timeStop,
-      'offers': data.offers,
+      'base_price': data.price,
       'destination': {name: data.destination, description: data.description, pictures: data.pictures},
-      'is_favorite': data.isFavorite
+      'is_favorite': data.isFavorite,
+      'offers': data.offers
     };
   }
 

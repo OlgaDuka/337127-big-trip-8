@@ -1,16 +1,15 @@
-import {EVENT_TYPES} from '../utils/index';
+import {EVENT_TYPES, POINT_DEFAULT} from '../utils/index';
 import moment from 'moment';
 import flatpickr from 'flatpickr';
 import Component from './component.js';
 
 export default class TripOpen extends Component {
-  constructor(data, offers, destinations) {
+  constructor(offers, destinations, data = POINT_DEFAULT) {
     super();
     this._id = data.id;
     this._type = data.type;
     this._destination = data.destination;
     this._price = data.price;
-    this._day = data.day;
     this._timeStart = data.timeStart;
     this._timeStop = data.timeStop;
     this._pictures = data.pictures;
@@ -25,7 +24,6 @@ export default class TripOpen extends Component {
       type: data.type,
       destination: data.destination,
       price: data.price,
-      day: data.day,
       timeStart: data.timeStart,
       timeStop: data.timeStop,
       pictures: data.pictures,
@@ -296,13 +294,17 @@ export default class TripOpen extends Component {
     return arrResult.map((item) => `<option value="${item}"></option>`).join(``);
   }
 
+  _getDay() {
+    return moment(this._timeStart).format(`MMMM YY`);
+  }
+
   get template() {
     return `<article class="point">
                 <form action="" method="get" class="point__form">
                   <header class="point__header">
                     <label class="point__date">
                       choose day
-                      <input class="point__input" type="text" placeholder="MAR 18" name="day">
+                      <input class="point__input" type="text" value="${this._getDay()}" name="day" readonly>
                     </label>
 
                     <div class="travel-way">
