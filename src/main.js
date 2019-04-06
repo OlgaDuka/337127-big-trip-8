@@ -98,14 +98,19 @@ const renderEvents = (arr, dist) => {
   }
 };
 
-const renderDays = (arr) => {
-  const arrDays = [];
+const createArrDays = (arr) => {
+  const arrResult = [];
   for (let obPoint of arr) {
     const day = moment(obPoint.timeStart).format(`DD MMMM YY`);
-    if (arrDays.indexOf(day) === -1) {
-      arrDays.push(day);
+    if (arrResult.indexOf(day) === -1) {
+      arrResult.push(day);
     }
   }
+  return arrResult;
+};
+
+const renderDays = (arr) => {
+  const arrDays = createArrDays(arr);
   for (let day of arrDays) {
     const obDay = new TripDay(day);
     const arrResult = arr.filter((it) => moment(it.timeStart).format(`DD MMMM YY`) === day);
@@ -119,7 +124,7 @@ const renderDays = (arr) => {
 formFilter.addEventListener(`click`, ({target}) => {
   if (target.className === `trip-filter__item` && !target.previousElementSibling.disabled) {
     boardDays.innerHTML = ``;
-    renderEvents(model.getFilterEvents(target.previousElementSibling.id));
+    renderDays(model.getFilterEvents(target.previousElementSibling.id));
   }
 });
 
@@ -128,7 +133,7 @@ formSorting.addEventListener(`click`, ({target}) => {
   const numPos = className.indexOf(` `);
   if (className.substring(0, numPos) === `trip-sorting__item` && !target.previousElementSibling.disabled) {
     boardDays.innerHTML = ``;
-    renderEvents(model.getSortingEvents(target.previousElementSibling.id));
+    renderDays(model.getSortingEvents(target.previousElementSibling.id));
   }
 });
 
@@ -164,7 +169,6 @@ const initialApp = () => {
   renderFilters(model.filters);
   renderSorting(model.sorting);
   renderDays(model.events);
-  // renderEvents(model.events);
   stat.render();
 };
 
