@@ -1,6 +1,7 @@
 import moment from 'moment';
 import Model from './model/model';
 import LoaderData from './model/loader-data';
+import TotalCost from './view/total-cost';
 import TripDay from './view/trip-day';
 import Trip from './view/trip';
 import TripOpen from './view/trip-open';
@@ -12,7 +13,9 @@ import Adapter from './model/adapter';
 const model = new Model();
 const stat = new Stat();
 const loaderData = new LoaderData();
+const cost = new TotalCost();
 
+const boardTotalCost = document.querySelector(`.trip`);
 const controls = document.querySelector(`.trip-controls`);
 export const formFilter = controls.querySelector(`.trip-filter`);
 const buttonTable = controls.querySelector(`a[href*=table]`);
@@ -43,6 +46,11 @@ const renderSorting = (arrSorting) => {
   });
 };
 
+const renderTotalCost = (arr) => {
+  cost.getCostTrim(arr);
+  boardTotalCost.appendChild(cost.render());
+};
+
 const renderEvents = (arr, dist) => {
   dist.innerHTML = ``;
   for (let obPoint of arr) {
@@ -64,6 +72,8 @@ const renderEvents = (arr, dist) => {
           dist.replaceChild(point.element, pointOpen.element);
           pointOpen.unrender();
           model.updatePoint(obPoint, newPoint);
+          cost.unrender();
+          renderTotalCost(model.events);
         })
         .catch(() => {
           pointOpen.element.style.border = `2px solid #FF0000`;
@@ -79,6 +89,8 @@ const renderEvents = (arr, dist) => {
           pointOpen.element.style.border = ``;
           renderEvents(newArrPoints);
           model.eventsData = newArrPoints;
+          cost.unrender();
+          renderTotalCost(model.events);
         })
         .catch(() => {
           pointOpen.element.style.border = `2px solid #FF0000`;
@@ -133,21 +145,31 @@ formSorting.addEventListener(`click`, ({target}) => {
   }
 });
 
-buttonTable.addEventListener(`click`, ({target}) => {
-  if (!target.classList.contains(`view-switch__item--active`)) {
-    target.classList.add(`view-switch__item--active`);
-    buttonStat.classList.remove(`view-switch__item--active`);
-    boardStat.classList.add(`visually-hidden`);
-    boardTable.classList.remove(`visually-hidden`);
+const toggleToTable = () => {
+  buttonTable.classList.add(`view-switch__item--active`);
+  buttonStat.classList.remove(`view-switch__item--active`);
+  boardStat.classList.add(`visually-hidden`);
+  boardTable.classList.remove(`visually-hidden`);
+};
+
+const toggleToStat = () => {
+  buttonStat.classList.add(`view-switch__item--active`);
+  buttonTable.classList.remove(`view-switch__item--active`);
+  boardStat.classList.remove(`visually-hidden`);
+  boardTable.classList.add(`visually-hidden`);
+};
+
+buttonTable.addEventListener(`click`, (evt) => {
+  evt.preventDefault();
+  if (!evt.target.classList.contains(`view-switch__item--active`)) {
+    toggleToTable();
   }
 });
 
-buttonStat.addEventListener(`click`, ({target}) => {
-  if (!target.classList.contains(`view-switch__item--active`)) {
-    target.classList.add(`view-switch__item--active`);
-    buttonTable.classList.remove(`view-switch__item--active`);
-    boardStat.classList.remove(`visually-hidden`);
-    boardTable.classList.add(`visually-hidden`);
+buttonStat.addEventListener(`click`, (evt) => {
+  evt.preventDefault();
+  if (!evt.target.classList.contains(`view-switch__item--active`)) {
+    toggleToStat();
   }
   stat.update(model);
 });
@@ -168,10 +190,13 @@ const makeRequestInsert = async (newDataPoint, newRenderPoint) => {
 };
 
 buttonNewEvent.addEventListener(`click`, () => {
+  toggleToTable();
   const newPoint = new TripOpen(model.offers, model.destinations);
   boardDays.insertBefore(newPoint.render(), boardDays.firstChild);
   newPoint.onSubmit = (newObject) => {
     makeRequestInsert(newObject, newPoint);
+    // cost.unrender();
+    // renderTotalCost(model.events);
   };
   newPoint.onKeyEsc = () => {
     newPoint.unrender();
@@ -181,6 +206,7 @@ buttonNewEvent.addEventListener(`click`, () => {
 const initialApp = () => {
   boardDays.textContent = ``;
   stat.config = model;
+  renderTotalCost(model.events);
   renderFilters(model.filters);
   renderSorting(model.sorting);
   renderDays(model.events);

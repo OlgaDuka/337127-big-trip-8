@@ -80,6 +80,12 @@ export default class Model {
     return this._state;
   }
 
+  // resetPoint(pointToUpdate, newPoint) {
+  //  const index = this._events.findIndex((it) => it === pointToUpdate);
+  //  this._state.events[index] = Object.assign({}, pointToUpdate, newPoint);
+  //  return this._state;
+  // }
+
   deletePoint(pointToDelete) {
     const index = this._events.findIndex((it) => it === pointToDelete);
     this._state.events.splice(index, 1);
