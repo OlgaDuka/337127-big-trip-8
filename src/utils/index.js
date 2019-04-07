@@ -1,10 +1,12 @@
+import moment from 'moment';
+
 export const POINT_DEFAULT = {
   id: null,
   type: `taxi`,
   destination: [],
   price: 0,
-  timeStart: new Date(),
-  timeStop: new Date(),
+  timeStart: moment().valueOf(),
+  timeStop: moment().valueOf(),
   pictures: [],
   offers: [],
   description: ``,

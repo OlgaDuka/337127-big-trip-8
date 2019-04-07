@@ -1,6 +1,5 @@
 import moment from 'moment';
 import Model from './model/model';
-// import Controller from './controller';
 import LoaderData from './model/loader-data';
 import TripDay from './view/trip-day';
 import Trip from './view/trip';
@@ -11,7 +10,6 @@ import Stat from './view/stat';
 import Adapter from './model/adapter';
 
 const model = new Model();
-// const app = new Controller();
 const stat = new Stat();
 const loaderData = new LoaderData();
 
@@ -50,9 +48,7 @@ const renderEvents = (arr, dist) => {
   for (let obPoint of arr) {
     const point = new Trip(obPoint);
     let pointOpen = new TripOpen(model.offers, model.destinations, obPoint);
-
     dist.appendChild(point.render());
-
     point.onClick = () => {
       pointOpen.render();
       dist.replaceChild(pointOpen.element, point.element);
@@ -156,28 +152,29 @@ buttonStat.addEventListener(`click`, ({target}) => {
   stat.update(model);
 });
 
-const makeRequestInsert = async (newObPoint) => {
-  await loaderData.createPoint({point: Adapter.toRAW(newObPoint)});
-  model.eventsData = await loaderData.getPoints();
+const makeRequestInsert = async (newDataPoint, newRenderPoint) => {
+  try {
+    newRenderPoint.blockToSave();
+    await loaderData.createPoint({point: Adapter.toRAW(newDataPoint)});
+    model.eventsData = await loaderData.getPoints();
+    newRenderPoint.unrender();
+    boardDays.innerHTML = ``;
+    renderDays(model.events);
+  } catch (err) {
+    newRenderPoint.element.style.border = `2px solid #FF0000`;
+    newRenderPoint.shake();
+    newRenderPoint.unblockToSave();
+  }
 };
 
 buttonNewEvent.addEventListener(`click`, () => {
   const newPoint = new TripOpen(model.offers, model.destinations);
   boardDays.insertBefore(newPoint.render(), boardDays.firstChild);
   newPoint.onSubmit = (newObject) => {
-    newPoint.blockToSave();
-    try {
-      makeRequestInsert(newObject);
-      newPoint.element.style.border = ``;
-      newPoint.unrender();
-      boardDays.innerHTML = ``;
-      renderDays(model.events);
-      model.insertPoint(newPoint);
-    } catch (err) {
-      newPoint.element.style.border = `2px solid #FF0000`;
-      newPoint.shake();
-      newPoint.unblockToSave();
-    }
+    makeRequestInsert(newObject, newPoint);
+  };
+  newPoint.onKeyEsc = () => {
+    newPoint.unrender();
   };
 });
 
