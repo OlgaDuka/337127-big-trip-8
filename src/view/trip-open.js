@@ -42,6 +42,7 @@ export default class TripOpen extends Component {
     this._onTypeChange = this._onTypeChange.bind(this);
     this._onDestinationChange = this._onDestinationChange.bind(this);
     this._onPriceChange = this._onPriceChange.bind(this);
+    this._onFavoriteChange = this._onFavoriteChange.bind(this);
     this._onOffersChange = this._onOffersChange.bind(this);
   }
 
@@ -99,6 +100,7 @@ export default class TripOpen extends Component {
     this._offers = this._state.offers;
     this._description = this._state.description;
     this._pictures = this._state.pictures;
+    this._isFavorite = this._state.isFavorite;
   }
 
   blockToDelete() {
@@ -172,6 +174,10 @@ export default class TripOpen extends Component {
     }
   }
 
+  _onFavoriteChange({target}) {
+    this._state.isFavorite = target.checked;
+  }
+
   bind() {
     this._element.querySelector(`.point__button-save`)
       .addEventListener(`click`, this._onSubmitButtonClick);
@@ -185,6 +191,8 @@ export default class TripOpen extends Component {
       .addEventListener(`change`, this._onDestinationChange);
     this._element.querySelector(`input[name="price"]`)
       .addEventListener(`change`, this._onPriceChange);
+    this._element.querySelector(`input[name="favorite"]`)
+      .addEventListener(`change`, this._onFavoriteChange);
 
     const offers = this._element.querySelectorAll(`.point__offers-input`);
     [].forEach.call(offers, (element) => {
@@ -235,6 +243,8 @@ export default class TripOpen extends Component {
       .removeEventListener(`change`, this._onDestinationChange);
     this._element.querySelector(`input[name="price"]`)
       .removeEventListener(`change`, this._onPriceChange);
+    this._element.querySelector(`input[name="favorite"]`)
+      .removeEventListener(`change`, this._onFavoriteChange);
 
     const offers = this._element.querySelectorAll(`.point__offers-input`);
     [].forEach.call(offers, (element) => {
@@ -329,7 +339,7 @@ export default class TripOpen extends Component {
                     </div>
 
                     <div class="paint__favorite-wrap">
-                      <input type="checkbox" class="point__favorite-input visually-hidden" id="favorite" name="favorite">
+                      <input type="checkbox" class="point__favorite-input visually-hidden" id="favorite" name="favorite" ${this._state.isFavorite ? `checked` : ``}>
                       <label class="point__favorite" for="favorite">favorite</label>
                     </div>
                   </header>
