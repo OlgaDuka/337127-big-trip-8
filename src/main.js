@@ -86,8 +86,8 @@ const renderEvents = (arr, dist) => {
       loaderData.deletePoint({id})
         .then(() => loaderData.getPoints())
         .then((newArrPoints) => {
-          pointOpen.element.style.border = ``;
-          renderEvents(newArrPoints);
+          pointOpen.unrender();
+          renderDays(newArrPoints);
           model.eventsData = newArrPoints;
           cost.unrender();
           renderTotalCost(model.events);
@@ -182,6 +182,8 @@ const makeRequestInsert = async (newDataPoint, newRenderPoint) => {
     newRenderPoint.unrender();
     boardDays.innerHTML = ``;
     renderDays(model.events);
+    cost.unrender();
+    renderTotalCost(model.events);
   } catch (err) {
     newRenderPoint.element.style.border = `2px solid #FF0000`;
     newRenderPoint.shake();
@@ -195,8 +197,6 @@ buttonNewEvent.addEventListener(`click`, () => {
   boardDays.insertBefore(newPoint.render(), boardDays.firstChild);
   newPoint.onSubmit = (newObject) => {
     makeRequestInsert(newObject, newPoint);
-    // cost.unrender();
-    // renderTotalCost(model.events);
   };
   newPoint.onKeyEsc = () => {
     newPoint.unrender();

@@ -1,22 +1,7 @@
 import Adapter from './adapter';
 
-const Method = {
-  GET: `GET`,
-  POST: `POST`,
-  PUT: `PUT`,
-  DELETE: `DELETE`
-};
-
 const AUTHORIZATION = `Basic dXNfckBgYXuzd27yZAo=${Math.random()}`;
 const END_POINT = `https://es8-demo-srv.appspot.com/big-trip`;
-
-const checkStatus = (response) => {
-  if (response.status >= 200 && response.status < 300) {
-    return response;
-  } else {
-    throw new Error(`${response.status}: ${response.statusText}`);
-  }
-};
 
 const toJSON = (response) => {
   return response.json();
@@ -26,6 +11,20 @@ export default class LoaderData {
   constructor() {
     this._endPoint = END_POINT;
     this._authorization = AUTHORIZATION;
+    this._method = {
+      GET: `GET`,
+      POST: `POST`,
+      PUT: `PUT`,
+      DELETE: `DELETE`
+    };
+  }
+
+  checkStatus(response) {
+    if (response.status >= 200 && response.status < 300) {
+      return response;
+    } else {
+      throw new Error(`${response.status}: ${response.statusText}`);
+    }
   }
 
   getPoints() {
@@ -47,7 +46,7 @@ export default class LoaderData {
   createPoint({point}) {
     return this._load({
       url: `points`,
-      method: Method.POST,
+      method: this._method.POST,
       body: JSON.stringify(point),
       headers: new Headers({'Content-Type': `application/json`})
     })
@@ -58,7 +57,7 @@ export default class LoaderData {
   updatePoint({id, data}) {
     return this._load({
       url: `points/${id}`,
-      method: Method.PUT,
+      method: this._method.PUT,
       body: JSON.stringify(data),
       headers: new Headers({'Content-Type': `application/json`})
     })
@@ -67,14 +66,14 @@ export default class LoaderData {
   }
 
   deletePoint({id}) {
-    return this._load({url: `points/${id}`, method: Method.DELETE});
+    return this._load({url: `points/${id}`, method: this._method.DELETE});
   }
 
-  _load({url, method = Method.GET, body = null, headers = new Headers()}) {
+  _load({url, method = this._method.GET, body = null, headers = new Headers()}) {
     headers.append(`Authorization`, this._authorization);
 
     return fetch(`${this._endPoint}/${url}`, {method, body, headers})
-      .then(checkStatus)
+      .then(this.checkStatus)
       .catch((err) => {
         window.console.error(`fetch error: ${err}`);
         throw err;
