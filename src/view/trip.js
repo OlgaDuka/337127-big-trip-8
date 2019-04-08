@@ -48,12 +48,6 @@ export default class Trip extends Component {
     this._pictures = data.pictures;
   }
 
-  get price() {
-    const offersTotalPrice = this._offers.filter((offer) => offer.accept === true).reduce((acc, offer) => acc + parseInt(offer.price, 10), 0);
-    return +this._price + offersTotalPrice;
-  }
-
-
   _getOffer() {
     let htmlOffers = ``;
     const num = this._offers.length > 3 ? 3 : this._offers.length;
@@ -79,16 +73,16 @@ export default class Trip extends Component {
 
   get template() {
     return `<article class="trip-point">
-                <i class="trip-icon">${EVENT_TYPES[this._type].icon}</i>
-                <h3 class="trip-point__title">${this._type} ${EVENT_TYPES[this._type].add} ${this._destination}</h3>
-                <p class="trip-point__schedule">
-                  <span class="trip-point__timetable">${this.getTimeStr()}</span>
-                  <span class="trip-point__duration">${this.getDuration()}</span>
-                </p>
-                <p class="trip-point__price">&euro;&nbsp;${this.price}</p>
-                <ul class="trip-point__offers">
-                  ${this._getOffer()}
-                </ul>
-              </article>`.trim();
+              <i class="trip-icon">${EVENT_TYPES[this._type].icon}</i>
+              <h3 class="trip-point__title">${this._type} ${EVENT_TYPES[this._type].add} ${this._destination}</h3>
+              <p class="trip-point__schedule">
+                <span class="trip-point__timetable">${this.getTimeStr()}</span>
+                <span class="trip-point__duration">${this.getDuration()}</span>
+              </p>
+              <p class="trip-point__price">&euro;&nbsp;${this._price}</p>
+              <ul class="trip-point__offers">
+                ${this._getOffer()}
+              </ul>
+            </article>`.trim();
   }
 }

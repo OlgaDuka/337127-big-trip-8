@@ -4,20 +4,15 @@ export default class TotalCost extends Component {
   constructor() {
     super();
     this._cost = 0;
-    this._state = {
-      cost: this._cost
-    };
   }
 
   _getPricePoint(point) {
-    const offersTotalPrice = point.offers.filter((offer) => offer.accepted === true).reduce((acc, offer) => acc + offer.price, 0);
-    return point._price + offersTotalPrice;
+    return point.offers.filter((offer) => offer.accepted === true).reduce((acc, offer) => acc + offer.price, 0);
   }
 
   getCostTrim(data) {
-    let cost = data.reduce((acc, point) => acc + point.price, 0);
-    this._cost = cost;
-    return cost;
+    this._cost = data.reduce((acc, point) => acc + point.price + this._getPricePoint(point), 0);
+    return this._cost;
   }
 
   get template() {
