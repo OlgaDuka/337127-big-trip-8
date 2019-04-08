@@ -55,19 +55,17 @@ export default class Stat {
   }
 
   _getDurationHour(arr, item) {
-    const dateStart = moment(arr[item].timeStart);
-    const dateEnd = moment(arr[item].timeStop);
-    const duration = moment.duration(dateEnd.diff(dateStart));
-    return duration.hours();
+    const duration = moment.duration(moment(arr[item].timeStop).diff(moment(arr[item].timeStart)));
+    return duration.days() * 24 + duration.hours() + (duration.minutes() > 30 ? 1 : 0);
   }
 
   getPointsTimeSpend(arr) {
     const arrLabel = [];
     const arrHour = [];
     arr.forEach((elem, i) => {
-      let item = arrLabel.indexOf(`${EVENT_TYPES[elem.type].icon} ${elem.destination.toUpperCase()}`);
+      let item = arrLabel.indexOf(`${EVENT_TYPES[elem.type].icon} ${elem.type.toUpperCase()}`);
       if (item === -1) {
-        arrLabel.push(`${EVENT_TYPES[elem.type].icon} ${elem.destination.toUpperCase()}`);
+        arrLabel.push(`${EVENT_TYPES[elem.type].icon} ${elem.type.toUpperCase()}`);
         arrHour.push(this._getDurationHour(arr, i));
       } else {
         arrHour[item] += this._getDurationHour(arr, i);

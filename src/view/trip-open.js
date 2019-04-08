@@ -1,16 +1,15 @@
-import {EVENT_TYPES} from '../utils/index';
+import {EVENT_TYPES, POINT_DEFAULT} from '../utils/index';
 import moment from 'moment';
 import flatpickr from 'flatpickr';
 import Component from './component.js';
 
 export default class TripOpen extends Component {
-  constructor(data, offers, destinations) {
+  constructor(offers, destinations, data = POINT_DEFAULT) {
     super();
     this._id = data.id;
     this._type = data.type;
     this._destination = data.destination;
     this._price = data.price;
-    this._day = data.day;
     this._timeStart = data.timeStart;
     this._timeStop = data.timeStop;
     this._pictures = data.pictures;
@@ -25,7 +24,6 @@ export default class TripOpen extends Component {
       type: data.type,
       destination: data.destination,
       price: data.price,
-      day: data.day,
       timeStart: data.timeStart,
       timeStop: data.timeStop,
       pictures: data.pictures,
@@ -44,6 +42,7 @@ export default class TripOpen extends Component {
     this._onTypeChange = this._onTypeChange.bind(this);
     this._onDestinationChange = this._onDestinationChange.bind(this);
     this._onPriceChange = this._onPriceChange.bind(this);
+    this._onFavoriteChange = this._onFavoriteChange.bind(this);
     this._onOffersChange = this._onOffersChange.bind(this);
   }
 
@@ -52,7 +51,7 @@ export default class TripOpen extends Component {
     if (typeof this._onSubmit === `function`) {
       this._onSubmit(this._state);
     }
-    // this.update(this._state);
+    this.update();
   }
 
   set onSubmit(fn) {
@@ -84,7 +83,6 @@ export default class TripOpen extends Component {
     }, ANIMATION_TIMEOUT);
   }
 
-
   _partialUpdate() {
     this.unbind();
     const oldElement = this._element;
@@ -92,16 +90,17 @@ export default class TripOpen extends Component {
     oldElement.parentNode.replaceChild(this._element, oldElement);
   }
 
-  update(dataFromState) {
-    this._type = dataFromState.type;
-    this._destination = dataFromState.destination;
-    this._price = dataFromState.price;
-    this._day = dataFromState.day;
-    this._timeStart = dataFromState.timeStart;
-    this._timeStop = dataFromState.timeStop;
-    this._offers = dataFromState.offers;
-    this._description = dataFromState.description;
-    this._pictures = dataFromState.pictures;
+  update() {
+    this._type = this._state.type;
+    this._destination = this._state.destination;
+    this._price = this._state.price;
+    this._day = this._state.day;
+    this._timeStart = this._state.timeStart;
+    this._timeStop = this._state.timeStop;
+    this._offers = this._state.offers;
+    this._description = this._state.description;
+    this._pictures = this._state.pictures;
+    this._isFavorite = this._state.isFavorite;
   }
 
   blockToDelete() {
@@ -133,37 +132,31 @@ export default class TripOpen extends Component {
   }
 
   _onTypeChange({target}) {
+    this._state.price = 0;
     if (target.classList[0] === `travel-way__select-label`) {
       this._state.type = target.previousElementSibling.value;
-      this._type = this._state.type;
-      this._offers = [];
-      const type = this._referenceOffers.filter((item) => item.type === this._type);
+      this._state.offers = [];
+      const type = this._referenceOffers.filter((item) => item.type === this._state.type);
       if (type.length !== 0) {
         const arrOffers = type[0].offers;
         for (const refOffer of arrOffers) {
-          this._offers.push({title: refOffer.name, price: refOffer.price, accepted: false});
+          this._state.offers.push({title: refOffer.name, price: refOffer.price, accepted: false});
         }
       }
-      this._state.offers = this._offers;
     }
     this._partialUpdate();
   }
 
   _onDestinationChange({target}) {
     this._state.destination = target.value;
-    this._destination = this._state.destination;
-    const name = this._referenceDestinations.filter((item) => item.name === this._destination);
+    this._state.price = 0;
+    const name = this._referenceDestinations.filter((item) => item.name === this._state.destination);
     if (name.length !== 0) {
       this._state.description = name[0].description;
       this._state.pictures = name[0].pictures;
-      this._description = this._state.description;
-      this._pictures = this._state.pictures;
     } else {
       this._state.description = ``;
       this._state.pictures = [];
-      this._description = ``;
-      this._pictures = [];
-
     }
     this._partialUpdate();
   }
@@ -176,10 +169,13 @@ export default class TripOpen extends Component {
     for (const offer of this._state.offers) {
       if (offer.title === target.value) {
         offer.accepted = target.checked;
-        // тут будет функция пересчета общей стоимости путешествия
         break;
       }
     }
+  }
+
+  _onFavoriteChange({target}) {
+    this._state.isFavorite = target.checked;
   }
 
   bind() {
@@ -195,6 +191,8 @@ export default class TripOpen extends Component {
       .addEventListener(`change`, this._onDestinationChange);
     this._element.querySelector(`input[name="price"]`)
       .addEventListener(`change`, this._onPriceChange);
+    this._element.querySelector(`input[name="favorite"]`)
+      .addEventListener(`change`, this._onFavoriteChange);
 
     const offers = this._element.querySelectorAll(`.point__offers-input`);
     [].forEach.call(offers, (element) => {
@@ -209,8 +207,7 @@ export default class TripOpen extends Component {
       altFormat: `H:i`,
       defaultDate: moment(this._timeStart).format(),
       onClose: (dateStr) => {
-        this._timeStart = Date.parse(dateStr);
-        this._state.timeStart = this._timeStart;
+        this._state.timeStart = Date.parse(dateStr);
       },
       onChange: (selectedDates) => {
         dateEnd.set(`minDate`, selectedDates[0]);
@@ -225,8 +222,7 @@ export default class TripOpen extends Component {
       altFormat: `H:i`,
       defaultDate: moment(this._timeStop).format(),
       onClose: (dateStr) => {
-        this._timeStop = Date.parse(dateStr);
-        this._state.timeStop = this._timeStop;
+        this._state.timeStop = Date.parse(dateStr);
       },
       onChange: (selectedDates) => {
         dateStart.set(`maxDate`, selectedDates[0]);
@@ -247,6 +243,8 @@ export default class TripOpen extends Component {
       .removeEventListener(`change`, this._onDestinationChange);
     this._element.querySelector(`input[name="price"]`)
       .removeEventListener(`change`, this._onPriceChange);
+    this._element.querySelector(`input[name="favorite"]`)
+      .removeEventListener(`change`, this._onFavoriteChange);
 
     const offers = this._element.querySelectorAll(`.point__offers-input`);
     [].forEach.call(offers, (element) => {
@@ -257,24 +255,15 @@ export default class TripOpen extends Component {
     flatpickr(this._element.querySelector(`input[name="date-end"]`)).destroy();
   }
 
-  get price() {
-    const offersTotalPrice = this._offers.filter((offer) => offer.accepted === true).reduce((acc, offer) => acc + parseInt(offer.price, 10), 0);
-    return +this._price + offersTotalPrice;
-  }
-
-  updatePrice() {
-    this._element.querySelector(`.point__input[name="price"]`).value = this.price;
-  }
-
   _getOffers() {
-    return this._offers.map((offer) => `<input class="point__offers-input visually-hidden" type="checkbox" id="${offer.title}" name="offer" value="${offer.title}" ${(offer.accepted === true) ? `checked` : ``}>
+    return this._state.offers.map((offer) => `<input class="point__offers-input visually-hidden" type="checkbox" id="${offer.title}" name="offer" value="${offer.title}" ${(offer.accepted === true) ? `checked` : ``}>
     <label for="${offer.title}" class="point__offers-label">
       <span class="point__offer-service">${offer.title}</span> + €<span class="point__offer-price">${offer.price}</span>
     </label>`).join(``);
   }
 
   _getPictures() {
-    return this._pictures.map((picture) =>
+    return this._state.pictures.map((picture) =>
       `<img src="${picture.src}" alt="picture from place" class="point__destination-image">`).join(``);
   }
 
@@ -296,17 +285,21 @@ export default class TripOpen extends Component {
     return arrResult.map((item) => `<option value="${item}"></option>`).join(``);
   }
 
+  _getDay() {
+    return moment(this._timeStart).format(`MMMM YY`);
+  }
+
   get template() {
     return `<article class="point">
                 <form action="" method="get" class="point__form">
                   <header class="point__header">
                     <label class="point__date">
                       choose day
-                      <input class="point__input" type="text" placeholder="MAR 18" name="day">
+                      <input class="point__input" type="text" value="${this._getDay()}" name="day" readonly>
                     </label>
 
                     <div class="travel-way">
-                      <label class="travel-way__label" for="travel-way__toggle">${EVENT_TYPES[this._type].icon}</label>
+                      <label class="travel-way__label" for="travel-way__toggle">${EVENT_TYPES[this._state.type].icon}</label>
 
                       <input type="checkbox" class="travel-way__toggle visually-hidden" id="travel-way__toggle">
 
@@ -321,8 +314,8 @@ export default class TripOpen extends Component {
                     </div>
 
                     <div class="point__destination-wrap">
-                      <label class="point__destination-label" for="destination">${(this._type)} ${EVENT_TYPES[this._type].add}</label>
-                      <input class="point__destination-input" list="destination-select" id="destination" value="${this._destination}" name="destination">
+                      <label class="point__destination-label" for="destination">${(this._state.type)} ${EVENT_TYPES[this._state.type].add}</label>
+                      <input class="point__destination-input" list="destination-select" id="destination" value="${this._state.destination}" name="destination" required>
                       <datalist id="destination-select">
                         ${this._getDestination()}
                       </datalist>
@@ -330,14 +323,14 @@ export default class TripOpen extends Component {
 
                     <div class="point__time">
                       choose time
-                      <input class="point__input" type="text" value="" name="date-start" placeholder="19:00">
-                      <input class="point__input" type="text" value="" name="date-end" placeholder="21:00">
+                      <input class="point__input" type="text" value="" name="date-start" placeholder="00:00">
+                      <input class="point__input" type="text" value="" name="date-end" placeholder="00:00">
                     </div>
 
                     <label class="point__price">
                       write price
                       <span class="point__price-currency">€</span>
-                      <input class="point__input" type="text" value="${this.price}" name="price">
+                      <input class="point__input" type="text" value="${this._state.price}" name="price">
                     </label>
 
                     <div class="point__buttons">
@@ -346,7 +339,7 @@ export default class TripOpen extends Component {
                     </div>
 
                     <div class="paint__favorite-wrap">
-                      <input type="checkbox" class="point__favorite-input visually-hidden" id="favorite" name="favorite">
+                      <input type="checkbox" class="point__favorite-input visually-hidden" id="favorite" name="favorite" ${this._state.isFavorite ? `checked` : ``}>
                       <label class="point__favorite" for="favorite">favorite</label>
                     </div>
                   </header>
@@ -362,7 +355,7 @@ export default class TripOpen extends Component {
                     </section>
                     <section class="point__destination">
                       <h3 class="point__details-destination">Destination</h3>
-                      <p class="point__destination-text">${this._description}</p>
+                      <p class="point__destination-text">${this._state.description}</p>
                       <div class="point__destination-images">
                         ${this._getPictures()}
                       </div>

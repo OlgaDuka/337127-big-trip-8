@@ -188,6 +188,7 @@ input[type=radio]:checked + .trip-filter__item {
 
 
 .trip-sorting {
+  display: flex;
   box-sizing: border-box;
   margin-top: 24px;
   padding-left: 160px;

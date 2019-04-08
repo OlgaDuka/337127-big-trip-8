@@ -1,4 +1,5 @@
 import * as util from '../utils/index';
+import moment from 'moment';
 
 export default class Model {
   constructor() {
@@ -6,6 +7,7 @@ export default class Model {
     this._destinations = [];
     this._offers = [];
     this.filters = util.NAME_FILTERS;
+    this.sorting = util.NAME_SORTING;
     this.stat = util.StatData;
     this._state = {
       events: this._events
@@ -52,11 +54,37 @@ export default class Model {
     return fnFilter[filterName]();
   }
 
+  _duration(obEvent) {
+    return moment.duration(moment(obEvent.timeStop).diff(moment(obEvent.timeStart)));
+  }
+
+  getSortingEvents(sortingName) {
+    let arrResult = this.events.slice();
+    const fnSorting = {
+      'sorting-event': () => {
+        return this.events;
+      },
+      'sorting-time': () => {
+        return arrResult.sort((a, b) => this._duration(a) - this._duration(b)).reverse();
+      },
+      'sorting-price': () => {
+        return arrResult.sort((a, b) => a.price - b.price).reverse();
+      }
+    };
+    return fnSorting[sortingName]();
+  }
+
   updatePoint(pointToUpdate, newPoint) {
     const index = this._events.findIndex((it) => it === pointToUpdate);
     this._state.events[index] = Object.assign({}, pointToUpdate, newPoint);
     return this._state;
   }
+
+  // resetPoint(pointToUpdate, newPoint) {
+  //  const index = this._events.findIndex((it) => it === pointToUpdate);
+  //  this._state.events[index] = Object.assign({}, pointToUpdate, newPoint);
+  //  return this._state;
+  // }
 
   deletePoint(pointToDelete) {
     const index = this._events.findIndex((it) => it === pointToDelete);
