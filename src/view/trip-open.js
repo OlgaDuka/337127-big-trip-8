@@ -286,7 +286,7 @@ export default class TripOpen extends Component {
   }
 
   _getDay() {
-    return moment(this._timeStart).format(`MMMM YY`);
+    return moment(this._timeStart).format(`MMM YY`);
   }
 
   get template() {
