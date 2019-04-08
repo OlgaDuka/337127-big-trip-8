@@ -1,5 +1,9 @@
 import Adapter from './adapter';
 
+const objectToArray = (object) => {
+  return Object.keys(object).map((id) => object[id]);
+};
+
 export default class Provider {
   constructor({loader, store, generateId}) {
     this._loader = loader;
@@ -17,7 +21,7 @@ export default class Provider {
         });
     } else {
       const rawPointsMap = this._store.getAll();
-      const rawPoints = Array.from(rawPointsMap);
+      const rawPoints = objectToArray(rawPointsMap);
       const points = Adapter.parsePoints(rawPoints);
 
       return Promise.resolve(points);
@@ -77,7 +81,7 @@ export default class Provider {
   }
 
   syncPoints() {
-    return this._loader.syncPoints({points: Array.from(this._store.getAll())});
+    return this._loader.syncPoints({points: objectToArray(this._store.getAll())});
   }
 
   _isOnline() {
