@@ -51,7 +51,7 @@ export default class Provider {
       return this._loader.updatePoint({id, data})
         .then(this._sendStorage);
     } else {
-      const point = Adapter.parsePoint(point);
+      const point = Adapter.parsePoint(data);
       this._needSync = true;
       this._sendStorage(point);
       return Promise.resolve(point);
