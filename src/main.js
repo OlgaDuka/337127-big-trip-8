@@ -16,8 +16,14 @@ const POINTS_STORE_KEY = `points-store-key`;
 const model = new Model();
 const stat = new Stat();
 const loaderData = new LoaderData();
-const store = new Store({key: POINTS_STORE_KEY, storage: localStorage});
-const provider = new Provider({loaderData, store, generateId: () => String(Date.now())});
+const store = new Store({
+  key: POINTS_STORE_KEY,
+  storage: localStorage
+});
+const provider = new Provider({
+  loaderData,
+  store,
+  generateId: () => String(Date.now())});
 const cost = new TotalCost();
 
 const boardTotalCost = document.querySelector(`.trip`);
@@ -234,11 +240,8 @@ const initialApp = () => {
 const makeRequestGetData = async () => {
   boardDays.textContent = `Loading route...`;
   try {
-    // [model.offersData, model.destinationsData, model.eventsData] =
-    // await Promise.all([provider.getOffers(), provider.getDestinations(), provider.getPoints()]);
-    model.offersData = await provider.getOffers();
-    model.destinationsData = await provider.getDestinations();
-    model.eventsData = await provider.getPoints();
+    [model.offersData, model.destinationsData, model.eventsData] =
+    await Promise.all([provider.getOffers(), provider.getDestinations(), provider.getPoints()]);
     initialApp();
   } catch (err) {
     boardDays.textContent = `Something went wrong while loading your route info. Check your connection or try again later`;
