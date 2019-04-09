@@ -69,6 +69,16 @@ export default class LoaderData {
     return this._load({url: `points/${id}`, method: this._method.DELETE});
   }
 
+  syncPoints({points}) {
+    return this._load({
+      url: `points/sync`,
+      method: this._method.POST,
+      body: JSON.stringify(points),
+      headers: new Headers({'Content-Type': `application/json`})
+    })
+      .then(toJSON);
+  }
+
   _load({url, method = this._method.GET, body = null, headers = new Headers()}) {
     headers.append(`Authorization`, this._authorization);
 

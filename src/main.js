@@ -1,6 +1,8 @@
 import moment from 'moment';
 import Model from './model/model';
 import LoaderData from './model/loader-data';
+import Store from './model/store';
+import Provider from './model/provider';
 import TotalCost from './view/total-cost';
 import TripDay from './view/trip-day';
 import Trip from './view/trip';
@@ -10,21 +12,49 @@ import Sorting from './view/sorting';
 import Stat from './view/stat';
 import Adapter from './model/adapter';
 
+const POINTS_STORE_KEY = `points-store-key`;
 const model = new Model();
 const stat = new Stat();
 const loaderData = new LoaderData();
+const store = new Store({key: POINTS_STORE_KEY, storage: localStorage});
+const provider = new Provider({loaderData, store, generateId: () => String(Date.now())});
 const cost = new TotalCost();
 
 const boardTotalCost = document.querySelector(`.trip`);
 const controls = document.querySelector(`.trip-controls`);
-export const formFilter = controls.querySelector(`.trip-filter`);
+const formFilter = controls.querySelector(`.trip-filter`);
 const buttonTable = controls.querySelector(`a[href*=table]`);
 const buttonStat = controls.querySelector(`a[href*=stats]`);
 const buttonNewEvent = controls.querySelector(`.trip-controls__new-event`);
 const boardTable = document.querySelector(`#table`);
 const boardStat = document.querySelector(`#stats`);
-export const boardDays = boardTable.querySelector(`.trip-points`);
-export const formSorting = boardTable.querySelector(`.trip-sorting`);
+const boardDays = boardTable.querySelector(`.trip-points`);
+const formSorting = boardTable.querySelector(`.trip-sorting`);
+
+const toggleToTable = () => {
+  buttonTable.classList.add(`view-switch__item--active`);
+  buttonStat.classList.remove(`view-switch__item--active`);
+  boardStat.classList.add(`visually-hidden`);
+  boardTable.classList.remove(`visually-hidden`);
+};
+
+const toggleToStat = () => {
+  buttonStat.classList.add(`view-switch__item--active`);
+  buttonTable.classList.remove(`view-switch__item--active`);
+  boardStat.classList.remove(`visually-hidden`);
+  boardTable.classList.add(`visually-hidden`);
+};
+
+const createArrDays = (arr) => {
+  const arrResult = [];
+  for (let obPoint of arr) {
+    const day = moment(obPoint.timeStart).format(`DD MMMM YY`);
+    if (arrResult.indexOf(day) === -1) {
+      arrResult.push(day);
+    }
+  }
+  return arrResult;
+};
 
 const renderFilters = (arrFilters) => {
   return arrFilters.map((element) => {
@@ -51,72 +81,6 @@ const renderTotalCost = (arr) => {
   boardTotalCost.appendChild(cost.render());
 };
 
-const renderEvents = (arr, dist) => {
-  dist.innerHTML = ``;
-  for (let obPoint of arr) {
-    const point = new Trip(obPoint);
-    let pointOpen = new TripOpen(model.offers, model.destinations, obPoint);
-    dist.appendChild(point.render());
-    point.onClick = () => {
-      pointOpen.render();
-      dist.replaceChild(pointOpen.element, point.element);
-      point.unrender();
-    };
-    pointOpen.onSubmit = (newObject) => {
-      pointOpen.blockToSave();
-      loaderData.updatePoint({id: obPoint.id, data: Adapter.toRAW(newObject)})
-        .then((newPoint) => {
-          pointOpen.element.style.border = ``;
-          point.update(newPoint);
-          point.render();
-          dist.replaceChild(point.element, pointOpen.element);
-          pointOpen.unrender();
-          model.updatePoint(obPoint, newPoint);
-          cost.unrender();
-          renderTotalCost(model.events);
-        })
-        .catch(() => {
-          pointOpen.element.style.border = `2px solid #FF0000`;
-          pointOpen.shake();
-          pointOpen.unblockToSave();
-        });
-    };
-    pointOpen.onDelete = (({id}) => {
-      pointOpen.blockToDelete();
-      loaderData.deletePoint({id})
-        .then(() => loaderData.getPoints())
-        .then((newArrPoints) => {
-          pointOpen.unrender();
-          renderDays(newArrPoints);
-          model.eventsData = newArrPoints;
-          cost.unrender();
-          renderTotalCost(model.events);
-        })
-        .catch(() => {
-          pointOpen.element.style.border = `2px solid #FF0000`;
-          pointOpen.shake();
-          pointOpen.unblockToDelete();
-        });
-    });
-    pointOpen.onKeyEsc = () => {
-      point.render();
-      dist.replaceChild(point.element, pointOpen.element);
-      pointOpen.unrender();
-    };
-  }
-};
-
-const createArrDays = (arr) => {
-  const arrResult = [];
-  for (let obPoint of arr) {
-    const day = moment(obPoint.timeStart).format(`DD MMMM YY`);
-    if (arrResult.indexOf(day) === -1) {
-      arrResult.push(day);
-    }
-  }
-  return arrResult;
-};
-
 const renderDays = (arr) => {
   const arrDays = createArrDays(arr);
   for (let day of arrDays) {
@@ -129,56 +93,71 @@ const renderDays = (arr) => {
   }
 };
 
-formFilter.addEventListener(`click`, ({target}) => {
-  if (target.className === `trip-filter__item` && !target.previousElementSibling.disabled) {
-    boardDays.innerHTML = ``;
-    renderDays(model.getFilterEvents(target.previousElementSibling.id));
+const makeRequestUpdateData = async (newDataPoint, obPoint, point, pointOpen, container) => {
+  try {
+    pointOpen.blockToSave();
+    const newPoint = await provider.updatePoint({id: obPoint.id, data: Adapter.toRAW(newDataPoint)});
+    pointOpen.element.style.border = ``;
+    point.update(newPoint);
+    point.render();
+    container.replaceChild(point.element, pointOpen.element);
+    pointOpen.unrender();
+    model.updatePoint(obPoint, newPoint);
+    cost.unrender();
+    renderTotalCost(model.events);
+  } catch (err) {
+    pointOpen.element.style.border = `2px solid #FF0000`;
+    pointOpen.shake();
+    pointOpen.unblockToSave();
   }
-});
-
-formSorting.addEventListener(`click`, ({target}) => {
-  const className = target.className;
-  const numPos = className.indexOf(` `);
-  if (className.substring(0, numPos) === `trip-sorting__item` && !target.previousElementSibling.disabled) {
-    boardDays.innerHTML = ``;
-    renderDays(model.getSortingEvents(target.previousElementSibling.id));
-  }
-});
-
-const toggleToTable = () => {
-  buttonTable.classList.add(`view-switch__item--active`);
-  buttonStat.classList.remove(`view-switch__item--active`);
-  boardStat.classList.add(`visually-hidden`);
-  boardTable.classList.remove(`visually-hidden`);
 };
 
-const toggleToStat = () => {
-  buttonStat.classList.add(`view-switch__item--active`);
-  buttonTable.classList.remove(`view-switch__item--active`);
-  boardStat.classList.remove(`visually-hidden`);
-  boardTable.classList.add(`visually-hidden`);
+const makeRequestDeleteData = async (id, pointOpen) => {
+  try {
+    pointOpen.blockToDelete();
+    await provider.deletePoint({id});
+    model.eventsData = await provider.getPoints();
+    pointOpen.unrender();
+    renderDays(model.events);
+    cost.unrender();
+    renderTotalCost(model.events);
+  } catch (err) {
+    pointOpen.element.style.border = `2px solid #FF0000`;
+    pointOpen.shake();
+    pointOpen.unblockToDelete();
+  }
 };
 
-buttonTable.addEventListener(`click`, (evt) => {
-  evt.preventDefault();
-  if (!evt.target.classList.contains(`view-switch__item--active`)) {
-    toggleToTable();
+const renderEvents = (arr, dist) => {
+  dist.innerHTML = ``;
+  for (let obPoint of arr) {
+    const point = new Trip(obPoint);
+    let pointOpen = new TripOpen(model.offers, model.destinations, obPoint);
+    dist.appendChild(point.render());
+    point.onClick = () => {
+      pointOpen.render();
+      dist.replaceChild(pointOpen.element, point.element);
+      point.unrender();
+    };
+    pointOpen.onSubmit = (newObject) => {
+      makeRequestUpdateData(newObject, obPoint, point, pointOpen, dist);
+    };
+    pointOpen.onDelete = (({id}) => {
+      makeRequestDeleteData(id, pointOpen);
+    });
+    pointOpen.onKeyEsc = () => {
+      point.render();
+      dist.replaceChild(point.element, pointOpen.element);
+      pointOpen.unrender();
+    };
   }
-});
-
-buttonStat.addEventListener(`click`, (evt) => {
-  evt.preventDefault();
-  if (!evt.target.classList.contains(`view-switch__item--active`)) {
-    toggleToStat();
-  }
-  stat.update(model);
-});
+};
 
 const makeRequestInsert = async (newDataPoint, newRenderPoint) => {
   try {
     newRenderPoint.blockToSave();
-    await loaderData.createPoint({point: Adapter.toRAW(newDataPoint)});
-    model.eventsData = await loaderData.getPoints();
+    await provider.createPoint({point: Adapter.toRAW(newDataPoint)});
+    model.eventsData = await provider.getPoints();
     newRenderPoint.unrender();
     boardDays.innerHTML = ``;
     renderDays(model.events);
@@ -203,6 +182,45 @@ buttonNewEvent.addEventListener(`click`, () => {
   };
 });
 
+buttonTable.addEventListener(`click`, (evt) => {
+  evt.preventDefault();
+  if (!evt.target.classList.contains(`view-switch__item--active`)) {
+    toggleToTable();
+  }
+});
+
+buttonStat.addEventListener(`click`, (evt) => {
+  evt.preventDefault();
+  if (!evt.target.classList.contains(`view-switch__item--active`)) {
+    toggleToStat();
+  }
+  stat.update(model);
+});
+
+formFilter.addEventListener(`click`, ({target}) => {
+  if (target.className === `trip-filter__item` && !target.previousElementSibling.disabled) {
+    boardDays.innerHTML = ``;
+    renderDays(model.getFilterEvents(target.previousElementSibling.id));
+  }
+});
+
+formSorting.addEventListener(`click`, ({target}) => {
+  const className = target.className;
+  const numPos = className.indexOf(` `);
+  if (className.substring(0, numPos) === `trip-sorting__item` && !target.previousElementSibling.disabled) {
+    boardDays.innerHTML = ``;
+    renderDays(model.getSortingEvents(target.previousElementSibling.id));
+  }
+});
+
+window.addEventListener(`offline`, () => {
+  document.title = `${document.title}[OFFLINE]`;
+});
+window.addEventListener(`online`, () => {
+  document.title = document.title.split(`[OFFLINE]`)[0];
+  provider.syncPoints();
+});
+
 const initialApp = () => {
   boardDays.textContent = ``;
   stat.config = model;
@@ -213,15 +231,18 @@ const initialApp = () => {
   stat.render();
 };
 
-const makeRequest = async () => {
+const makeRequestGetData = async () => {
   boardDays.textContent = `Loading route...`;
   try {
-    [model.offersData, model.destinationsData, model.eventsData] =
-    await Promise.all([loaderData.getOffers(), loaderData.getDestinations(), loaderData.getPoints()]);
-    await initialApp();
+    // [model.offersData, model.destinationsData, model.eventsData] =
+    // await Promise.all([provider.getOffers(), provider.getDestinations(), provider.getPoints()]);
+    model.offersData = await provider.getOffers();
+    model.destinationsData = await provider.getDestinations();
+    model.eventsData = await provider.getPoints();
+    initialApp();
   } catch (err) {
     boardDays.textContent = `Something went wrong while loading your route info. Check your connection or try again later`;
   }
 };
 
-makeRequest();
+makeRequestGetData();
