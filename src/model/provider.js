@@ -1,29 +1,26 @@
 import Adapter from './adapter';
 
-const objectToArray = (object) => {
-  return Object.keys(object).map((id) => object[id]);
-};
-
 export default class Provider {
-  constructor({loader, store, generateId}) {
-    this._loader = loader;
+  constructor({loaderData, store, generateId}) {
+    this._loader = loaderData;
     this._store = store;
     this._generateId = generateId;
     this._needSync = false;
+
+    this._sendStorage = this._sendStorage.bind(this);
   }
 
   getPoints() {
-    if (this._isOnline()) {
+    if (Provider.isOnline()) {
       return this._loader.getPoints()
-        .then((events) => {
-          events.map((it) => this._store.setItem({key: it.id, item: it.toRAW()}));
-          return events;
+        .then((points) => {
+          points.forEach(this._sendStorage);
+          return points;
         });
     } else {
       const rawPointsMap = this._store.getAll();
-      const rawPoints = objectToArray(rawPointsMap);
+      const rawPoints = Provider.objectToArray(rawPointsMap);
       const points = Adapter.parsePoints(rawPoints);
-
       return Promise.resolve(points);
     }
   }
@@ -37,54 +34,66 @@ export default class Provider {
   }
 
   createPoint({point}) {
-    if (this._isOnline()) {
+    if (Provider.isOnline()) {
       return this._loader.createPoint({point})
-        .then(() => {
-          this._store.setItem({key: point.id, item: point.toRAW()});
-          return point;
-        });
+        .then(this._sendStorage);
     } else {
       point.id = this._generateId();
+      point = Adapter.parsePoint(point);
       this._needSync = true;
-
-      this._store.setItem({key: point.id, item: point});
-      return Promise.resolve(Adapter.parsePoint(point));
+      this._sendStorage(point);
+      return Promise.resolve(point);
     }
   }
 
   updatePoint({id, data}) {
-    if (this._isOnline()) {
+    if (Provider.isOnline()) {
       return this._loader.updatePoint({id, data})
-        .then((point) => {
-          this._store.setItem({key: point.id, item: point.toRAW()});
-          return point;
-        });
+        .then(this._sendStorage);
     } else {
-      const point = data;
+      const point = Adapter.parsePoint(point);
       this._needSync = true;
-      this._store.setItem({key: point.id, item: point});
-      return Promise.resolve(Adapter.parsePoint(point));
+      this._sendStorage(point);
+      return Promise.resolve(point);
     }
   }
 
   deletePoint({id}) {
-    if (this._isOnline()) {
+    if (Provider.isOnline()) {
       return this._loader.deletePoint({id})
         .then(() => {
-          this._store.removeItem({key: id});
+          this._store.removeItem({id});
         });
     } else {
       this._needSync = true;
-      this._store.removeItem({key: id});
-      return Promise.resolve(true);
+      this._store.removeItem({id});
+      return Promise.resolve(id);
     }
   }
 
-  syncPoints() {
-    return this._loader.syncPoints({points: objectToArray(this._store.getAll())});
+  _sendStorage(point) {
+    this._store.setItem({
+      id: point.id,
+      item: Adapter.toRAW(point)
+    });
+    return point;
   }
 
-  _isOnline() {
+  syncPoints() {
+    return this._loader.syncPoints({
+      points: Provider.objectToArray(this._store.getAll())
+    })
+    .then(() => {
+      this._needSync = false;
+    });
+  }
+
+  static isOnline() {
     return window.navigator.onLine;
   }
+
+  static objectToArray(object) {
+    return Object.keys(object).map((id) => object[id]);
+  }
+
 }

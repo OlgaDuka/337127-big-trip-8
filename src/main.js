@@ -12,10 +12,11 @@ import Sorting from './view/sorting';
 import Stat from './view/stat';
 import Adapter from './model/adapter';
 
+const POINTS_STORE_KEY = `points-store-key`;
 const model = new Model();
 const stat = new Stat();
 const loaderData = new LoaderData();
-const store = new Store();
+const store = new Store({key: POINTS_STORE_KEY, storage: localStorage});
 const provider = new Provider({loaderData, store, generateId: () => String(Date.now())});
 const cost = new TotalCost();
 
@@ -29,6 +30,31 @@ const boardTable = document.querySelector(`#table`);
 const boardStat = document.querySelector(`#stats`);
 const boardDays = boardTable.querySelector(`.trip-points`);
 const formSorting = boardTable.querySelector(`.trip-sorting`);
+
+const toggleToTable = () => {
+  buttonTable.classList.add(`view-switch__item--active`);
+  buttonStat.classList.remove(`view-switch__item--active`);
+  boardStat.classList.add(`visually-hidden`);
+  boardTable.classList.remove(`visually-hidden`);
+};
+
+const toggleToStat = () => {
+  buttonStat.classList.add(`view-switch__item--active`);
+  buttonTable.classList.remove(`view-switch__item--active`);
+  boardStat.classList.remove(`visually-hidden`);
+  boardTable.classList.add(`visually-hidden`);
+};
+
+const createArrDays = (arr) => {
+  const arrResult = [];
+  for (let obPoint of arr) {
+    const day = moment(obPoint.timeStart).format(`DD MMMM YY`);
+    if (arrResult.indexOf(day) === -1) {
+      arrResult.push(day);
+    }
+  }
+  return arrResult;
+};
 
 const renderFilters = (arrFilters) => {
   return arrFilters.map((element) => {
@@ -53,17 +79,6 @@ const renderSorting = (arrSorting) => {
 const renderTotalCost = (arr) => {
   cost.getCostTrim(arr);
   boardTotalCost.appendChild(cost.render());
-};
-
-const createArrDays = (arr) => {
-  const arrResult = [];
-  for (let obPoint of arr) {
-    const day = moment(obPoint.timeStart).format(`DD MMMM YY`);
-    if (arrResult.indexOf(day) === -1) {
-      arrResult.push(day);
-    }
-  }
-  return arrResult;
 };
 
 const renderDays = (arr) => {
@@ -138,27 +153,6 @@ const renderEvents = (arr, dist) => {
   }
 };
 
-const initialApp = () => {
-  boardDays.textContent = ``;
-  stat.config = model;
-  renderTotalCost(model.events);
-  renderFilters(model.filters);
-  renderSorting(model.sorting);
-  renderDays(model.events);
-  stat.render();
-};
-
-const makeRequestGetData = async () => {
-  boardDays.textContent = `Loading route...`;
-  try {
-    [model.offersData, model.destinationsData, model.eventsData] =
-    await Promise.all([loaderData.getOffers(), loaderData.getDestinations(), provider.getPoints()]);
-    await initialApp();
-  } catch (err) {
-    boardDays.textContent = `Something went wrong while loading your route info. Check your connection or try again later`;
-  }
-};
-
 const makeRequestInsert = async (newDataPoint, newRenderPoint) => {
   try {
     newRenderPoint.blockToSave();
@@ -187,20 +181,6 @@ buttonNewEvent.addEventListener(`click`, () => {
     newPoint.unrender();
   };
 });
-
-const toggleToTable = () => {
-  buttonTable.classList.add(`view-switch__item--active`);
-  buttonStat.classList.remove(`view-switch__item--active`);
-  boardStat.classList.add(`visually-hidden`);
-  boardTable.classList.remove(`visually-hidden`);
-};
-
-const toggleToStat = () => {
-  buttonStat.classList.add(`view-switch__item--active`);
-  buttonTable.classList.remove(`view-switch__item--active`);
-  boardStat.classList.remove(`visually-hidden`);
-  boardTable.classList.add(`visually-hidden`);
-};
 
 buttonTable.addEventListener(`click`, (evt) => {
   evt.preventDefault();
@@ -240,5 +220,29 @@ window.addEventListener(`online`, () => {
   document.title = document.title.split(`[OFFLINE]`)[0];
   provider.syncTasks();
 });
+
+const initialApp = () => {
+  boardDays.textContent = ``;
+  stat.config = model;
+  renderTotalCost(model.events);
+  renderFilters(model.filters);
+  renderSorting(model.sorting);
+  renderDays(model.events);
+  stat.render();
+};
+
+const makeRequestGetData = async () => {
+  boardDays.textContent = `Loading route...`;
+  try {
+    // [model.offersData, model.destinationsData, model.eventsData] =
+    // await Promise.all([provider.getOffers(), provider.getDestinations(), provider.getPoints()]);
+    model.offersData = await provider.getOffers();
+    model.destinationsData = await provider.getDestinations();
+    model.eventsData = await provider.getPoints();
+    initialApp();
+  } catch (err) {
+    boardDays.textContent = `Something went wrong while loading your route info. Check your connection or try again later`;
+  }
+};
 
 makeRequestGetData();
