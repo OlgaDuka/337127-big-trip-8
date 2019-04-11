@@ -94,7 +94,6 @@ export default class TripOpen extends Component {
     this._type = this._state.type;
     this._destination = this._state.destination;
     this._price = this._state.price;
-    this._day = this._state.day;
     this._timeStart = this._state.timeStart;
     this._timeStop = this._state.timeStop;
     this._offers = this._state.offers;

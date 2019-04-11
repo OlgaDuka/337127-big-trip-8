@@ -6,12 +6,8 @@ export default class TotalCost extends Component {
     this._cost = 0;
   }
 
-  _getPricePoint(point) {
-    return point.offers.filter((offer) => offer.accepted === true).reduce((acc, offer) => acc + offer.price, 0);
-  }
-
   getCostTrim(data) {
-    this._cost = data.reduce((acc, point) => acc + point.price + this._getPricePoint(point), 0);
+    this._cost = data.reduce((acc, point) => acc + point.price + TotalCost.getPricePoint(point), 0);
     return this._cost;
   }
 
@@ -19,5 +15,9 @@ export default class TotalCost extends Component {
     return `<p class="trip__total">Total:
               <span class="trip__total-cost">&euro;&nbsp;${this._cost}</span>
             </p>`;
+  }
+
+  static getPricePoint(point) {
+    return point.offers.filter((offer) => offer.accepted === true).reduce((acc, offer) => acc + offer.price, 0);
   }
 }
