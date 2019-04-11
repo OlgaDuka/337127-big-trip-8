@@ -19,8 +19,8 @@ export default class LoaderData {
     };
   }
 
-  checkStatus(response) {
-    if (response.status >= 200 && response.status < 300) {
+  static checkStatus(response) {
+    if (response.ok) {
       return response;
     } else {
       throw new Error(`${response.status}: ${response.statusText}`);

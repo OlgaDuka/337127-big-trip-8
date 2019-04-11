@@ -1,3 +1,4 @@
+import {STORE_KEYS} from './utils/index.js';
 import moment from 'moment';
 import Model from './model/model';
 import LoaderData from './model/loader-data';
@@ -12,12 +13,15 @@ import Sorting from './view/sorting';
 import Stat from './view/stat';
 import Adapter from './model/adapter';
 
-const POINTS_STORE_KEY = `points-store-key`;
 const model = new Model();
 const stat = new Stat();
 const loaderData = new LoaderData();
-const store = new Store({key: POINTS_STORE_KEY, storage: localStorage});
+const store = new Store({key: STORE_KEYS.points, storage: localStorage});
 const provider = new Provider({loaderData, store, generateId: () => String(Date.now())});
+const storeOffers = new Store({key: STORE_KEYS.offers, storage: localStorage});
+const providerOffers = new Provider({loaderData, store: storeOffers, generateId: () => String(Date.now())});
+const storeDestinations = new Store({key: STORE_KEYS.destinations, storage: localStorage});
+const providerDestinations = new Provider({loaderData, store: storeDestinations, generateId: () => String(Date.now())});
 const cost = new TotalCost();
 
 const boardTotalCost = document.querySelector(`.trip`);
@@ -46,9 +50,10 @@ const toggleToStat = () => {
 };
 
 const createArrDays = (arr) => {
+  let day;
   const arrResult = [];
   for (let obPoint of arr) {
-    const day = moment(obPoint.timeStart).format(`DD MMMM YY`);
+    day = moment(obPoint.timeStart).format(`DD MMM YY`);
     if (arrResult.indexOf(day) === -1) {
       arrResult.push(day);
     }
@@ -85,7 +90,7 @@ const renderDays = (arr) => {
   const arrDays = createArrDays(arr);
   for (let day of arrDays) {
     const obDay = new TripDay(day);
-    const arrResult = arr.filter((it) => moment(it.timeStart).format(`DD MMMM YY`) === day);
+    const arrResult = arr.filter((it) => moment(it.timeStart).format(`DD MMM YY`) === day);
     const boardDay = obDay.render();
     boardDays.appendChild(boardDay);
     const distEvents = boardDay.querySelector(`.trip-day__items`);
@@ -231,14 +236,11 @@ const initialApp = () => {
   stat.render();
 };
 
-const makeRequestGetData = async () => {
+let makeRequestGetData = async () => {
   boardDays.textContent = `Loading route...`;
   try {
-    // [model.offersData, model.destinationsData, model.eventsData] =
-    // await Promise.all([provider.getOffers(), provider.getDestinations(), provider.getPoints()]);
-    model.offersData = await provider.getOffers();
-    model.destinationsData = await provider.getDestinations();
-    model.eventsData = await provider.getPoints();
+    [model.offersData, model.destinationsData, model.eventsData] =
+    await Promise.all([providerOffers.getOffers(), providerDestinations.getDestinations(), provider.getPoints()]);
     initialApp();
   } catch (err) {
     boardDays.textContent = `Something went wrong while loading your route info. Check your connection or try again later`;
