@@ -25,12 +25,28 @@ export default class Provider {
     }
   }
 
-  getDestinations() {
-    return this._loader.getDestinations();
+  getOffers() {
+    if (Provider.isOnline()) {
+      return this._loader.getOffers()
+        .then((offers) => {
+          this._store.setRefs(offers);
+          return offers;
+        });
+    } else {
+      return Promise.resolve(this._store.getAll());
+    }
   }
 
-  getOffers() {
-    return this._loader.getOffers();
+  getDestinations() {
+    if (Provider.isOnline()) {
+      return this._loader.getDestinations()
+        .then((destinations) => {
+          this._store.setRefs(destinations);
+          return destinations;
+        });
+    } else {
+      return Promise.resolve(this._store.getAll());
+    }
   }
 
   createPoint({point}) {

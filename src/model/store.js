@@ -10,6 +10,10 @@ export default class Store {
     this._storage.setItem(this._storeKey, JSON.stringify(items));
   }
 
+  setRefs(refs) {
+    this._storage.setItem(this._storeKey, JSON.stringify(refs));
+  }
+
   getItem({id}) {
     const items = this.getAll();
     return items[id];
