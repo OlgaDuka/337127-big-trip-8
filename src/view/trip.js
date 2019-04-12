@@ -21,10 +21,8 @@ export default class Trip extends Component {
     };
 
     this._onClick = null;
-    this._onSubmit = null;
 
     this._onPointClick = this._onPointClick.bind(this);
-    this._onOfferClick = this._onOfferClick.bind(this);
   }
 
   _onPointClick() {
@@ -33,14 +31,6 @@ export default class Trip extends Component {
 
   set onClick(fn) {
     this._onClick = fn;
-  }
-
-  _onOfferClick(evt) {
-    evt.preventDefault();
-    if (typeof this._onSubmit === `function`) {
-      this._onSubmit(this._state);
-    }
-    this.update();
   }
 
   set onSubmit(fn) {
@@ -53,14 +43,10 @@ export default class Trip extends Component {
 
   bind() {
     this._element.addEventListener(`click`, this._onPointClick);
-    this._element.querySelector(`.trip-point__offer`)
-      .addEventListener(`click`, this._onOfferClick);
   }
 
   unbind() {
     this._element.removeEventListener(`click`, this._onPointClick);
-    this._element.querySelector(`.trip-point__offer`)
-      .removeEventListener(`click`, this._onOfferClick);
   }
 
   _getOffer() {

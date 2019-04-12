@@ -117,21 +117,6 @@ const makeRequestUpdateData = async (newDataPoint, obPoint, point, pointOpen, co
   }
 };
 
-const makeRequestUpdateCost = async (newDataPoint, obPoint, point) => {
-  try {
-    point.blockToSave();
-    const newPoint = await provider.updatePoint({id: obPoint.id, data: Adapter.toRAW(newDataPoint)});
-    point.update(newPoint);
-    point.render();
-    model.updatePoint(obPoint, newPoint);
-    cost.unrender();
-    renderTotalCost(model.events);
-  } catch (err) {
-    point.shake();
-    point.unblockToSave();
-  }
-};
-
 const makeRequestDeleteData = async (id, pointOpen) => {
   try {
     pointOpen.blockToDelete();
@@ -158,9 +143,6 @@ const renderEvents = (arr, dist) => {
       pointOpen.render();
       dist.replaceChild(pointOpen.element, point.element);
       point.unrender();
-    };
-    point.onSubmit = (newObject) => {
-      makeRequestUpdateCost(newObject, obPoint, point);
     };
     pointOpen.onSubmit = (newObject) => {
       makeRequestUpdateData(newObject, obPoint, point, pointOpen, dist);
