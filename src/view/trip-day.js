@@ -6,14 +6,6 @@ export default class TripDay extends Component {
     this._day = data;
   }
 
-  update(data) {
-    this._day = data;
-  }
-
-  _getDay() {
-    return this._day.substring(0, 2)[0] === `0` ? this._day.substring(1, 2) : this._day.substring(0, 2);
-  }
-
   get template() {
     return `<section class="trip-day">
               <article class="trip-day__info">
@@ -25,5 +17,13 @@ export default class TripDay extends Component {
 
               </div>
             </section>`.trim();
+  }
+
+  _getDay() {
+    return this._day.substring(0, 2)[0] === `0` ? this._day.substring(1, 2) : this._day.substring(0, 2);
+  }
+
+  update(data) {
+    this._day = data;
   }
 }

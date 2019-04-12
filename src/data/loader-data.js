@@ -3,6 +3,13 @@ import Adapter from './adapter';
 const AUTHORIZATION = `Basic dXNfckBgYXuzd27yZAo=${Math.random()}`;
 const END_POINT = `https://es8-demo-srv.appspot.com/big-trip`;
 
+const METHOD = {
+  get: `GET`,
+  post: `POST`,
+  put: `PUT`,
+  delete: `DELETE`
+};
+
 const toJSON = (response) => {
   return response.json();
 };
@@ -11,20 +18,6 @@ export default class LoaderData {
   constructor() {
     this._endPoint = END_POINT;
     this._authorization = AUTHORIZATION;
-    this._method = {
-      GET: `GET`,
-      POST: `POST`,
-      PUT: `PUT`,
-      DELETE: `DELETE`
-    };
-  }
-
-  static checkStatus(response) {
-    if (response.ok) {
-      return response;
-    } else {
-      throw new Error(`${response.status}: ${response.statusText}`);
-    }
   }
 
   getPoints() {
@@ -46,7 +39,7 @@ export default class LoaderData {
   createPoint({point}) {
     return this._load({
       url: `points`,
-      method: this._method.POST,
+      method: METHOD.post,
       body: JSON.stringify(point),
       headers: new Headers({'Content-Type': `application/json`})
     })
@@ -57,7 +50,7 @@ export default class LoaderData {
   updatePoint({id, data}) {
     return this._load({
       url: `points/${id}`,
-      method: this._method.PUT,
+      method: METHOD.put,
       body: JSON.stringify(data),
       headers: new Headers({'Content-Type': `application/json`})
     })
@@ -66,20 +59,20 @@ export default class LoaderData {
   }
 
   deletePoint({id}) {
-    return this._load({url: `points/${id}`, method: this._method.DELETE});
+    return this._load({url: `points/${id}`, method: METHOD.delete});
   }
 
   syncPoints({points}) {
     return this._load({
       url: `points/sync`,
-      method: this._method.POST,
+      method: METHOD.post,
       body: JSON.stringify(points),
       headers: new Headers({'Content-Type': `application/json`})
     })
       .then(toJSON);
   }
 
-  _load({url, method = this._method.GET, body = null, headers = new Headers()}) {
+  _load({url, method = METHOD.get, body = null, headers = new Headers()}) {
     headers.append(`Authorization`, this._authorization);
 
     return fetch(`${this._endPoint}/${url}`, {method, body, headers})
@@ -88,5 +81,13 @@ export default class LoaderData {
         window.console.error(`fetch error: ${err}`);
         throw err;
       });
+  }
+
+  static checkStatus(response) {
+    if (response.ok) {
+      return response;
+    } else {
+      throw new Error(`${response.status}: ${response.statusText}`);
+    }
   }
 }

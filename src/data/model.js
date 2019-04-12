@@ -40,7 +40,7 @@ export default class Model {
   }
 
   getFilterEvents(filterName) {
-    const fnFilter = {
+    const FnFilter = {
       'filter-everything': () => {
         return this.events;
       },
@@ -51,27 +51,23 @@ export default class Model {
         return this.events.filter((it) => it.timeStop < Date.now());
       }
     };
-    return fnFilter[filterName]();
-  }
-
-  _duration(obEvent) {
-    return moment.duration(moment(obEvent.timeStop).diff(moment(obEvent.timeStart)));
+    return FnFilter[filterName]();
   }
 
   getSortingEvents(sortingName) {
     let arrResult = this.events.slice();
-    const fnSorting = {
+    const FnSorting = {
       'sorting-event': () => {
         return this.events;
       },
       'sorting-time': () => {
-        return arrResult.sort((a, b) => this._duration(a) - this._duration(b)).reverse();
+        return arrResult.sort((a, b) => this.duration(a) - this.duration(b)).reverse();
       },
       'sorting-price': () => {
         return arrResult.sort((a, b) => a.price - b.price).reverse();
       }
     };
-    return fnSorting[sortingName]();
+    return FnSorting[sortingName]();
   }
 
   updatePoint(pointToUpdate, newPoint) {
@@ -104,5 +100,9 @@ export default class Model {
 
   update() {
     this._events = this._state.events;
+  }
+
+  static duration(obEvent) {
+    return moment.duration(moment(obEvent.timeStop).diff(moment(obEvent.timeStart)));
   }
 }
