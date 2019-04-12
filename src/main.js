@@ -104,11 +104,10 @@ const makeRequestUpdateData = async (newDataPoint, obPoint, point, pointOpen, co
     const newPoint = await provider.updatePoint({id: obPoint.id, data: Adapter.toRAW(newDataPoint)});
     model.updatePoint(obPoint, newPoint);
     pointOpen.element.style.border = ``;
-    // point.update(newPoint);
+    point.update(newPoint);
     point.render();
     container.replaceChild(point.element, pointOpen.element);
     pointOpen.unRender();
-    updateTotalCost();
   } catch (err) {
     onErrorToRespond(pointOpen);
   }
@@ -121,7 +120,6 @@ const makeRequestDeleteData = async (id, pointOpen) => {
     model.eventsData = await provider.getPoints();
     pointOpen.unRender();
     renderDays(model.events);
-    updateTotalCost();
   } catch (err) {
     onErrorToRespond(pointOpen);
   }
@@ -140,9 +138,11 @@ const renderEvents = (arr, dist) => {
     };
     pointOpen.onSubmit = (newObject) => {
       makeRequestUpdateData(newObject, obPoint, point, pointOpen, dist);
+      updateTotalCost();
     };
     pointOpen.onDelete = (({id}) => {
       makeRequestDeleteData(id, pointOpen);
+      updateTotalCost();
     });
     pointOpen.onKeyEsc = () => {
       point.render();
@@ -160,7 +160,6 @@ const makeRequestInsert = async (newDataPoint, newRenderPoint) => {
     newRenderPoint.unRender();
     boardDays.innerHTML = ``;
     renderDays(model.events);
-    updateTotalCost();
   } catch (err) {
     onErrorToRespond(newRenderPoint);
   }
@@ -172,6 +171,7 @@ buttonNewEvent.addEventListener(`click`, () => {
   boardDays.insertBefore(newPoint.render(), boardDays.firstChild);
   newPoint.onSubmit = (newObject) => {
     makeRequestInsert(newObject, newPoint);
+    updateTotalCost();
   };
   newPoint.onKeyEsc = () => {
     newPoint.unRender();

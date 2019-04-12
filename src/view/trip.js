@@ -6,16 +6,14 @@ import TotalCost from './total-cost';
 export default class Trip extends Component {
   constructor(data) {
     super();
-    this._id = data.id;
     this._type = data.type;
     this._destination = data.destination;
-    this._price = data.price;
     this._timeStart = data.timeStart;
     this._timeStop = data.timeStop;
+    this._price = data.price;
     this._offers = data.offers;
 
     this._state = {
-      id: data.id,
       price: data.price,
     };
 
@@ -66,8 +64,17 @@ export default class Trip extends Component {
     return `${moment(this._timeStart).format(`H:mm`)}&nbsp;&mdash;&nbsp;${moment(this._timeStop).format(`H:mm`)}`;
   }
 
-  update() {
-    this._price = this._state.price;
+  update(point) {
+    this._type = point.type;
+    this._destination = point.destination;
+    this._timeStart = point.timeStart;
+    this._timeStop = point.timeStop;
+    this._price = point.price;
+    this._offers = point.offers;
+  }
+
+  _onPointClick() {
+    return (typeof this._onClick === `function`) && this._onClick();
   }
 
   bind() {
@@ -76,9 +83,5 @@ export default class Trip extends Component {
 
   unbind() {
     this._element.removeEventListener(`click`, this._onPointClick);
-  }
-
-  _onPointClick() {
-    return (typeof this._onClick === `function`) && this._onClick();
   }
 }
