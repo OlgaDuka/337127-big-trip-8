@@ -1,20 +1,9 @@
 import {STORE_KEYS} from './utils/index.js';
 import moment from 'moment';
-import Model from './model/model';
-import LoaderData from './model/loader-data';
-import Store from './model/store';
-import Provider from './model/provider';
-import TotalCost from './view/total-cost';
-import TripDay from './view/trip-day';
-import Trip from './view/trip';
-import TripOpen from './view/trip-open';
-import Filter from './view/filter';
-import Sorting from './view/sorting';
-import Stat from './view/stat';
-import Adapter from './model/adapter';
+import {Model, LoaderData, Store, Provider, Adapter} from './data/index';
+import {TotalCost, TripDay, Trip, TripOpen, Filter, Sorting, Stat} from './view/index';
 
 const model = new Model();
-const stat = new Stat();
 const loaderData = new LoaderData();
 const store = new Store({key: STORE_KEYS.points, storage: localStorage});
 const provider = new Provider({loaderData, store, generateId: () => String(Date.now())});
@@ -22,6 +11,7 @@ const storeOffers = new Store({key: STORE_KEYS.offers, storage: localStorage});
 const providerOffers = new Provider({loaderData, store: storeOffers, generateId: () => String(Date.now())});
 const storeDestinations = new Store({key: STORE_KEYS.destinations, storage: localStorage});
 const providerDestinations = new Provider({loaderData, store: storeDestinations, generateId: () => String(Date.now())});
+const stat = new Stat();
 const cost = new TotalCost();
 
 const boardTotalCost = document.querySelector(`.trip`);
@@ -49,18 +39,6 @@ const toggleToStat = () => {
   boardTable.classList.add(`visually-hidden`);
 };
 
-const createArrDays = (arr) => {
-  let day;
-  const arrResult = [];
-  for (let obPoint of arr) {
-    day = moment(obPoint.timeStart).format(`DD MMM YY`);
-    if (arrResult.indexOf(day) === -1) {
-      arrResult.push(day);
-    }
-  }
-  return arrResult;
-};
-
 const renderFilters = (arrFilters) => {
   return arrFilters.map((element) => {
     const filter = new Filter(element);
@@ -81,39 +59,58 @@ const renderSorting = (arrSorting) => {
   });
 };
 
-const renderTotalCost = (arr) => {
-  cost.getCostTrim(arr);
+const renderTotalCost = (arrPoints) => {
+  cost.getCostTrip(arrPoints);
   boardTotalCost.appendChild(cost.render());
 };
 
-const renderDays = (arr) => {
-  const arrDays = createArrDays(arr);
+const updateTotalCost = () => {
+  cost.unRender();
+  renderTotalCost(model.events);
+};
+
+const createArrDays = (arrPoints) => {
+  const arrDays = [];
+  arrPoints.forEach((point) => {
+    const day = moment(point.timeStart).format(`DD MMM YY`);
+    if (arrDays.indexOf(day) === -1) {
+      arrDays.push(day);
+    }
+  });
+  return arrDays;
+};
+
+const renderDays = (arrPoints) => {
+  const arrDays = createArrDays(arrPoints);
   for (let day of arrDays) {
     const obDay = new TripDay(day);
-    const arrResult = arr.filter((it) => moment(it.timeStart).format(`DD MMM YY`) === day);
+    const arrDayPoints = arrPoints.filter((it) => moment(it.timeStart).format(`DD MMM YY`) === day);
     const boardDay = obDay.render();
-    boardDays.appendChild(boardDay);
     const distEvents = boardDay.querySelector(`.trip-day__items`);
-    renderEvents(arrResult, distEvents);
+    boardDays.appendChild(boardDay);
+    renderEvents(arrDayPoints, distEvents);
   }
+};
+
+const onErrorToRespond = (elem) => {
+  elem.element.style.border = `2px solid #FF0000`;
+  elem.shake();
+  elem.unblockToSave();
 };
 
 const makeRequestUpdateData = async (newDataPoint, obPoint, point, pointOpen, container) => {
   try {
     pointOpen.blockToSave();
     const newPoint = await provider.updatePoint({id: obPoint.id, data: Adapter.toRAW(newDataPoint)});
+    model.updatePoint(obPoint, newPoint);
     pointOpen.element.style.border = ``;
-    point.update(newPoint);
+    // point.update(newPoint);
     point.render();
     container.replaceChild(point.element, pointOpen.element);
-    pointOpen.unrender();
-    model.updatePoint(obPoint, newPoint);
-    cost.unrender();
-    renderTotalCost(model.events);
+    pointOpen.unRender();
+    updateTotalCost();
   } catch (err) {
-    pointOpen.element.style.border = `2px solid #FF0000`;
-    pointOpen.shake();
-    pointOpen.unblockToSave();
+    onErrorToRespond(pointOpen);
   }
 };
 
@@ -122,14 +119,11 @@ const makeRequestDeleteData = async (id, pointOpen) => {
     pointOpen.blockToDelete();
     await provider.deletePoint({id});
     model.eventsData = await provider.getPoints();
-    pointOpen.unrender();
+    pointOpen.unRender();
     renderDays(model.events);
-    cost.unrender();
-    renderTotalCost(model.events);
+    updateTotalCost();
   } catch (err) {
-    pointOpen.element.style.border = `2px solid #FF0000`;
-    pointOpen.shake();
-    pointOpen.unblockToDelete();
+    onErrorToRespond(pointOpen);
   }
 };
 
@@ -142,7 +136,7 @@ const renderEvents = (arr, dist) => {
     point.onClick = () => {
       pointOpen.render();
       dist.replaceChild(pointOpen.element, point.element);
-      point.unrender();
+      point.unRender();
     };
     pointOpen.onSubmit = (newObject) => {
       makeRequestUpdateData(newObject, obPoint, point, pointOpen, dist);
@@ -153,7 +147,7 @@ const renderEvents = (arr, dist) => {
     pointOpen.onKeyEsc = () => {
       point.render();
       dist.replaceChild(point.element, pointOpen.element);
-      pointOpen.unrender();
+      pointOpen.unRender();
     };
   }
 };
@@ -163,15 +157,12 @@ const makeRequestInsert = async (newDataPoint, newRenderPoint) => {
     newRenderPoint.blockToSave();
     await provider.createPoint({point: Adapter.toRAW(newDataPoint)});
     model.eventsData = await provider.getPoints();
-    newRenderPoint.unrender();
+    newRenderPoint.unRender();
     boardDays.innerHTML = ``;
     renderDays(model.events);
-    cost.unrender();
-    renderTotalCost(model.events);
+    updateTotalCost();
   } catch (err) {
-    newRenderPoint.element.style.border = `2px solid #FF0000`;
-    newRenderPoint.shake();
-    newRenderPoint.unblockToSave();
+    onErrorToRespond(newRenderPoint);
   }
 };
 
@@ -183,12 +174,13 @@ buttonNewEvent.addEventListener(`click`, () => {
     makeRequestInsert(newObject, newPoint);
   };
   newPoint.onKeyEsc = () => {
-    newPoint.unrender();
+    newPoint.unRender();
   };
 });
 
 buttonTable.addEventListener(`click`, (evt) => {
   evt.preventDefault();
+  formFilter.classList.remove(`visually-hidden`);
   if (!evt.target.classList.contains(`view-switch__item--active`)) {
     toggleToTable();
   }
@@ -196,6 +188,7 @@ buttonTable.addEventListener(`click`, (evt) => {
 
 buttonStat.addEventListener(`click`, (evt) => {
   evt.preventDefault();
+  formFilter.classList.add(`visually-hidden`);
   if (!evt.target.classList.contains(`view-switch__item--active`)) {
     toggleToStat();
   }
@@ -237,13 +230,19 @@ const initialApp = () => {
 };
 
 let makeRequestGetData = async () => {
+  let load = true;
+  let error = false;
   boardDays.textContent = `Loading route...`;
   try {
     [model.offersData, model.destinationsData, model.eventsData] =
     await Promise.all([providerOffers.getOffers(), providerDestinations.getDestinations(), provider.getPoints()]);
-    initialApp();
+    load = false;
+    error = false;
   } catch (err) {
     boardDays.textContent = `Something went wrong while loading your route info. Check your connection or try again later`;
+  }
+  if (!load && !error) {
+    initialApp();
   }
 };
 

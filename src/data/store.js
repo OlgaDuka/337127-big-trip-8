@@ -15,8 +15,7 @@ export default class Store {
   }
 
   getItem({id}) {
-    const items = this.getAll();
-    return items[id];
+    return this.getAll()[id];
   }
 
   removeItem({id}) {
@@ -31,7 +30,6 @@ export default class Store {
     if (!items) {
       return emptyItems;
     }
-
     try {
       return JSON.parse(items);
     } catch (err) {
