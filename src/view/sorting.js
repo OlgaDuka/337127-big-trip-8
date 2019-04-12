@@ -11,12 +11,13 @@ export default class Sorting extends Component {
     this._onSortingClick = this._onSortingClick.bind(this);
   }
 
-  _onSortingClick() {
-    return (typeof this._onSorting === `function`) && this._onSorting();
-  }
-
   set onSorting(fn) {
     this._onSorting = fn;
+  }
+
+  get template() {
+    return `<input type="radio" id="sorting-${this._name}" name="sorting" value="${this._name}" ${(this._name === `event`) ? `checked` : ``}>
+            <label class="trip-sorting__item trip-sorting__item--${this._name}" for="sorting-${this._name}">${this._name}</label>`;
   }
 
   render() {
@@ -34,8 +35,7 @@ export default class Sorting extends Component {
     this._element.removeEventListener(`click`, this._onSortingClick);
   }
 
-  get template() {
-    return `<input type="radio" id="sorting-${this._name}" name="sorting" value="${this._name}" ${(this._name === `event`) ? `checked` : ``}>
-            <label class="trip-sorting__item trip-sorting__item--${this._name}" for="sorting-${this._name}">${this._name}</label>`;
+  _onSortingClick() {
+    return (typeof this._onSorting === `function`) && this._onSorting();
   }
 }

@@ -1,4 +1,3 @@
-import moment from 'moment';
 import {createElement} from '../utils/index.js';
 
 export default class Component {
@@ -11,14 +10,6 @@ export default class Component {
 
   get element() {
     return this._element;
-  }
-
-  getDate(time) {
-    return moment.unix(time).format(`DD MMMM`);
-  }
-
-  getTime(time) {
-    return moment.unix(time).format(`LT`);
   }
 
   get template() {
@@ -36,7 +27,7 @@ export default class Component {
     return this._element;
   }
 
-  unrender() {
+  unRender() {
     this.unbind();
     this._element.remove();
     this._element = null;

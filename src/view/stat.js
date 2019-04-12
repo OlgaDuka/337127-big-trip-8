@@ -1,7 +1,8 @@
-import {EVENT_TYPES} from '../utils/index.js';
+import {EVENT_TYPES} from '../utils/index';
 import moment from 'moment';
 import Chart from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+import TotalCost from './total-cost';
 
 const BAR_HEIGHT = 60;
 const COUNT_STAT = 3;
@@ -28,47 +29,32 @@ export default class Stat {
     }
   }
 
-  _getPriceOffers(arr, item) {
-    let price = 0;
-    arr[item].offers.forEach((elem) => {
-      if (elem.accepted) {
-        price += parseInt(elem.price, 10);
-      }
-    });
-    return price;
-  }
-
   getPointsMoney(arr) {
     const arrType = [];
     const arrPrice = [];
-    arr.forEach((elem, i) => {
-      let item = arrType.indexOf(`${EVENT_TYPES[elem.type].icon} ${elem.type.toUpperCase()}`);
+    arr.forEach((elem) => {
+      let item = arrType.indexOf(Stat.getStrLabel(elem));
       if (item === -1) {
-        arrType.push(`${EVENT_TYPES[elem.type].icon} ${elem.type.toUpperCase()}`);
-        arrPrice.push(elem.price + this._getPriceOffers(arr, i));
+        arrType.push(Stat.getStrLabel(elem));
+        arrPrice.push(elem.price + TotalCost.getPricePointOffers(elem.offers));
       } else {
-        arrPrice[item] += (elem.price + this._getPriceOffers(arr, i));
+        arrPrice[item] += (elem.price + TotalCost.getPricePointOffers(elem.offers));
       }
     });
     const count = arrType.length;
     return {labels: arrType, data: arrPrice, numPoints: count};
   }
 
-  _getDurationHour(arr, item) {
-    const duration = moment.duration(moment(arr[item].timeStop).diff(moment(arr[item].timeStart)));
-    return duration.days() * 24 + duration.hours() + (duration.minutes() > 30 ? 1 : 0);
-  }
-
   getPointsTimeSpend(arr) {
     const arrLabel = [];
     const arrHour = [];
     arr.forEach((elem, i) => {
-      let item = arrLabel.indexOf(`${EVENT_TYPES[elem.type].icon} ${elem.type.toUpperCase()}`);
+      let item = arrLabel.indexOf(Stat.getStrLabel(elem));
       if (item === -1) {
-        arrLabel.push(`${EVENT_TYPES[elem.type].icon} ${elem.type.toUpperCase()}`);
-        arrHour.push(this._getDurationHour(arr, i));
+        arrLabel.push(Stat.getStrLabel(elem));
+        arrHour.push(Stat.getDurationHour(arr, i));
       } else {
-        arrHour[item] += this._getDurationHour(arr, i);
+        arrHour[item] += Stat.getDurationHour(arr, i);
       }
     });
     const count = arrLabel.length;
@@ -79,9 +65,9 @@ export default class Stat {
     const arrType = [];
     const arrNum = [];
     arr.forEach((elem) => {
-      let item = arrType.indexOf(`${EVENT_TYPES[elem.type].icon} ${elem.type.toUpperCase()}`);
+      let item = arrType.indexOf(Stat.getStrLabel(elem));
       if ((item === -1) && (EVENT_TYPES[elem.type].add === `to`)) {
-        arrType.push(`${EVENT_TYPES[elem.type].icon} ${elem.type.toUpperCase()}`);
+        arrType.push(Stat.getStrLabel(elem));
         arrNum.push(1);
       } else {
         arrNum[item] += 1;
@@ -100,10 +86,6 @@ export default class Stat {
       this._ctx[i].height = BAR_HEIGHT * this._config[i]._arrPoints.numPoints;
       this._container[i].style = `height: ${this._ctx[i].height}px`;
     }
-  }
-
-  unrender() {
-    this._element = null;
   }
 
   render() {
@@ -180,5 +162,14 @@ export default class Stat {
         }
       }
     };
+  }
+
+  static getDurationHour(arr, item) {
+    const duration = moment.duration(moment(arr[item].timeStop).diff(moment(arr[item].timeStart)));
+    return duration.days() * 24 + duration.hours() + (duration.minutes() > 30 ? 1 : 0);
+  }
+
+  static getStrLabel(point) {
+    return `${EVENT_TYPES[point.type].icon} ${point.type.toUpperCase()}`;
   }
 }

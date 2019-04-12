@@ -11,12 +11,13 @@ export default class Filter extends Component {
     this._onFilterClick = this._onFilterClick.bind(this);
   }
 
-  _onFilterClick() {
-    return (typeof this._onFilter === `function`) && this._onFilter();
-  }
-
   set onFilter(fn) {
     this._onFilter = fn;
+  }
+
+  get template() {
+    return `<input type="radio" id="filter-${this._name}" name="filter" value="${this._name}" ${(this._name === `everything`) ? `checked` : ``}>
+            <label class="trip-filter__item" for="filter-${this._name}">${this._name}</label>`;
   }
 
   render() {
@@ -34,8 +35,7 @@ export default class Filter extends Component {
     this._element.removeEventListener(`click`, this._onFilterClick);
   }
 
-  get template() {
-    return `<input type="radio" id="filter-${this._name}" name="filter" value="${this._name}" ${(this._name === `everything`) ? `checked` : ``}>
-            <label class="trip-filter__item" for="filter-${this._name}">${this._name}</label>`;
+  _onFilterClick() {
+    return (typeof this._onFilter === `function`) && this._onFilter();
   }
 }

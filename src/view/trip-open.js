@@ -7,20 +7,10 @@ export default class TripOpen extends Component {
   constructor(offers, destinations, data = POINT_DEFAULT) {
     super();
     this._id = data.id;
-    this._type = data.type;
-    this._destination = data.destination;
-    this._price = data.price;
-    this._timeStart = data.timeStart;
-    this._timeStop = data.timeStop;
-    this._pictures = data.pictures;
-    this._offers = data.offers;
-    this._description = data.description;
-    this._isFavorite = data.isFavorite;
     this._referenceOffers = offers;
     this._referenceDestinations = destinations;
 
     this._state = {
-      id: data.id,
       type: data.type,
       destination: data.destination,
       price: data.price,
@@ -46,247 +36,16 @@ export default class TripOpen extends Component {
     this._onOffersChange = this._onOffersChange.bind(this);
   }
 
-  _onSubmitButtonClick(evt) {
-    evt.preventDefault();
-    if (typeof this._onSubmit === `function`) {
-      this._onSubmit(this._state);
-    }
-    this.update();
-  }
-
   set onSubmit(fn) {
     this._onSubmit = fn;
-  }
-
-  _onDeleteButtonClick() {
-    return (typeof this._onDelete === `function`) && this._onDelete({id: this._id});
   }
 
   set onDelete(fn) {
     this._onDelete = fn;
   }
 
-  _onKeydownEsc(evt) {
-    return (typeof this._onKeyEsc === `function`) && (evt.keyCode === 27) && this._onKeyEsc();
-  }
-
   set onKeyEsc(fn) {
     this._onKeyEsc = fn;
-  }
-
-  shake() {
-    const ANIMATION_TIMEOUT = 600;
-    this._element.style.animation = `shake ${ANIMATION_TIMEOUT / 1000}s`;
-
-    setTimeout(() => {
-      this._element.style.animation = ``;
-    }, ANIMATION_TIMEOUT);
-  }
-
-  _partialUpdate() {
-    this.unbind();
-    const oldElement = this._element;
-    this.render();
-    oldElement.parentNode.replaceChild(this._element, oldElement);
-  }
-
-  update() {
-    this._type = this._state.type;
-    this._destination = this._state.destination;
-    this._price = this._state.price;
-    this._day = this._state.day;
-    this._timeStart = this._state.timeStart;
-    this._timeStop = this._state.timeStop;
-    this._offers = this._state.offers;
-    this._description = this._state.description;
-    this._pictures = this._state.pictures;
-    this._isFavorite = this._state.isFavorite;
-  }
-
-  blockToDelete() {
-    const btnDelete = this._element.querySelector(`.point__button-delete`);
-    btnDelete.disabled = true;
-    btnDelete.textContent = `Deleting...`;
-    this._element.querySelector(`.point__button-save`).disabled = true;
-  }
-
-  unblockToDelete() {
-    const btnDelete = this._element.querySelector(`.point__button-delete`);
-    btnDelete.disabled = false;
-    btnDelete.textContent = `Delete`;
-    this._element.querySelector(`.point__button-save`).disabled = false;
-  }
-
-  blockToSave() {
-    const btnSave = this._element.querySelector(`.point__button-save`);
-    btnSave.disabled = true;
-    btnSave.textContent = `Saving...`;
-    this._element.querySelector(`.point__button-delete`).disabled = true;
-  }
-
-  unblockToSave() {
-    const btnSave = this._element.querySelector(`.point__button-save`);
-    btnSave.disabled = false;
-    btnSave.textContent = `Save`;
-    this._element.querySelector(`.point__button-delete`).disabled = false;
-  }
-
-  _onTypeChange({target}) {
-    this._state.price = 0;
-    if (target.classList[0] === `travel-way__select-label`) {
-      this._state.type = target.previousElementSibling.value;
-      this._state.offers = [];
-      const type = this._referenceOffers.filter((item) => item.type === this._state.type);
-      if (type.length !== 0) {
-        const arrOffers = type[0].offers;
-        for (const refOffer of arrOffers) {
-          this._state.offers.push({title: refOffer.name, price: refOffer.price, accepted: false});
-        }
-      }
-    }
-    this._partialUpdate();
-  }
-
-  _onDestinationChange({target}) {
-    this._state.destination = target.value;
-    this._state.price = 0;
-    const name = this._referenceDestinations.filter((item) => item.name === this._state.destination);
-    if (name.length !== 0) {
-      this._state.description = name[0].description;
-      this._state.pictures = name[0].pictures;
-    } else {
-      this._state.description = ``;
-      this._state.pictures = [];
-    }
-    this._partialUpdate();
-  }
-
-  _onPriceChange({target}) {
-    this._state.price = target.value;
-  }
-
-  _onOffersChange({target}) {
-    for (const offer of this._state.offers) {
-      if (offer.title === target.value) {
-        offer.accepted = target.checked;
-        break;
-      }
-    }
-  }
-
-  _onFavoriteChange({target}) {
-    this._state.isFavorite = target.checked;
-  }
-
-  bind() {
-    this._element.querySelector(`.point__button-save`)
-      .addEventListener(`click`, this._onSubmitButtonClick);
-    this._element.querySelector(`.point__button-delete`)
-      .addEventListener(`click`, this._onDeleteButtonClick);
-    document.addEventListener(`keydown`, this._onKeydownEsc);
-
-    this._element.querySelector(`.travel-way__select`)
-      .addEventListener(`click`, this._onTypeChange);
-    this._element.querySelector(`input[name="destination"]`)
-      .addEventListener(`change`, this._onDestinationChange);
-    this._element.querySelector(`input[name="price"]`)
-      .addEventListener(`change`, this._onPriceChange);
-    this._element.querySelector(`input[name="favorite"]`)
-      .addEventListener(`change`, this._onFavoriteChange);
-
-    const offers = this._element.querySelectorAll(`.point__offers-input`);
-    [].forEach.call(offers, (element) => {
-      element.addEventListener(`click`, this._onOffersChange);
-    });
-
-    const dateStart = flatpickr(this._element.querySelector(`input[name="date-start"]`), {
-      [`time_24hr`]: true,
-      enableTime: true,
-      altInput: true,
-      dateFormat: `Z`,
-      altFormat: `H:i`,
-      defaultDate: moment(this._timeStart).format(),
-      onClose: (dateStr) => {
-        this._state.timeStart = Date.parse(dateStr);
-      },
-      onChange: (selectedDates) => {
-        dateEnd.set(`minDate`, selectedDates[0]);
-      }
-    });
-
-    const dateEnd = flatpickr(this._element.querySelector(`input[name="date-end"]`), {
-      [`time_24hr`]: true,
-      enableTime: true,
-      altInput: true,
-      dateFormat: `Z`,
-      altFormat: `H:i`,
-      defaultDate: moment(this._timeStop).format(),
-      onClose: (dateStr) => {
-        this._state.timeStop = Date.parse(dateStr);
-      },
-      onChange: (selectedDates) => {
-        dateStart.set(`maxDate`, selectedDates[0]);
-      }
-    });
-  }
-
-  unbind() {
-    this._element.querySelector(`.point__button-save`)
-      .removeEventListener(`click`, this._onSubmitButtonClick);
-    this._element.querySelector(`.point__button-delete`)
-      .removeEventListener(`click`, this._onDeleteButtonClick);
-    document.removeEventListener(`keydown`, this._onKeydownEsc);
-
-    this._element.querySelector(`.travel-way__select`)
-      .removeEventListener(`click`, this._onTypeChange);
-    this._element.querySelector(`input[name="destination"]`)
-      .removeEventListener(`change`, this._onDestinationChange);
-    this._element.querySelector(`input[name="price"]`)
-      .removeEventListener(`change`, this._onPriceChange);
-    this._element.querySelector(`input[name="favorite"]`)
-      .removeEventListener(`change`, this._onFavoriteChange);
-
-    const offers = this._element.querySelectorAll(`.point__offers-input`);
-    [].forEach.call(offers, (element) => {
-      element.removeEventListener(`click`, this._onOffersChange);
-    });
-
-    flatpickr(this._element.querySelector(`input[name="date-start"]`)).destroy();
-    flatpickr(this._element.querySelector(`input[name="date-end"]`)).destroy();
-  }
-
-  _getOffers() {
-    return this._state.offers.map((offer) => `<input class="point__offers-input visually-hidden" type="checkbox" id="${offer.title}" name="offer" value="${offer.title}" ${(offer.accepted === true) ? `checked` : ``}>
-    <label for="${offer.title}" class="point__offers-label">
-      <span class="point__offer-service">${offer.title}</span> + €<span class="point__offer-price">${offer.price}</span>
-    </label>`).join(``);
-  }
-
-  _getPictures() {
-    return this._state.pictures.map((picture) =>
-      `<img src="${picture.src}" alt="picture from place" class="point__destination-image">`).join(``);
-  }
-
-  _getTravelWay(typeTravel) {
-    const arrResult = [];
-    for (let key in EVENT_TYPES) {
-      if (EVENT_TYPES[key].add === typeTravel) {
-        arrResult.push({type: key, icon: EVENT_TYPES[key].icon});
-      }
-    }
-    return arrResult.map((item) =>
-      `<input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-${item.type}" name="travel-way" value="${item.type}">
-      <label class="travel-way__select-label" for="travel-way-${item.type}">${item.icon} ${item.type}</label>`).join(``);
-  }
-
-  _getDestination() {
-    const arrResult = [];
-    this._referenceDestinations.map((item) => arrResult.push(item.name));
-    return arrResult.map((item) => `<option value="${item}"></option>`).join(``);
-  }
-
-  _getDay() {
-    return moment(this._timeStart).format(`MMM YY`);
   }
 
   get template() {
@@ -305,10 +64,10 @@ export default class TripOpen extends Component {
 
                       <div class="travel-way__select">
                         <div class="travel-way__select-group" data-add="to">
-                          ${this._getTravelWay(`to`)}
+                          ${TripOpen.getTravelWay(`to`)}
                         </div>
                         <div class="travel-way__select-group" data-add="in">
-                          ${this._getTravelWay(`in`)}
+                          ${TripOpen.getTravelWay(`in`)}
                         </div>
                       </div>
                     </div>
@@ -364,5 +123,222 @@ export default class TripOpen extends Component {
                   </section>
                 </form>
               </article>`.trim();
+  }
+
+  _getOffers() {
+    return this._state.offers.map((offer) => `<input class="point__offers-input visually-hidden" type="checkbox" id="${offer.title}" name="offer" value="${offer.title}" ${(offer.accepted === true) ? `checked` : ``}>
+    <label for="${offer.title}" class="point__offers-label">
+      <span class="point__offer-service">${offer.title}</span> + €<span class="point__offer-price">${offer.price}</span>
+    </label>`).join(``);
+  }
+
+  _getPictures() {
+    return this._state.pictures.map((picture) =>
+      `<img src="${picture.src}" alt="picture from place" class="point__destination-image">`).join(``);
+  }
+
+  _getDestination() {
+    const arrResult = [];
+    this._referenceDestinations.map((item) => arrResult.push(item.name));
+    return arrResult.map((item) => `<option value="${item}"></option>`).join(``);
+  }
+
+  _getDay() {
+    return moment(this._state.timeStart).format(`MMM YY`);
+  }
+
+  _partialUpdate() {
+    this.unbind();
+    const oldElement = this._element;
+    this.render();
+    oldElement.parentNode.replaceChild(this._element, oldElement);
+  }
+
+  blockToDelete() {
+    const btnDelete = this._element.querySelector(`.point__button-delete`);
+    btnDelete.disabled = true;
+    btnDelete.textContent = `Deleting...`;
+    this._element.querySelector(`.point__button-save`).disabled = true;
+  }
+
+  unblockToDelete() {
+    const btnDelete = this._element.querySelector(`.point__button-delete`);
+    btnDelete.disabled = false;
+    btnDelete.textContent = `Delete`;
+    this._element.querySelector(`.point__button-save`).disabled = false;
+  }
+
+  blockToSave() {
+    const btnSave = this._element.querySelector(`.point__button-save`);
+    btnSave.disabled = true;
+    btnSave.textContent = `Saving...`;
+    this._element.querySelector(`.point__button-delete`).disabled = true;
+  }
+
+  unblockToSave() {
+    const btnSave = this._element.querySelector(`.point__button-save`);
+    btnSave.disabled = false;
+    btnSave.textContent = `Save`;
+    this._element.querySelector(`.point__button-delete`).disabled = false;
+  }
+
+  shake() {
+    const ANIMATION_TIMEOUT = 600;
+    this._element.style.animation = `shake ${ANIMATION_TIMEOUT / 1000}s`;
+
+    setTimeout(() => {
+      this._element.style.animation = ``;
+    }, ANIMATION_TIMEOUT);
+  }
+
+  _onSubmitButtonClick(evt) {
+    evt.preventDefault();
+    if (typeof this._onSubmit === `function`) {
+      this._onSubmit(this._state);
+    }
+  }
+
+  _onDeleteButtonClick() {
+    return (typeof this._onDelete === `function`) && this._onDelete({id: this._id});
+  }
+
+  _onKeydownEsc(evt) {
+    return (typeof this._onKeyEsc === `function`) && (evt.keyCode === 27) && this._onKeyEsc();
+  }
+
+  _onTypeChange({target}) {
+    const oldPrice = target.parentNode.parentNode.parentNode.parentNode.querySelector(`input[name="price"]`);
+    oldPrice.style.color = `red`;
+    if (target.classList[0] === `travel-way__select-label`) {
+      this._state.type = target.previousElementSibling.value;
+      this._state.offers = [];
+      const type = this._referenceOffers.filter((item) => item.type === this._state.type);
+      if (type.length !== 0) {
+        const arrOffers = type[0].offers;
+        for (const refOffer of arrOffers) {
+          this._state.offers.push({title: refOffer.name, price: refOffer.price, accepted: false});
+        }
+      }
+    }
+    this._partialUpdate();
+  }
+
+  _onDestinationChange({target}) {
+    this._state.destination = target.value;
+    const name = this._referenceDestinations.filter((item) => item.name === this._state.destination);
+    if (name.length !== 0) {
+      this._state.description = name[0].description;
+      this._state.pictures = name[0].pictures;
+    } else {
+      this._state.description = ``;
+      this._state.pictures = [];
+    }
+    this._partialUpdate();
+  }
+
+  _onPriceChange({target}) {
+    this._state.price = target.value;
+  }
+
+  _onOffersChange({target}) {
+    for (const offer of this._state.offers) {
+      if (offer.title === target.value) {
+        offer.accepted = target.checked;
+        break;
+      }
+    }
+  }
+
+  _onFavoriteChange({target}) {
+    this._state.isFavorite = target.checked;
+  }
+
+  bind() {
+    this._element.querySelector(`.point__button-save`)
+      .addEventListener(`click`, this._onSubmitButtonClick);
+    this._element.querySelector(`.point__button-delete`)
+      .addEventListener(`click`, this._onDeleteButtonClick);
+    document.addEventListener(`keydown`, this._onKeydownEsc);
+
+    this._element.querySelector(`.travel-way__select`)
+      .addEventListener(`click`, this._onTypeChange);
+    this._element.querySelector(`input[name="destination"]`)
+      .addEventListener(`change`, this._onDestinationChange);
+    this._element.querySelector(`input[name="price"]`)
+      .addEventListener(`change`, this._onPriceChange);
+    this._element.querySelector(`input[name="favorite"]`)
+      .addEventListener(`change`, this._onFavoriteChange);
+
+    const offers = this._element.querySelectorAll(`.point__offers-input`);
+    [].forEach.call(offers, (element) => {
+      element.addEventListener(`click`, this._onOffersChange);
+    });
+
+    const dateStart = flatpickr(this._element.querySelector(`input[name="date-start"]`), {
+      [`time_24hr`]: true,
+      enableTime: true,
+      altInput: true,
+      dateFormat: `Z`,
+      altFormat: `H:i`,
+      defaultDate: moment(this._state.timeStart).format(),
+      onClose: (dateStr) => {
+        this._state.timeStart = Date.parse(dateStr);
+      },
+      onChange: (selectedDates) => {
+        dateEnd.set(`minDate`, selectedDates[0]);
+      }
+    });
+
+    const dateEnd = flatpickr(this._element.querySelector(`input[name="date-end"]`), {
+      [`time_24hr`]: true,
+      enableTime: true,
+      altInput: true,
+      dateFormat: `Z`,
+      altFormat: `H:i`,
+      defaultDate: moment(this._state.timeStop).format(),
+      onClose: (dateStr) => {
+        this._state.timeStop = Date.parse(dateStr);
+      },
+      onChange: (selectedDates) => {
+        dateStart.set(`maxDate`, selectedDates[0]);
+      }
+    });
+  }
+
+  unbind() {
+    this._element.querySelector(`.point__button-save`)
+      .removeEventListener(`click`, this._onSubmitButtonClick);
+    this._element.querySelector(`.point__button-delete`)
+      .removeEventListener(`click`, this._onDeleteButtonClick);
+    document.removeEventListener(`keydown`, this._onKeydownEsc);
+
+    this._element.querySelector(`.travel-way__select`)
+      .removeEventListener(`click`, this._onTypeChange);
+    this._element.querySelector(`input[name="destination"]`)
+      .removeEventListener(`change`, this._onDestinationChange);
+    this._element.querySelector(`input[name="price"]`)
+      .removeEventListener(`change`, this._onPriceChange);
+    this._element.querySelector(`input[name="favorite"]`)
+      .removeEventListener(`change`, this._onFavoriteChange);
+
+    const offers = this._element.querySelectorAll(`.point__offers-input`);
+    [].forEach.call(offers, (element) => {
+      element.removeEventListener(`click`, this._onOffersChange);
+    });
+
+    flatpickr(this._element.querySelector(`input[name="date-start"]`)).destroy();
+    flatpickr(this._element.querySelector(`input[name="date-end"]`)).destroy();
+  }
+
+  static getTravelWay(typeTravel) {
+    const arrResult = [];
+    for (let key in EVENT_TYPES) {
+      if (EVENT_TYPES[key].add === typeTravel) {
+        arrResult.push({type: key, icon: EVENT_TYPES[key].icon});
+      }
+    }
+    return arrResult.map((item) =>
+      `<input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-${item.type}" name="travel-way" value="${item.type}">
+      <label class="travel-way__select-label" for="travel-way-${item.type}">${item.icon} ${item.type}</label>`).join(``);
   }
 }

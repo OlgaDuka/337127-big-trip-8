@@ -10,6 +10,14 @@ export default class Provider {
     this._sendStorage = this._sendStorage.bind(this);
   }
 
+  _sendStorage(point) {
+    this._store.setItem({
+      id: point.id,
+      item: Adapter.toRAW(point)
+    });
+    return point;
+  }
+
   getPoints() {
     if (Provider.isOnline()) {
       return this._loader.getPoints()
@@ -17,12 +25,8 @@ export default class Provider {
           points.forEach(this._sendStorage);
           return points;
         });
-    } else {
-      const rawPointsMap = this._store.getAll();
-      const rawPoints = Provider.objectToArray(rawPointsMap);
-      const points = Adapter.parsePoints(rawPoints);
-      return Promise.resolve(points);
     }
+    return Promise.resolve(Adapter.parsePoints(Provider.objectToArray(this._store.getAll())));
   }
 
   getOffers() {
@@ -32,9 +36,8 @@ export default class Provider {
           this._store.setRefs(offers);
           return offers;
         });
-    } else {
-      return Promise.resolve(this._store.getAll());
     }
+    return Promise.resolve(this._store.getAll());
   }
 
   getDestinations() {
@@ -44,9 +47,8 @@ export default class Provider {
           this._store.setRefs(destinations);
           return destinations;
         });
-    } else {
-      return Promise.resolve(this._store.getAll());
     }
+    return Promise.resolve(this._store.getAll());
   }
 
   createPoint({point}) {
@@ -85,14 +87,6 @@ export default class Provider {
       this._store.removeItem({id});
       return Promise.resolve(id);
     }
-  }
-
-  _sendStorage(point) {
-    this._store.setItem({
-      id: point.id,
-      item: Adapter.toRAW(point)
-    });
-    return point;
   }
 
   syncPoints() {
