@@ -13,11 +13,12 @@ export default class TotalCost extends Component {
   }
 
   getCostTrip(data) {
-    this._cost = data.reduce((acc, point) => acc + point.price + TotalCost.getPricePointOffers(point.offers), 0);
+    this._cost = data.reduce((acc, point) => acc + TotalCost.getPricePoint(point), 0);
     return this._cost;
   }
 
-  static getPricePointOffers(offers) {
-    return offers.filter((offer) => offer.accepted === true).reduce((acc, offer) => acc + offer.price, 0);
+  static getPricePoint(point) {
+    const totalOffersPrice = point.offers.filter((offer) => offer.accepted === true).reduce((acc, offer) => acc + offer.price, 0);
+    return point.price + totalOffersPrice;
   }
 }
