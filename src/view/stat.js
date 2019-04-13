@@ -36,9 +36,9 @@ export default class Stat {
       let item = arrType.indexOf(Stat.getStrLabel(elem));
       if (item === -1) {
         arrType.push(Stat.getStrLabel(elem));
-        arrPrice.push(elem.price + TotalCost.getPricePointOffers(elem.offers));
+        arrPrice.push(TotalCost.getPricePoint(elem));
       } else {
-        arrPrice[item] += (elem.price + TotalCost.getPricePointOffers(elem.offers));
+        arrPrice[item] += (TotalCost.getPricePoint(elem));
       }
     });
     const count = arrType.length;

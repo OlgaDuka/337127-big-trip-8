@@ -81,11 +81,11 @@ const createArrDays = (arrPoints) => {
 };
 
 const renderDays = (arrPoints) => {
+  boardDays.innerHTML = ``;
   const arrDays = createArrDays(arrPoints);
   for (let day of arrDays) {
-    const obDay = new TripDay(day);
     const arrDayPoints = arrPoints.filter((it) => moment(it.timeStart).format(`DD MMM YY`) === day);
-    const boardDay = obDay.render();
+    const boardDay = new TripDay(day).render();
     const distEvents = boardDay.querySelector(`.trip-day__items`);
     boardDays.appendChild(boardDay);
     renderEvents(arrDayPoints, distEvents);
@@ -108,6 +108,7 @@ const makeRequestUpdateData = async (newDataPoint, obPoint, point, pointOpen, co
     point.render();
     container.replaceChild(point.element, pointOpen.element);
     pointOpen.unRender();
+    updateTotalCost();
   } catch (err) {
     onErrorToRespond(pointOpen);
   }
@@ -120,6 +121,7 @@ const makeRequestDeleteData = async (id, pointOpen) => {
     model.eventsData = await provider.getPoints();
     pointOpen.unRender();
     renderDays(model.events);
+    updateTotalCost();
   } catch (err) {
     onErrorToRespond(pointOpen);
   }
@@ -138,11 +140,9 @@ const renderEvents = (arr, dist) => {
     };
     pointOpen.onSubmit = (newObject) => {
       makeRequestUpdateData(newObject, obPoint, point, pointOpen, dist);
-      updateTotalCost();
     };
     pointOpen.onDelete = (({id}) => {
       makeRequestDeleteData(id, pointOpen);
-      updateTotalCost();
     });
     pointOpen.onKeyEsc = () => {
       point.render();
@@ -160,6 +160,7 @@ const makeRequestInsert = async (newDataPoint, newRenderPoint) => {
     newRenderPoint.unRender();
     boardDays.innerHTML = ``;
     renderDays(model.events);
+    updateTotalCost();
   } catch (err) {
     onErrorToRespond(newRenderPoint);
   }
@@ -171,7 +172,6 @@ buttonNewEvent.addEventListener(`click`, () => {
   boardDays.insertBefore(newPoint.render(), boardDays.firstChild);
   newPoint.onSubmit = (newObject) => {
     makeRequestInsert(newObject, newPoint);
-    updateTotalCost();
   };
   newPoint.onKeyEsc = () => {
     newPoint.unRender();

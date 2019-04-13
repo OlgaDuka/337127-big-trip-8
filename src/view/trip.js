@@ -10,12 +10,9 @@ export default class Trip extends Component {
     this._destination = data.destination;
     this._timeStart = data.timeStart;
     this._timeStop = data.timeStop;
-    this._price = data.price;
-    this._offers = data.offers;
 
-    this._state = {
-      price: data.price,
-    };
+    this.offers = data.offers;
+    this.price = data.price;
 
     this._onClick = null;
 
@@ -34,7 +31,7 @@ export default class Trip extends Component {
                 <span class="trip-point__timetable">${this._getTimeStr()}</span>
                 <span class="trip-point__duration">${this._getDuration()}</span>
               </p>
-              <p class="trip-point__price">&euro;&nbsp;${this._price + TotalCost.getPricePointOffers(this._offers)}</p>
+              <p class="trip-point__price">&euro;&nbsp;${TotalCost.getPricePoint(this)}</p>
               <ul class="trip-point__offers">
                 ${this._getOffer()}
               </ul>
@@ -43,11 +40,11 @@ export default class Trip extends Component {
 
   _getOffer() {
     let htmlOffers = ``;
-    const num = this._offers.length > 3 ? 3 : this._offers.length;
+    const num = this.offers.length > 3 ? 3 : this.offers.length;
     if (num > 0) {
       for (let i = 0; i < num; i += 1) {
-        if (!this._offers[i].accepted) {
-          htmlOffers += `<li><button class="trip-point__offer">${this._offers[i].title} +&euro;&nbsp;${this._offers[i].price}</button></li>`;
+        if (!this.offers[i].accepted) {
+          htmlOffers += `<li><button class="trip-point__offer">${this.offers[i].title} +&euro;&nbsp;${this.offers[i].price}</button></li>`;
         }
       }
     }
@@ -69,8 +66,8 @@ export default class Trip extends Component {
     this._destination = point.destination;
     this._timeStart = point.timeStart;
     this._timeStop = point.timeStop;
-    this._price = point.price;
-    this._offers = point.offers;
+    this.price = point.price;
+    this.offers = point.offers;
   }
 
   _onPointClick() {

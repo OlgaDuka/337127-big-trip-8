@@ -9,14 +9,10 @@ export default class Model {
     this.filters = util.NAME_FILTERS;
     this.sorting = util.NAME_SORTING;
     this.stat = util.StatData;
-    this._state = {
-      events: this._events
-    };
   }
 
   set eventsData(data) {
     this._events = data;
-    this._state.events = data;
   }
 
   set destinationsData(data) {
@@ -61,7 +57,7 @@ export default class Model {
         return this.events;
       },
       'sorting-time': () => {
-        return arrResult.sort((a, b) => this.duration(a) - this.duration(b)).reverse();
+        return arrResult.sort((a, b) => Model.duration(a) - Model.duration(b)).reverse();
       },
       'sorting-price': () => {
         return arrResult.sort((a, b) => a.price - b.price).reverse();
@@ -71,35 +67,9 @@ export default class Model {
   }
 
   updatePoint(pointToUpdate, newPoint) {
-    const index = this._events.findIndex((it) => it === pointToUpdate);
-    this._state.events[index] = Object.assign({}, pointToUpdate, newPoint);
-    return this._state;
-  }
-
-  // resetPoint(pointToUpdate, newPoint) {
-  //  const index = this._events.findIndex((it) => it === pointToUpdate);
-  //  this._state.events[index] = Object.assign({}, pointToUpdate, newPoint);
-  //  return this._state;
-  // }
-
-  deletePoint(pointToDelete) {
-    const index = this._events.findIndex((it) => it === pointToDelete);
-    this._state.events.splice(index, 1);
-    return this._state;
-  }
-
-  insertPoint(pointToInsert) {
-    this._state.events.push(pointToInsert);
-    const index = this._state.events.size - 1;
-    return this._state.events[index];
-  }
-
-  reset() {
-    this._state.events = this._events;
-  }
-
-  update() {
-    this._events = this._state.events;
+    const index = pointToUpdate.id;
+    this._events[index] = Object.assign({}, newPoint);
+    return this._events;
   }
 
   static duration(obEvent) {
