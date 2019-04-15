@@ -3,7 +3,18 @@ import moment from 'moment';
 import Component from './component.js';
 import TotalCost from './total-cost';
 
+/**
+ * @description Класс компонента точки маршрута
+ * @export
+ * @class Trip
+ * @extends {Component}
+ */
 export default class Trip extends Component {
+  /**
+   * @description Конструктор класса
+   * @param {Object} data данные для отрисовки точки маршрута в списке точек
+   * @member Trip
+   */
   constructor(data) {
     super();
     this._type = data.type;
@@ -19,10 +30,19 @@ export default class Trip extends Component {
     this._onPointClick = this._onPointClick.bind(this);
   }
 
+  /**
+   * @description Сеттер - устанавливает коллбэк-функцию для реакции на клик по элементу
+   * @member Trip
+   */
   set onClick(fn) {
     this._onClick = fn;
   }
 
+  /**
+   * @description Геттер - создание шаблона компонента
+   * @return {Node} DOM-элемент <template>
+   * @member Trip
+   */
   get template() {
     return `<article class="trip-point">
               <i class="trip-icon">${EVENT_TYPES[this._type].icon}</i>
@@ -38,6 +58,11 @@ export default class Trip extends Component {
             </article>`.trim();
   }
 
+  /**
+   * @description Формирует список предложений, доступных для выбора, для вывода в шаблон
+   * @return {Node} DOM-элемент <template>
+   * @member Trip
+   */
   _getOffer() {
     let htmlOffers = ``;
     const num = this.offers.length > 3 ? 3 : this.offers.length;
@@ -51,16 +76,31 @@ export default class Trip extends Component {
     return htmlOffers;
   }
 
+  /**
+   * @description Формирует строку длительности точки маршрута для вывода в шаблон
+   * @return {String} строка, содержит длительность в днях (если > 24 часов), часах и минутах
+   * @member Trip
+   */
   _getDuration() {
     const duration = moment.duration(moment(this._timeStop).diff(moment(this._timeStart)));
     const days = duration.days();
     return days > 0 ? `${days}D ${duration.hours()}H ${duration.minutes()}M` : `${duration.hours()}H ${duration.minutes()}M`;
   }
 
+  /**
+   * @description Формирует строку с временем для вывода в шаблон начала и завершения точки маршрута
+   * @return {String} строка, содержит время в формате "00:00 - 00:00"
+   * @member Trip
+   */
   _getTimeStr() {
     return `${moment(this._timeStart).format(`H:mm`)}&nbsp;&mdash;&nbsp;${moment(this._timeStop).format(`H:mm`)}`;
   }
 
+  /**
+   * @description Обновляет данные точки маршрута
+   * @param {Object} point новые данные, полученные в результате редактирования точки маршрута
+   * @member Trip
+   */
   update(point) {
     this._type = point.type;
     this._destination = point.destination;
@@ -70,14 +110,27 @@ export default class Trip extends Component {
     this.offers = point.offers;
   }
 
+  /**
+   * @description Обработчик события `click` компонента
+   * @return function
+   * @member Trip
+   */
   _onPointClick() {
     return (typeof this._onClick === `function`) && this._onClick();
   }
 
+  /**
+   * @description Установка обработчика события
+   * @member Trip
+   */
   bind() {
     this._element.addEventListener(`click`, this._onPointClick);
   }
 
+  /**
+   * @description Снятие обработчика события
+   * @member Trip
+   */
   unbind() {
     this._element.removeEventListener(`click`, this._onPointClick);
   }

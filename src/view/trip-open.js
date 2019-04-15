@@ -1,9 +1,21 @@
-import {EVENT_TYPES, POINT_DEFAULT} from '../utils/index';
+import {createElement, EVENT_TYPES, POINT_DEFAULT} from '../utils/index';
 import moment from 'moment';
 import flatpickr from 'flatpickr';
 import Component from './component.js';
-
+/**
+ * @description Класс компонента точки маршрута в режиме редактирования
+ * @export
+ * @class TripOpen
+ * @extends {Component}
+ */
 export default class TripOpen extends Component {
+  /**
+   * @description Конструктор класса
+   * @param {Array} offers справочник предложений
+   * @param {Array} destinations справочник пунктов назначения
+   * @param {Object} data данные точки маршрута, для создания новой точки передается объект POINT_DEFAULT
+   * @member TripOpen
+   */
   constructor(offers, destinations, data = POINT_DEFAULT) {
     super();
     this._id = data.id;
@@ -35,19 +47,36 @@ export default class TripOpen extends Component {
     this._onFavoriteChange = this._onFavoriteChange.bind(this);
     this._onOffersChange = this._onOffersChange.bind(this);
   }
-
+  /**
+   * @description Сеттер - устанавливает коллбэк-функцию для сохранения элемента
+   * @member TripOpen
+   */
   set onSubmit(fn) {
     this._onSubmit = fn;
   }
 
+  /**
+   * @description Сеттер - устанавливает коллбэк-функцию для удаления элемента
+   * @member TripOpen
+   */
   set onDelete(fn) {
     this._onDelete = fn;
   }
 
+  /**
+   * @description Сеттер - устанавливает коллбэк-функцию для сброса элемента в начальное состояние
+   * @member TripOpen
+   */
   set onKeyEsc(fn) {
     this._onKeyEsc = fn;
+
   }
 
+  /**
+   * @description Геттер - создание шаблона компонента
+   * @return {Node} DOM-элемент <template>
+   * @member TripOpen
+   */
   get template() {
     return `<article class="point">
                 <form action="" method="get" class="point__form">
@@ -125,28 +154,53 @@ export default class TripOpen extends Component {
               </article>`.trim();
   }
 
+  /**
+   * @description Формирует список предложений к точке маршрута для вывода в шаблон
+   * @return {Node} DOM-элемент <template>
+   * @member TripOpen
+   */
   _getOffers() {
     return this._state.offers.map((offer) => `<input class="point__offers-input visually-hidden" type="checkbox" id="${offer.title}" name="offer" value="${offer.title}" ${(offer.accepted === true) ? `checked` : ``}>
     <label for="${offer.title}" class="point__offers-label">
       <span class="point__offer-service">${offer.title}</span> + €<span class="point__offer-price">${offer.price}</span>
     </label>`).join(``);
   }
-
+  /**
+   * @description Формирует список изображений для вывода в шаблон
+   * @return {Node} DOM-элемент <template>
+   * @member TripOpen
+   */
   _getPictures() {
     return this._state.pictures.map((picture) =>
       `<img src="${picture.src}" alt="picture from place" class="point__destination-image">`).join(``);
   }
 
+  /**
+   * @description Формирует dataset со списком пунктов назначения
+   * @const {Array} arrResult массив опций для dataset
+   * @return {Node} DOM-элемент <template>
+   * @member TripOpen
+   */
   _getDestination() {
     const arrResult = [];
     this._referenceDestinations.map((item) => arrResult.push(item.name));
     return arrResult.map((item) => `<option value="${item}"></option>`).join(``);
   }
 
+  /**
+   * @description Формирует строку с днем для новой точки маршрута для вывода в шаблон
+   * @return {Node} DOM-элемент <template>
+   * @member TripOpen
+   */
   _getDay() {
     return moment(this._state.timeStart).format(`MMM YY`);
   }
 
+  /**
+   * @description Частичное обновление данных внутри формы ввода
+   * @const {Object} oldElement сохранение данных на время перерисовки компонента
+   * @member TripOpen
+   */
   _partialUpdate() {
     this.unbind();
     const oldElement = this._element;
@@ -154,6 +208,29 @@ export default class TripOpen extends Component {
     oldElement.parentNode.replaceChild(this._element, oldElement);
   }
 
+  /**
+   * @description Сброс изменений данных при необходимости отмены
+   * @const {Object} oldElement сохранение данных на время перерисовки компонента
+   * @member TripOpen
+   */
+  resetPoint(data) {
+    this._state = {
+      type: data.type,
+      destination: data.destination,
+      price: data.price,
+      timeStart: data.timeStart,
+      timeStop: data.timeStop,
+      pictures: data.pictures,
+      offers: data.offers,
+      description: data.description,
+      isFavorite: data.isFavorite,
+    };
+  }
+
+   /**
+   * @description Блокирует кнопку Delete на время запроса к серверу на удаление точки маршрута
+   * @member TripOpen
+   */
   blockToDelete() {
     const btnDelete = this._element.querySelector(`.point__button-delete`);
     btnDelete.disabled = true;
@@ -161,13 +238,10 @@ export default class TripOpen extends Component {
     this._element.querySelector(`.point__button-save`).disabled = true;
   }
 
-  unblockToDelete() {
-    const btnDelete = this._element.querySelector(`.point__button-delete`);
-    btnDelete.disabled = false;
-    btnDelete.textContent = `Delete`;
-    this._element.querySelector(`.point__button-save`).disabled = false;
-  }
-
+  /**
+   * @description Блокирует кнопку Save на время запроса к серверу на обновление точки маршрута
+   * @member TripOpen
+   */
   blockToSave() {
     const btnSave = this._element.querySelector(`.point__button-save`);
     btnSave.disabled = true;
@@ -175,6 +249,10 @@ export default class TripOpen extends Component {
     this._element.querySelector(`.point__button-delete`).disabled = true;
   }
 
+  /**
+   * @description Разблокирует кнопку Save после выполнения запроса к серверу на обновление точки маршрута
+   * @member TripOpen
+   */
   unblockToSave() {
     const btnSave = this._element.querySelector(`.point__button-save`);
     btnSave.disabled = false;
@@ -182,6 +260,10 @@ export default class TripOpen extends Component {
     this._element.querySelector(`.point__button-delete`).disabled = false;
   }
 
+  /**
+   * @description Выполняет анимацию при возникновении ошибки во время обработки запроса сервером
+   * @member TripOpen
+   */
   shake() {
     const ANIMATION_TIMEOUT = 600;
     this._element.style.animation = `shake ${ANIMATION_TIMEOUT / 1000}s`;
@@ -191,6 +273,10 @@ export default class TripOpen extends Component {
     }, ANIMATION_TIMEOUT);
   }
 
+  /**
+   * @description Обработчик события `click` по кнопке Save компонента - записывает данные на сервер
+   * @member TripOpen
+   */
   _onSubmitButtonClick(evt) {
     evt.preventDefault();
     if (typeof this._onSubmit === `function`) {
@@ -198,14 +284,28 @@ export default class TripOpen extends Component {
     }
   }
 
+  /**
+   * @description Обработчик события `click` по кнопке Delete компонента
+   * @return function
+   * @member TripOpen
+   */
   _onDeleteButtonClick() {
     return (typeof this._onDelete === `function`) && this._onDelete({id: this._id});
   }
 
+  /**
+   * @description Обработчик события при нажатии на клавишу`ESC` - сброс результатов редактирования
+   * @return function
+   * @member TripOpen
+   */
   _onKeydownEsc(evt) {
     return (typeof this._onKeyEsc === `function`) && (evt.keyCode === 27) && this._onKeyEsc();
   }
 
+  /**
+   * @description Обработчик события `change` при выборе типа события
+   * @member TripOpen
+   */
   _onTypeChange({target}) {
     const oldPrice = target.parentNode.parentNode.parentNode.parentNode.querySelector(`input[name="price"]`);
     oldPrice.style.color = `red`;
@@ -223,6 +323,10 @@ export default class TripOpen extends Component {
     this._partialUpdate();
   }
 
+  /**
+   * @description Обработчик события `change` при выборе пункта назначения
+   * @member TripOpen
+   */
   _onDestinationChange({target}) {
     this._state.destination = target.value;
     const name = this._referenceDestinations.filter((item) => item.name === this._state.destination);
@@ -236,10 +340,18 @@ export default class TripOpen extends Component {
     this._partialUpdate();
   }
 
+  /**
+   * @description Обработчик события `change` при вводе данных в поле стоимости точки маршрута
+   * @member TripOpen
+   */
   _onPriceChange({target}) {
     this._state.price = target.value;
   }
 
+  /**
+   * @description Обработчик события `change` при выборе или снятии выбора на предложении к точке маршрута
+   * @member TripOpen
+   */
   _onOffersChange({target}) {
     for (const offer of this._state.offers) {
       if (offer.title === target.value) {
@@ -249,10 +361,18 @@ export default class TripOpen extends Component {
     }
   }
 
+  /**
+   * @description Обработчик события `change` нажатии на "звездочку"
+   * @member TripOpen
+   */
   _onFavoriteChange({target}) {
     this._state.isFavorite = target.checked;
   }
 
+  /**
+   * @description Установка обработчиков событий
+   * @member TripOpen
+   */
   bind() {
     this._element.querySelector(`.point__button-save`)
       .addEventListener(`click`, this._onSubmitButtonClick);
@@ -305,6 +425,10 @@ export default class TripOpen extends Component {
     });
   }
 
+  /**
+   * @description Снятие обработчиков событий
+   * @member TripOpen
+   */
   unbind() {
     this._element.querySelector(`.point__button-save`)
       .removeEventListener(`click`, this._onSubmitButtonClick);
@@ -330,6 +454,13 @@ export default class TripOpen extends Component {
     flatpickr(this._element.querySelector(`input[name="date-end"]`)).destroy();
   }
 
+  /**
+   * @description Формирует dataset для выбора типа точки маршрута
+   * @static
+   * @param {String} typeTravel строка с идентификатором группы типов точек
+   * @return {Array} массив опций с типами точек маршрута
+   * @member TripOpen
+   */
   static getTravelWay(typeTravel) {
     const arrResult = [];
     for (let key in EVENT_TYPES) {
