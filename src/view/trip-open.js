@@ -213,7 +213,6 @@ export default class TripOpen extends Component {
   /**
    * @description Сброс изменений данных при необходимости отмены
    * @param {Object} data
-   * @const {Object} oldElement сохранение данных на время перерисовки компонента
    * @member TripOpen
    */
   resetPoint(data) {

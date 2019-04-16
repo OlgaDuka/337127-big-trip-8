@@ -54,7 +54,7 @@ export default class Model {
 
   /**
    * @description Геттер - предоставляет данные точек маршрута приложению для работы
-   * @return {Array} data массив объектов данных всех точек маршрута
+   * @return {Array} массив объектов данных всех точек маршрута
    * @member Model
    */
   get events() {
@@ -63,7 +63,7 @@ export default class Model {
 
   /**
    * @description Геттер - предоставляет данные справочника пунктов назначения приложению для работы
-   * @return {Array} data массив объектов данных справочника пунктов назначения
+   * @return {Array} массив объектов данных справочника пунктов назначения
    * @member Model
    */
   get destinations() {
@@ -72,7 +72,7 @@ export default class Model {
 
   /**
    * @description Геттер - предоставляет данные справочника предложений к точкам маршрута приложению для работы
-   * @return {Array} data массив объектов данных справочника предложений к точкам маршрута
+   * @return {Array} массив объектов данных справочника предложений к точкам маршрута
    * @member Model
    */
   get offers() {
@@ -80,9 +80,10 @@ export default class Model {
   }
 
   /**
-   * @description Выбирает по имени и применяет к массиву точек маршрута функцию фильтрации
+   * @description Выбирает по имени и применяет к массиву точек маршрута функцию фильтрации и сортировки
    * @const {Enum} FnFilter функции фильтрации точек маршрута
-   * @return {Function} FnFilter функция, выполняется в момент возврата
+   * @const {Enum} FnSorting функции сортировки точек маршрута
+   * @return {Array} arrResult отфильтрованный и отсортированный массив
    * @member Model
    */
   getFilterSortingEvents() {
@@ -112,35 +113,6 @@ export default class Model {
     arrResult = FnFilter[this.state.nameFilter]();
     arrResult = FnSorting[this.state.nameSorting]();
     return arrResult;
-  }
-
-  /**
-   * @description Выбирает по имени и применяет к массиву точек маршрута функцию сортировки
-   * @param {String} sortingName имя функции сортировки
-   * @const {Enum} FnSorting функции сортировки точек маршрута
-   * @return {Function} FnSorting функция, выполняется в момент возврата
-   * @member Model
-   */
-  getSortingEvents(sortingName) {
-    let arrResult = [];
-    if (this._state.nameFilter === `filter-everything`) {
-      arrResult = this.events.slice();
-    } else {
-      arrResult = this.events.this.getFilterEvents(this._state.nameFilter).slice();
-    }
-    const FnSorting = {
-      'sorting-event': () => {
-        return this.events;
-      },
-      'sorting-time': () => {
-        return arrResult.sort((a, b) => Model.duration(a) - Model.duration(b)).reverse();
-      },
-      'sorting-price': () => {
-        return arrResult.sort((a, b) => TotalCost.getPricePoint(a) - TotalCost.getPricePoint(b)).reverse();
-      }
-    };
-    this._state.nameSorting = sortingName;
-    return FnSorting[sortingName]();
   }
 
   /**

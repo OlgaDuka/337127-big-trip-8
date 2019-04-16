@@ -41,7 +41,7 @@ export default class Store {
   }
 
   /**
-   * @description Получение данных точки маршрута из хранилища
+   * @description Удаление точки маршрута из хранилища
    * @param {String} {id} ID точки маршрута
    * @member Store
    */
@@ -51,6 +51,11 @@ export default class Store {
     this._storage.setItem(this._storeKey, JSON.stringify(items));
   }
 
+  /**
+   * @description Получение данных всех точек маршрута из хранилища
+   * @return {Array}
+   * @member Store
+   */
   getAll() {
     const emptyItems = {};
     const items = this._storage.getItem(this._storeKey);

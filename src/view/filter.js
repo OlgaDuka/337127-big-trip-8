@@ -43,7 +43,7 @@ export default class Filter extends Component {
 
   /**
    * @description Отрисовка компонента
-   * @return {node}
+   * @return {Node}
    * @member Filter
    */
   render() {

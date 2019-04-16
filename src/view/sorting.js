@@ -42,7 +42,7 @@ export default class Sorting extends Component {
 
   /**
    * @description Отрисовка компонента
-   * @return {node}
+   * @return {Node}
    * @member Sorting
    */
   render() {
