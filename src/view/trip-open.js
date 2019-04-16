@@ -45,7 +45,6 @@ export default class TripOpen extends Component {
     this._onDestinationChange = this._onDestinationChange.bind(this);
     this._onPriceChange = this._onPriceChange.bind(this);
     this._onFavoriteChange = this._onFavoriteChange.bind(this);
-    this._onOffersChange = this._onOffersChange.bind(this);
   }
   /**
    * @description Сеттер - устанавливает коллбэк-функцию для сохранения элемента
@@ -285,6 +284,10 @@ export default class TripOpen extends Component {
   _onSubmitButtonClick(evt) {
     evt.preventDefault();
     if (typeof this._onSubmit === `function`) {
+      const offers = this._element.querySelectorAll(`.point__offers-input`);
+      offers.forEach((element, item) => {
+        this._state.offers[item].accepted = element.checked;
+      });
       this._onSubmit(this._state);
     }
   }
@@ -355,19 +358,6 @@ export default class TripOpen extends Component {
   }
 
   /**
-   * @description Обработчик события `change` при выборе или снятии выбора на предложении к точке маршрута
-   * @member TripOpen
-   */
-  _onOffersChange({target}) {
-    for (const offer of this._state.offers) {
-      if (offer.title === target.value) {
-        offer.accepted = target.checked;
-        break;
-      }
-    }
-  }
-
-  /**
    * @description Обработчик события `change` нажатии на "звездочку"
    * @member TripOpen
    */
@@ -394,11 +384,6 @@ export default class TripOpen extends Component {
       .addEventListener(`change`, this._onPriceChange);
     this._element.querySelector(`input[name="favorite"]`)
       .addEventListener(`change`, this._onFavoriteChange);
-
-    const offers = this._element.querySelectorAll(`.point__offers-input`);
-    [].forEach.call(offers, (element) => {
-      element.addEventListener(`click`, this._onOffersChange);
-    });
 
     const dateStart = flatpickr(this._element.querySelector(`input[name="date-start"]`), {
       [`time_24hr`]: true,
@@ -450,11 +435,6 @@ export default class TripOpen extends Component {
       .removeEventListener(`change`, this._onPriceChange);
     this._element.querySelector(`input[name="favorite"]`)
       .removeEventListener(`change`, this._onFavoriteChange);
-
-    const offers = this._element.querySelectorAll(`.point__offers-input`);
-    [].forEach.call(offers, (element) => {
-      element.removeEventListener(`click`, this._onOffersChange);
-    });
 
     flatpickr(this._element.querySelector(`input[name="date-start"]`)).destroy();
     flatpickr(this._element.querySelector(`input[name="date-end"]`)).destroy();
