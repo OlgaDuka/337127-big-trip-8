@@ -1,4 +1,14 @@
+/**
+ * @description Класс обработки данных для обмена между приложением и сервером
+ * @export
+ * @class Adapter
+ */
 export default class Adapter {
+  /**
+   * @description Конструктор касса Adapter
+   * @param {Array} data Массив данных, получаемых с сервера
+   * @member Adapter
+   */
   constructor(data) {
     this.id = data[`id`];
     this.type = data[`type`];
@@ -9,9 +19,16 @@ export default class Adapter {
     this.destination = data[`destination`].name || ``;
     this.description = data[`destination`].description || ``;
     this.pictures = data[`destination`].pictures || [];
-    this.isFavorite = Boolean(data[`is_favorite`]);
+    this.isFavorite = Boolean(data[`is_favorite`]) || false;
   }
 
+  /**
+   * @description Фабричный метод для приведения структуры данных к серверному виду
+   * @static
+   * @param {Object} data точка маршрута
+   * @return {JSON}
+   * @member Adapter
+   */
   static toRAW(data) {
     return {
       'id': data.id,
@@ -25,10 +42,24 @@ export default class Adapter {
     };
   }
 
+  /**
+   * @description Фабричный метод разбора данных
+   * @static
+   * @param {Array} data Массив данных
+   * @return {Adapter} Объект класса Adapter с адаптированными под приложение данными
+   * @member Adapter
+   */
   static parsePoint(data) {
     return new Adapter(data);
   }
 
+  /**
+   * @description Фабричный метод разбора группы данных
+   * @static
+   * @param {Array} data Массив данных
+   * @return {Array} Массив объектов класса Adapter
+   * @member Adapter
+   */
   static parsePoints(data) {
     return data.map(Adapter.parsePoint);
   }

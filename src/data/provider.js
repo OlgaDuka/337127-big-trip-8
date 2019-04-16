@@ -1,6 +1,13 @@
 import Adapter from './adapter';
 
 export default class Provider {
+  /**
+   * @description Конструктор класса Provider
+   * @param {LoaderData} loaderData Инстанс LoaderData - загрузчика данных
+   * @param {Storage} store Инстанс Store - хранилища данных
+   * @param {Function} generateId Метод генерации ID записи
+   * @member Provider
+   */
   constructor({loaderData, store, generateId}) {
     this._loader = loaderData;
     this._store = store;
@@ -9,7 +16,12 @@ export default class Provider {
 
     this._sendStorage = this._sendStorage.bind(this);
   }
-
+  /**
+   * @description Отправить данные в хранилище
+   * @param {point} point Данные точки маршрута
+   * @return {point} point Данные точки маршрута
+   * @member Provider
+   */
   _sendStorage(point) {
     this._store.setItem({
       id: point.id,
@@ -18,6 +30,11 @@ export default class Provider {
     return point;
   }
 
+  /**
+   * @description Запрос на получение данных всех точек маршрута
+   * @return {JSON} Данные в JSON-формате
+   * @member Provider
+   */
   getPoints() {
     if (Provider.isOnline()) {
       return this._loader.getPoints()
@@ -29,6 +46,11 @@ export default class Provider {
     return Promise.resolve(Adapter.parsePoints(Provider.objectToArray(this._store.getAll())));
   }
 
+  /**
+   * @description Запрос на получение справочника предложений по типам точек маршрута
+   * @return {JSON} Данные в JSON-формате
+   * @member Provider
+   */
   getOffers() {
     if (Provider.isOnline()) {
       return this._loader.getOffers()
@@ -40,6 +62,11 @@ export default class Provider {
     return Promise.resolve(this._store.getAll());
   }
 
+  /**
+   * @description Запрос на получение справочника пунктов назначения
+   * @return {JSON} Данные в JSON-формате
+   * @member Provider
+   */
   getDestinations() {
     if (Provider.isOnline()) {
       return this._loader.getDestinations()
@@ -51,6 +78,12 @@ export default class Provider {
     return Promise.resolve(this._store.getAll());
   }
 
+  /**
+   * @description Запрос на создание точки маршрута
+   * @param {*} {point} Данные точки маршрута
+   * @return {JSON} Ответ сервера в JSON-формате
+   * @member Provider
+   */
   createPoint({point}) {
     if (Provider.isOnline()) {
       return this._loader.createPoint({point})
@@ -64,6 +97,13 @@ export default class Provider {
     }
   }
 
+  /**
+   * @description Запрос на обновление точки маршрута
+   * @param {String} id ID точки маршрута
+   * @param {Object} data Данные точки маршрута
+   * @return {JSON} Ответ сервера в JSON-формате
+   * @member Provider
+   */
   updatePoint({id, data}) {
     if (Provider.isOnline()) {
       return this._loader.updatePoint({id, data})
@@ -76,6 +116,12 @@ export default class Provider {
     }
   }
 
+  /**
+   * @description Запрос на удаление точки маршрута
+   * @param {String} {id} ID точки маршрута
+   * @return {Promise}
+   * @member Provider
+   */
   deletePoint({id}) {
     if (Provider.isOnline()) {
       return this._loader.deletePoint({id})
@@ -89,6 +135,11 @@ export default class Provider {
     }
   }
 
+  /**
+   * @description Синхронизация данных хранилища и сервера
+   * @return {JSON}
+   * @member Provider
+   */
   syncPoints() {
     return this._loader.syncPoints({
       points: Provider.objectToArray(this._store.getAll())
@@ -97,11 +148,22 @@ export default class Provider {
       this._needSync = false;
     });
   }
-
+  /**
+   * @description Проверка статуса подключения к сети интернет
+   * @static
+   * @return {Boolean}
+   * @member Provider
+   */
   static isOnline() {
     return window.navigator.onLine;
   }
-
+  /**
+   * @description Преобразование объекта данных в массив
+   * @static
+   * @param {Object} object Объект данных
+   * @return {Array} Массив данных
+   * @member Provider
+   */
   static objectToArray(object) {
     return Object.keys(object).map((id) => object[id]);
   }

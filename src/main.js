@@ -3,8 +3,20 @@ import moment from 'moment';
 import {Model, LoaderData, Store, Provider, Adapter} from './data/index';
 import {TotalCost, TripDay, Trip, TripOpen, Filter, Sorting, Stat} from './view/index';
 
+/**
+ * @description Константы для создания загрузчика данных
+ * @const AUTHORIZATION, END_POINT
+ * @type {string}
+ */
+const AUTHORIZATION = `Basic dXNfckBgtXuzd27yZAo=${Math.random()}`;
+const END_POINT = `https://es8-demo-srv.appspot.com/big-trip`;
+
+/**
+ * @description Создание объектов, необходимых для запуска приложения
+ * @type {Model, LoaderData, Store, Provider, Stat, TotalCost}
+ */
 const model = new Model();
-const loaderData = new LoaderData();
+const loaderData = new LoaderData(END_POINT, AUTHORIZATION);
 const store = new Store({key: STORE_KEYS.points, storage: localStorage});
 const provider = new Provider({loaderData, store, generateId: () => String(Date.now())});
 const storeOffers = new Store({key: STORE_KEYS.offers, storage: localStorage});
@@ -14,6 +26,10 @@ const providerDestinations = new Provider({loaderData, store: storeDestinations,
 const stat = new Stat();
 const cost = new TotalCost();
 
+/**
+ * @description Константы для работы с DOM-элементами
+ * @type {Node}
+ */
 const boardTotalCost = document.querySelector(`.trip`);
 const controls = document.querySelector(`.trip-controls`);
 const formFilter = controls.querySelector(`.trip-filter`);
@@ -25,6 +41,9 @@ const boardStat = document.querySelector(`#stats`);
 const boardDays = boardTable.querySelector(`.trip-points`);
 const formSorting = boardTable.querySelector(`.trip-sorting`);
 
+/**
+ * @description Функция переключения страницы на показ списка точек маршрута
+ */
 const toggleToTable = () => {
   buttonTable.classList.add(`view-switch__item--active`);
   buttonStat.classList.remove(`view-switch__item--active`);
@@ -32,6 +51,9 @@ const toggleToTable = () => {
   boardTable.classList.remove(`visually-hidden`);
 };
 
+/**
+ * @description Функция переключения страницы на показ статистики
+ */
 const toggleToStat = () => {
   buttonStat.classList.add(`view-switch__item--active`);
   buttonTable.classList.remove(`view-switch__item--active`);
@@ -39,6 +61,11 @@ const toggleToStat = () => {
   boardTable.classList.add(`visually-hidden`);
 };
 
+/**
+ * @description Функция отрисовки панели фильтров
+ * @param {Array} arrFilters массив названий фильтров
+ * @return {Array}
+ */
 const renderFilters = (arrFilters) => {
   return arrFilters.map((element) => {
     const filter = new Filter(element);
@@ -49,6 +76,11 @@ const renderFilters = (arrFilters) => {
   });
 };
 
+/**
+ * @description Функция отрисовки строки сортировки точек маршрута перед списком точек
+ * @param {Array} arrSorting массив названий полей сортировки
+ * @return {Array}
+ */
 const renderSorting = (arrSorting) => {
   return arrSorting.map((element) => {
     const sorting = new Sorting(element);
@@ -59,16 +91,28 @@ const renderSorting = (arrSorting) => {
   });
 };
 
+/**
+ * @description Функция отрисовки общей стоимости путешествия
+ * @param {Array} arrPoints массив точек маршрута
+ */
 const renderTotalCost = (arrPoints) => {
   cost.getCostTrip(arrPoints);
   boardTotalCost.appendChild(cost.render());
 };
 
+/**
+ * @description Функция обновления общей стоимости путешествия
+ */
 const updateTotalCost = () => {
   cost.unRender();
   renderTotalCost(model.events);
 };
 
+/**
+ * @description Функция создания массива дней путешествия
+ * @param {Array} arrPoints массив точек маршрута
+ * @return {Array} arrDays
+ */
 const createArrDays = (arrPoints) => {
   const arrDays = [];
   arrPoints.forEach((point) => {
@@ -80,6 +124,10 @@ const createArrDays = (arrPoints) => {
   return arrDays;
 };
 
+/**
+ * @description Функция отрисовки списка точек маршрута, распределенных по дням путешествия
+ * @param {Array} arrPoints массив точек маршрута
+ */
 const renderDays = (arrPoints) => {
   boardDays.innerHTML = ``;
   const arrDays = createArrDays(arrPoints);
@@ -92,12 +140,41 @@ const renderDays = (arrPoints) => {
   }
 };
 
-const onErrorToRespond = (elem) => {
+/**
+ * @description Функция отрисовки списка точек маршрута, в контейрере первого дня путешествия (для сортировки)
+ * @param {Array} arrPoints массив точек маршрута
+ */
+const renderOneDay = (arrPoints) => {
+  let minDay = Date.now();
+  arrPoints.forEach((elem) => {
+    minDay = elem.timeStart < minDay ? elem.timeStart : minDay;
+  });
+  minDay = moment(minDay).format(`DD MMM YY`);
+  boardDays.innerHTML = ``;
+  const boardDay = new TripDay(minDay).render();
+  const distEvents = boardDay.querySelector(`.trip-day__items`);
+  boardDays.appendChild(boardDay);
+  renderEvents(arrPoints, distEvents);
+};
+
+/**
+ * @description Функция реакции на ошибку при выполнении запросов к серверу
+ * @param {Array} elem массив точек маршрута
+ */
+const respondToError = (elem) => {
   elem.element.style.border = `2px solid #FF0000`;
   elem.shake();
   elem.unblockToSave();
 };
 
+/**
+ * @description Выполняет запрос к серверу на обновление точки маршрута
+ * @param {Object} newDataPoint - новые данные
+ * @param {Object} obPoint - данные точки в модели
+ * @param {Object} point - объект точки в списке
+ * @param {Object} pointOpen - объект точки в режиме редактирования
+ * @param {Node} container - контейнер для отрисовки точки маршрута
+ */
 const makeRequestUpdateData = async (newDataPoint, obPoint, point, pointOpen, container) => {
   try {
     pointOpen.blockToSave();
@@ -110,26 +187,36 @@ const makeRequestUpdateData = async (newDataPoint, obPoint, point, pointOpen, co
     pointOpen.unRender();
     updateTotalCost();
   } catch (err) {
-    onErrorToRespond(pointOpen);
+    respondToError(pointOpen);
   }
 };
 
+/**
+ * @description Выполняет запрос к серверу на удаление точки маршрута
+ * @param {String} id - идентификатор точки
+ * @param {Object} pointOpen - объект точки в режиме редактирования
+ */
 const makeRequestDeleteData = async (id, pointOpen) => {
   try {
     pointOpen.blockToDelete();
     await provider.deletePoint({id});
     model.eventsData = await provider.getPoints();
     pointOpen.unRender();
-    renderDays(model.events);
+    renderTargetEvents();
     updateTotalCost();
   } catch (err) {
-    onErrorToRespond(pointOpen);
+    respondToError(pointOpen);
   }
 };
 
-const renderEvents = (arr, dist) => {
+/**
+ * @description Отрисовывает точки маршрута и устанавливает для них обработчики событий
+ * @param {Array} arrPoint - массив точек маршрута
+ * @param {Node} dist - контейнер для отрисовки точки маршрута
+ */
+const renderEvents = (arrPoint, dist) => {
   dist.innerHTML = ``;
-  for (let obPoint of arr) {
+  for (let obPoint of arrPoint) {
     const point = new Trip(obPoint);
     let pointOpen = new TripOpen(model.offers, model.destinations, obPoint);
     dist.appendChild(point.render());
@@ -147,11 +234,17 @@ const renderEvents = (arr, dist) => {
     pointOpen.onKeyEsc = () => {
       point.render();
       dist.replaceChild(point.element, pointOpen.element);
+      pointOpen.resetPoint(obPoint);
       pointOpen.unRender();
     };
   }
 };
 
+/**
+ * @description Выполняет запрос к серверу на добавление точки маршрута
+ * @param {Object} newDataPoint - новые данные
+ * @param {Object} newRenderPoint - объект новой точки
+ */
 const makeRequestInsert = async (newDataPoint, newRenderPoint) => {
   try {
     newRenderPoint.blockToSave();
@@ -159,13 +252,17 @@ const makeRequestInsert = async (newDataPoint, newRenderPoint) => {
     model.eventsData = await provider.getPoints();
     newRenderPoint.unRender();
     boardDays.innerHTML = ``;
-    renderDays(model.events);
+    renderTargetEvents();
     updateTotalCost();
   } catch (err) {
-    onErrorToRespond(newRenderPoint);
+    respondToError(newRenderPoint);
   }
 };
 
+/**
+ * @description Установка обработчика события `click` на кнопку NewEvent
+ * @const {Object} newPoint - объект TripOpen
+ */
 buttonNewEvent.addEventListener(`click`, () => {
   toggleToTable();
   const newPoint = new TripOpen(model.offers, model.destinations);
@@ -178,6 +275,10 @@ buttonNewEvent.addEventListener(`click`, () => {
   };
 });
 
+/**
+ * @description Установка обработчика события `click` на кнопку Table
+ * @description переключает страницу в режим показа списка точек маршрута
+ */
 buttonTable.addEventListener(`click`, (evt) => {
   evt.preventDefault();
   formFilter.classList.remove(`visually-hidden`);
@@ -186,6 +287,10 @@ buttonTable.addEventListener(`click`, (evt) => {
   }
 });
 
+/**
+ * @description Установка обработчика события `click` на кнопку Stat
+ * @description переключает страницу в режим показа статистики
+ */
 buttonStat.addEventListener(`click`, (evt) => {
   evt.preventDefault();
   formFilter.classList.add(`visually-hidden`);
@@ -195,30 +300,59 @@ buttonStat.addEventListener(`click`, (evt) => {
   stat.update(model);
 });
 
+/**
+ * @description В зависимости от установленных фильтров и сортировок вызывает функции
+ * @description отрисовки точек маршрута по дням или в контейнере первого дня путешествия
+ */
+const renderTargetEvents = () => {
+  if (model.state.nameSorting === `sorting-event`) {
+    renderDays(model.getFilterSortingEvents());
+  } else {
+    renderOneDay(model.getFilterSortingEvents());
+  }
+};
+/**
+ * @description Установка обработчика события `click` на кнопки панели фильтров
+ */
 formFilter.addEventListener(`click`, ({target}) => {
   if (target.className === `trip-filter__item` && !target.previousElementSibling.disabled) {
     boardDays.innerHTML = ``;
-    renderDays(model.getFilterEvents(target.previousElementSibling.id));
+    model.state.nameFilter = target.previousElementSibling.id;
+    renderTargetEvents();
   }
 });
 
+/**
+ * @description Установка обработчика события `click` на кнопки переключения сортировки
+ */
 formSorting.addEventListener(`click`, ({target}) => {
   const className = target.className;
   const numPos = className.indexOf(` `);
-  if (className.substring(0, numPos) === `trip-sorting__item` && !target.previousElementSibling.disabled) {
+  if ((className.substring(0, numPos) === `trip-sorting__item`)
+    && !target.previousElementSibling.disabled && (target.previousElementSibling.id !== `sorting-offers`)) {
     boardDays.innerHTML = ``;
-    renderDays(model.getSortingEvents(target.previousElementSibling.id));
+    model.state.nameSorting = target.previousElementSibling.id;
+    renderTargetEvents();
   }
 });
 
+/**
+ * @description Установка обработчика события `offline` на страницу браузера
+ */
 window.addEventListener(`offline`, () => {
   document.title = `${document.title}[OFFLINE]`;
 });
+/**
+ * @description Установка обработчика события `online` на страницу браузера
+ */
 window.addEventListener(`online`, () => {
   document.title = document.title.split(`[OFFLINE]`)[0];
   provider.syncPoints();
 });
 
+/**
+ * @description Инициализация приложения, отрисовка компонентов страницы после получения данных с сервера
+ */
 const initialApp = () => {
   boardDays.textContent = ``;
   stat.config = model;
@@ -229,6 +363,9 @@ const initialApp = () => {
   stat.render();
 };
 
+/**
+ * @description Выполняет первоначальный запрос к серверу для получения данных точек маршрута и справочников
+ */
 let makeRequestGetData = async () => {
   let load = true;
   let error = false;
@@ -246,4 +383,7 @@ let makeRequestGetData = async () => {
   }
 };
 
+/**
+ * @description Начало: получение данных с сервера и отрисовка страницы приложения.
+ */
 makeRequestGetData();

@@ -7,7 +7,17 @@ import TotalCost from './total-cost';
 const BAR_HEIGHT = 60;
 const COUNT_STAT = 3;
 
+/**
+ * @description Класс компонента для показа статистики
+ * @export
+ * @class Stat
+ * @extends {Component}
+ */
 export default class Stat {
+  /**
+   * @description Конструктор класса
+   * @member Stat
+   */
   constructor() {
     this._element = [];
     this._config = [];
@@ -15,6 +25,11 @@ export default class Stat {
     this._ctx = [];
   }
 
+  /**
+   * @description Сеттер - заполняет конфиг для графиков статистики
+   * @param {Array} data модель, используются данные всех точек events и массив stat
+   * @member Stat
+   */
   set config(data) {
     for (let i = 0; i < COUNT_STAT; i += 1) {
       this._container[i] = document.querySelector(data.stat[i].selectorParent);
@@ -29,6 +44,12 @@ export default class Stat {
     }
   }
 
+  /**
+   * @description Функция для создания имен чартов и расчета стоимости по типам точек маршрута
+   * @param {Array} arr данные всех точек маршрута
+   * @return {Object} массив лейб, массив стоимостей и количество чартов для расчета высоты графика
+   * @member Stat
+   */
   getPointsMoney(arr) {
     const arrType = [];
     const arrPrice = [];
@@ -45,6 +66,12 @@ export default class Stat {
     return {labels: arrType, data: arrPrice, numPoints: count};
   }
 
+  /**
+   * @description Функция для создания имен чартов и расчета времени по типам точек маршрута
+   * @param {Array} arr данные всех точек маршрута
+   * @return {Object} массив лейб, массив времен в часах и количество чартов для расчета высоты графика
+   * @member Stat
+   */
   getPointsTimeSpend(arr) {
     const arrLabel = [];
     const arrHour = [];
@@ -61,6 +88,12 @@ export default class Stat {
     return {labels: arrLabel, data: arrHour, numPoints: count};
   }
 
+  /**
+   * @description Функция для создания имен чартов и определения используемых видов транспорта в путешествии
+   * @param {Array} arr данные всех точек маршрута
+   * @return {Object} массив лейб, массив кол-ва раз использования видов транспорта и кол-во чартов
+   * @member Stat
+   */
   getPointsTransport(arr) {
     const arrType = [];
     const arrNum = [];
@@ -77,6 +110,11 @@ export default class Stat {
     return {labels: arrType, data: arrNum, numPoints: count};
   }
 
+  /**
+   * @description Обновляет данные для вывода статистики
+   * @param {Array} data модель, используются данные всех точек events и массив stat
+   * @member Stat
+   */
   update(data) {
     for (let i = 0; i < COUNT_STAT; i += 1) {
       this._config[i]._arrPoints = this[data.stat[i].method](data.events);
@@ -88,6 +126,11 @@ export default class Stat {
     }
   }
 
+  /**
+   * @description Отрисовывает графики со статистикой
+   * @return {Node}
+   * @member Stat
+   */
   render() {
     for (let i = 0; i < COUNT_STAT; i += 1) {
       this._element[i] = new Chart(this._ctx[i], this._configChart(i));
@@ -95,6 +138,12 @@ export default class Stat {
     return this._element;
   }
 
+  /**
+   * @description Заполняет конфигурационный объект чарта для вывода статистики
+   * @param {Array} item массив с данными для настройки чарта
+   * @return {Object} с настройками для рисования графиков
+   * @member Stat
+   */
   _configChart(item) {
     return {
       plugins: [ChartDataLabels],
@@ -164,11 +213,26 @@ export default class Stat {
     };
   }
 
+  /**
+   * @description Получение длительности точки маршрута
+   * @static
+   * @param {Array} arr массив данных точек маршрута
+   * @param {Integer} item элемент массива
+   * @return {Integer} длительность в часах с округлением минут > 30 до целого часа
+   * @member Stat
+   */
   static getDurationHour(arr, item) {
     const duration = moment.duration(moment(arr[item].timeStop).diff(moment(arr[item].timeStart)));
     return duration.days() * 24 + duration.hours() + (duration.minutes() > 30 ? 1 : 0);
   }
 
+  /**
+   * @description Создание лейбы для чарта
+   * @static
+   * @param {Object} point объект данных точки маршрута
+   * @return {String} строка, содержит иконку и название типа точки маршрута
+   * @member Stat
+   */
   static getStrLabel(point) {
     return `${EVENT_TYPES[point.type].icon} ${point.type.toUpperCase()}`;
   }
