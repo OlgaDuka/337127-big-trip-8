@@ -1,4 +1,4 @@
-import {createElement, EVENT_TYPES, POINT_DEFAULT} from '../utils/index';
+import {EVENT_TYPES, POINT_DEFAULT} from '../utils/index';
 import moment from 'moment';
 import flatpickr from 'flatpickr';
 import Component from './component.js';
@@ -49,6 +49,7 @@ export default class TripOpen extends Component {
   }
   /**
    * @description Сеттер - устанавливает коллбэк-функцию для сохранения элемента
+   * @param {Function} fn
    * @member TripOpen
    */
   set onSubmit(fn) {
@@ -57,6 +58,7 @@ export default class TripOpen extends Component {
 
   /**
    * @description Сеттер - устанавливает коллбэк-функцию для удаления элемента
+   * @param {Function} fn
    * @member TripOpen
    */
   set onDelete(fn) {
@@ -65,6 +67,7 @@ export default class TripOpen extends Component {
 
   /**
    * @description Сеттер - устанавливает коллбэк-функцию для сброса элемента в начальное состояние
+   * @param {Function} fn
    * @member TripOpen
    */
   set onKeyEsc(fn) {
@@ -210,6 +213,7 @@ export default class TripOpen extends Component {
 
   /**
    * @description Сброс изменений данных при необходимости отмены
+   * @param {Object} data
    * @const {Object} oldElement сохранение данных на время перерисовки компонента
    * @member TripOpen
    */
@@ -227,7 +231,7 @@ export default class TripOpen extends Component {
     };
   }
 
-   /**
+  /**
    * @description Блокирует кнопку Delete на время запроса к серверу на удаление точки маршрута
    * @member TripOpen
    */
@@ -275,6 +279,7 @@ export default class TripOpen extends Component {
 
   /**
    * @description Обработчик события `click` по кнопке Save компонента - записывает данные на сервер
+   * @param {event} evt сoбытие
    * @member TripOpen
    */
   _onSubmitButtonClick(evt) {
@@ -286,7 +291,7 @@ export default class TripOpen extends Component {
 
   /**
    * @description Обработчик события `click` по кнопке Delete компонента
-   * @return function
+   * @return {function}
    * @member TripOpen
    */
   _onDeleteButtonClick() {
@@ -295,7 +300,8 @@ export default class TripOpen extends Component {
 
   /**
    * @description Обработчик события при нажатии на клавишу`ESC` - сброс результатов редактирования
-   * @return function
+   * @param {event} evt
+   * @return {function}
    * @member TripOpen
    */
   _onKeydownEsc(evt) {

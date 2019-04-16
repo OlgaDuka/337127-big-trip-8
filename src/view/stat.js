@@ -128,6 +128,7 @@ export default class Stat {
 
   /**
    * @description Отрисовывает графики со статистикой
+   * @return {node}
    * @member Stat
    */
   render() {

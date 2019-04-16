@@ -32,6 +32,7 @@ export default class Trip extends Component {
 
   /**
    * @description Сеттер - устанавливает коллбэк-функцию для реакции на клик по элементу
+   * @param {Function} fn
    * @member Trip
    */
   set onClick(fn) {
@@ -112,7 +113,7 @@ export default class Trip extends Component {
 
   /**
    * @description Обработчик события `click` компонента
-   * @return function
+   * @return {Function}
    * @member Trip
    */
   _onPointClick() {

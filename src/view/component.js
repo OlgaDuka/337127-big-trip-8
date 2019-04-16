@@ -47,7 +47,6 @@ export default class Component {
 
   /**
    * @description Очистка свойств и отвязка обработчиков событий элемента
-   * @return {Node} DOM-элемент
    * @member Component
    */
   unRender() {

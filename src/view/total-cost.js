@@ -28,6 +28,7 @@ export default class TotalCost extends Component {
 
   /**
    * @description Считает общую стоимость путешествия
+   * @param {Array} data массив объектов точек маршрута
    * @return {Integer} стоимость путешествия
    * @member TotalCost
    */
@@ -39,6 +40,7 @@ export default class TotalCost extends Component {
   /**
    * @description Фабричный метод рассчета стоимости точки маршрута с учетом предложений
    * @static
+   * @param {Object} point точка маршрута
    * @const {Integer} totalOffersPrice стоимость предложений
    * @return {Integer} стоимость точки маршрута
    * @member TotalCost

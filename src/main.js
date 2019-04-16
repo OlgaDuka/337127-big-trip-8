@@ -64,6 +64,7 @@ const toggleToStat = () => {
 /**
  * @description Функция отрисовки панели фильтров
  * @param {Array} arrFilters массив названий фильтров
+ * @return {Array}
  */
 const renderFilters = (arrFilters) => {
   return arrFilters.map((element) => {
@@ -78,6 +79,7 @@ const renderFilters = (arrFilters) => {
 /**
  * @description Функция отрисовки строки сортировки точек маршрута перед списком точек
  * @param {Array} arrSorting массив названий полей сортировки
+ * @return {Array}
  */
 const renderSorting = (arrSorting) => {
   return arrSorting.map((element) => {
@@ -200,7 +202,7 @@ const makeRequestDeleteData = async (id, pointOpen) => {
     await provider.deletePoint({id});
     model.eventsData = await provider.getPoints();
     pointOpen.unRender();
-    renderDays(model.events);
+    renderTargetEvents();
     updateTotalCost();
   } catch (err) {
     respondToError(pointOpen);
@@ -250,7 +252,7 @@ const makeRequestInsert = async (newDataPoint, newRenderPoint) => {
     model.eventsData = await provider.getPoints();
     newRenderPoint.unRender();
     boardDays.innerHTML = ``;
-    renderDays(model.events);
+    renderTargetEvents();
     updateTotalCost();
   } catch (err) {
     respondToError(newRenderPoint);
@@ -299,13 +301,24 @@ buttonStat.addEventListener(`click`, (evt) => {
 });
 
 /**
+ * @description В зависимости от установленных фильтров и сортировок вызывает функции
+ * @description отрисовки точек маршрута по дням или в контейнере первого дня путешествия
+ */
+const renderTargetEvents = () => {
+  if (model.state.nameSorting === `sorting-event`) {
+    renderDays(model.getFilterSortingEvents());
+  } else {
+    renderOneDay(model.getFilterSortingEvents());
+  }
+};
+/**
  * @description Установка обработчика события `click` на кнопки панели фильтров
  */
 formFilter.addEventListener(`click`, ({target}) => {
   if (target.className === `trip-filter__item` && !target.previousElementSibling.disabled) {
     boardDays.innerHTML = ``;
     model.state.nameFilter = target.previousElementSibling.id;
-    renderDays(model.getFilterSortingEvents());
+    renderTargetEvents();
   }
 });
 
@@ -315,17 +328,11 @@ formFilter.addEventListener(`click`, ({target}) => {
 formSorting.addEventListener(`click`, ({target}) => {
   const className = target.className;
   const numPos = className.indexOf(` `);
-  if (className.substring(0, numPos) === `trip-sorting__item` && !target.previousElementSibling.disabled) {
-    const sortingName = target.previousElementSibling.id;
-    if (sortingName !== `sorting-offers`) {
-      boardDays.innerHTML = ``;
-      model.state.nameSorting = sortingName;
-      if (sortingName === `sorting-event`) {
-        renderDays(model.getFilterSortingEvents(sortingName));
-      } else {
-        renderOneDay(model.getFilterSortingEvents(sortingName));
-      }
-    }
+  if ((className.substring(0, numPos) === `trip-sorting__item`)
+    && !target.previousElementSibling.disabled && (target.previousElementSibling.id !== `sorting-offers`)) {
+    boardDays.innerHTML = ``;
+    model.state.nameSorting = target.previousElementSibling.id;
+    renderTargetEvents();
   }
 });
 

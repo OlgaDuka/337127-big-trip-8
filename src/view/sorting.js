@@ -42,7 +42,7 @@ export default class Sorting extends Component {
 
   /**
    * @description Отрисовка компонента
-   * @return Элемент
+   * @return {node}
    * @member Sorting
    */
   render() {
@@ -70,7 +70,7 @@ export default class Sorting extends Component {
 
   /**
    * @description Обработчик события `click` компонента
-   * @return function
+   * @return {Function}
    * @member Sorting
    */
   _onSortingClick() {

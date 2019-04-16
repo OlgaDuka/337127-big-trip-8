@@ -25,8 +25,9 @@ export default class Adapter {
   /**
    * @description Фабричный метод для приведения структуры данных к серверному виду
    * @static
-   * @return {Object}
-   * @member ModelItem
+   * @param {Object} data точка маршрута
+   * @return {JSON}
+   * @member Adapter
    */
   static toRAW(data) {
     return {
@@ -51,7 +52,7 @@ export default class Adapter {
   static parsePoint(data) {
     return new Adapter(data);
   }
-  
+
   /**
    * @description Фабричный метод разбора группы данных
    * @static

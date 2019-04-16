@@ -43,7 +43,7 @@ export default class Filter extends Component {
 
   /**
    * @description Отрисовка компонента
-   * @return Элемент
+   * @return {node}
    * @member Filter
    */
   render() {
@@ -71,7 +71,7 @@ export default class Filter extends Component {
   /**
    * @description Обработчик события `click` компонента
    * @member Filter
-   * @return function
+   * @return {Function}
    */
   _onFilterClick() {
     return (typeof this._onFilter === `function`) && this._onFilter();
