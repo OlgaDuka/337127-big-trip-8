@@ -17,6 +17,8 @@ export default class Trip extends Component {
    */
   constructor(data) {
     super();
+    this.data = data;
+
     this._type = data.type;
     this._destination = data.destination;
     this._timeStart = data.timeStart;
@@ -26,8 +28,10 @@ export default class Trip extends Component {
     this.price = data.price;
 
     this._onClick = null;
+    this._onSubmit = null;
 
     this._onPointClick = this._onPointClick.bind(this);
+    this._onOfferClick = this._onOfferClick.bind(this);
   }
 
   /**
@@ -38,6 +42,16 @@ export default class Trip extends Component {
   set onClick(fn) {
     this._onClick = fn;
   }
+
+  /**
+   * @description Сеттер - устанавливает коллбэк-функцию для добавления предложения к точке маршрута
+   * @param {Function} fn
+   * @member Trip
+   */
+  set onSubmit(fn) {
+    this._onSubmit = fn;
+  }
+
 
   /**
    * @description Геттер - создание шаблона компонента
@@ -121,11 +135,35 @@ export default class Trip extends Component {
   }
 
   /**
+   * @description Обработчик события `click` по кнопке с предложением
+   * @return {Function}
+   * @member Trip
+   */
+  _onOfferClick({target}) {
+    if (typeof this._onSubmit === `function`) {
+      for (const offer of this.data.offers) {
+        if (offer.title === target.value) {
+          offer.accepted = target.checked;
+          break;
+        }
+      }
+      this.price = TotalCost.getPricePoint(this.data);
+      this._onSubmit(this.data);
+    }
+  }
+
+  /**
    * @description Установка обработчика события
    * @member Trip
    */
   bind() {
     this._element.addEventListener(`click`, this._onPointClick);
+
+    const offers = this._element.querySelectorAll(`.point__offers-input`);
+    [].forEach.call(offers, (element) => {
+      element.addEventListener(`click`, this._onOfferClick);
+    });
+
   }
 
   /**
@@ -134,5 +172,11 @@ export default class Trip extends Component {
    */
   unbind() {
     this._element.removeEventListener(`click`, this._onPointClick);
+
+    const offers = this._element.querySelectorAll(`.point__offers-input`);
+    [].forEach.call(offers, (element) => {
+      element.removeEventListener(`click`, this._onOfferClick);
+    });
+
   }
 }

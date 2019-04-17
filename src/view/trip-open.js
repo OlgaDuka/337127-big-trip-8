@@ -46,6 +46,7 @@ export default class TripOpen extends Component {
     this._onPriceChange = this._onPriceChange.bind(this);
     this._onFavoriteChange = this._onFavoriteChange.bind(this);
   }
+
   /**
    * @description Сеттер - устанавливает коллбэк-функцию для сохранения элемента
    * @param {Function} fn
