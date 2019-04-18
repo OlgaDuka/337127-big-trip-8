@@ -171,7 +171,7 @@ export default class Stat {
             formatter: (val) => `${val}${this._config[item]._unit}`
           }
         },
-        destination: {
+        title: {
           display: true,
           text: this._config[item]._title,
           fontColor: `#000000`,

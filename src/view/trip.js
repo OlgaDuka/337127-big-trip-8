@@ -126,28 +126,50 @@ export default class Trip extends Component {
   }
 
   /**
-   * @description Обработчик события `click` компонента
-   * @return {Function}
+   * @description Частичное обновление данных внутри формы ввода
+   * @const {Object} oldElement сохранение данных на время перерисовки компонента
    * @member Trip
    */
-  _onPointClick() {
-    return (typeof this._onClick === `function`) && this._onClick();
+  _partialUpdate() {
+    this.unbind();
+    const oldElement = this._element;
+    this.render();
+    oldElement.parentNode.replaceChild(this._element, oldElement);
+  }
+
+
+  /**
+   * @description Обработчик события `click` компонента
+   * @param {event} evt
+   * @member Trip
+   */
+  _onPointClick(evt) {
+    if (typeof this._onClick !== `function`) {
+      return;
+    }
+    if (evt.target.tagName === `BUTTON`) {
+      evt.stopPropagation();
+      return;
+    }
+    this._onClick();
   }
 
   /**
    * @description Обработчик события `click` по кнопке с предложением
-   * @return {Function}
+   * @param {event} evt
    * @member Trip
    */
-  _onOfferClick({target}) {
+  _onOfferClick(evt) {
+    evt.preventDefault();
     if (typeof this._onSubmit === `function`) {
       for (const offer of this.data.offers) {
-        if (offer.title === target.value) {
-          offer.accepted = target.checked;
+        const numPos = evt.target.textContent.indexOf(` +`);
+        if (offer.title === evt.target.textContent.substring(0, numPos)) {
+          offer.accepted = true;
           break;
         }
       }
-      this.price = TotalCost.getPricePoint(this.data);
+      this._partialUpdate();
       this._onSubmit(this.data);
     }
   }
@@ -159,7 +181,7 @@ export default class Trip extends Component {
   bind() {
     this._element.addEventListener(`click`, this._onPointClick);
 
-    const offers = this._element.querySelectorAll(`.point__offers-input`);
+    const offers = this._element.querySelectorAll(`.trip-point__offer`);
     [].forEach.call(offers, (element) => {
       element.addEventListener(`click`, this._onOfferClick);
     });
@@ -173,7 +195,7 @@ export default class Trip extends Component {
   unbind() {
     this._element.removeEventListener(`click`, this._onPointClick);
 
-    const offers = this._element.querySelectorAll(`.point__offers-input`);
+    const offers = this._element.querySelectorAll(`.trip-point__offer`);
     [].forEach.call(offers, (element) => {
       element.removeEventListener(`click`, this._onOfferClick);
     });
