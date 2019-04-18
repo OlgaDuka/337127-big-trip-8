@@ -17,6 +17,8 @@ export default class Trip extends Component {
    */
   constructor(data) {
     super();
+    this.data = data;
+
     this._type = data.type;
     this._destination = data.destination;
     this._timeStart = data.timeStart;
@@ -26,8 +28,10 @@ export default class Trip extends Component {
     this.price = data.price;
 
     this._onClick = null;
+    this._onSubmit = null;
 
     this._onPointClick = this._onPointClick.bind(this);
+    this._onOfferClick = this._onOfferClick.bind(this);
   }
 
   /**
@@ -38,6 +42,16 @@ export default class Trip extends Component {
   set onClick(fn) {
     this._onClick = fn;
   }
+
+  /**
+   * @description Сеттер - устанавливает коллбэк-функцию для добавления предложения к точке маршрута
+   * @param {Function} fn
+   * @member Trip
+   */
+  set onSubmit(fn) {
+    this._onSubmit = fn;
+  }
+
 
   /**
    * @description Геттер - создание шаблона компонента
@@ -112,12 +126,52 @@ export default class Trip extends Component {
   }
 
   /**
-   * @description Обработчик события `click` компонента
-   * @return {Function}
+   * @description Частичное обновление данных внутри формы ввода
+   * @const {Object} oldElement сохранение данных на время перерисовки компонента
    * @member Trip
    */
-  _onPointClick() {
-    return (typeof this._onClick === `function`) && this._onClick();
+  _partialUpdate() {
+    this.unbind();
+    const oldElement = this._element;
+    this.render();
+    oldElement.parentNode.replaceChild(this._element, oldElement);
+  }
+
+
+  /**
+   * @description Обработчик события `click` компонента
+   * @param {event} evt
+   * @member Trip
+   */
+  _onPointClick(evt) {
+    if (typeof this._onClick !== `function`) {
+      return;
+    }
+    if (evt.target.tagName === `BUTTON`) {
+      evt.stopPropagation();
+      return;
+    }
+    this._onClick();
+  }
+
+  /**
+   * @description Обработчик события `click` по кнопке с предложением
+   * @param {event} evt
+   * @member Trip
+   */
+  _onOfferClick(evt) {
+    evt.preventDefault();
+    if (typeof this._onSubmit === `function`) {
+      for (const offer of this.data.offers) {
+        const numPos = evt.target.textContent.indexOf(` +`);
+        if (offer.title === evt.target.textContent.substring(0, numPos)) {
+          offer.accepted = true;
+          break;
+        }
+      }
+      this._partialUpdate();
+      this._onSubmit(this.data);
+    }
   }
 
   /**
@@ -126,6 +180,12 @@ export default class Trip extends Component {
    */
   bind() {
     this._element.addEventListener(`click`, this._onPointClick);
+
+    const offers = this._element.querySelectorAll(`.trip-point__offer`);
+    [].forEach.call(offers, (element) => {
+      element.addEventListener(`click`, this._onOfferClick);
+    });
+
   }
 
   /**
@@ -134,5 +194,11 @@ export default class Trip extends Component {
    */
   unbind() {
     this._element.removeEventListener(`click`, this._onPointClick);
+
+    const offers = this._element.querySelectorAll(`.trip-point__offer`);
+    [].forEach.call(offers, (element) => {
+      element.removeEventListener(`click`, this._onOfferClick);
+    });
+
   }
 }

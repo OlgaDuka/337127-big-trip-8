@@ -192,6 +192,23 @@ const makeRequestUpdateData = async (newDataPoint, obPoint, point, pointOpen, co
 };
 
 /**
+ * @description Выполняет запрос к серверу на добавление предложения к точке маршрута
+ * @param {Object} newDataPoint - новые данные
+ * @param {Object} obPoint - данные точки в модели
+ * @param {Object} point - объект точки в списке
+ */
+const makeRequestUpdateOffer = async (newDataPoint, obPoint, point) => {
+  try {
+    const newPoint = await provider.updatePoint({id: obPoint.id, data: Adapter.toRAW(newDataPoint)});
+    model.updatePoint(obPoint, newPoint);
+    point.update(newPoint);
+    updateTotalCost();
+  } catch (err) {
+    respondToError(point);
+  }
+};
+
+/**
  * @description Выполняет запрос к серверу на удаление точки маршрута
  * @param {String} id - идентификатор точки
  * @param {Object} pointOpen - объект точки в режиме редактирования
@@ -224,6 +241,9 @@ const renderEvents = (arrPoint, dist) => {
       pointOpen.render();
       dist.replaceChild(pointOpen.element, point.element);
       point.unRender();
+    };
+    point.onSubmit = (newObject) => {
+      makeRequestUpdateOffer(newObject, obPoint, point);
     };
     pointOpen.onSubmit = (newObject) => {
       makeRequestUpdateData(newObject, obPoint, point, pointOpen, dist);
