@@ -36,8 +36,8 @@ export const StatData = [{selector: `.statistic__money`, selectorParent: `.stati
   {selector: `.statistic__transport`, selectorParent: `.statistic__item--transport`, title: `TRANSPORT`, unit: `x`, method: `getPointsTransport`},
   {selector: `.statistic__time-spend`, selectorParent: `.statistic__item--time-spend`, title: `TIME-SPEND`, unit: `H`, method: `getPointsTimeSpend`}];
 
-export const NAME_FILTERS = [`everything`, `future`, `past`];
-export const NAME_SORTING = [`event`, `time`, `price`, `offers`];
+export const FILTER_NAMES = [`everything`, `future`, `past`];
+export const SORTING_NAMES = [`event`, `time`, `price`, `offers`];
 
 export const createElement = (template) => {
   const newElement = document.createElement(`div`);

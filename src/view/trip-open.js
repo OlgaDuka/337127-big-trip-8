@@ -84,10 +84,6 @@ export default class TripOpen extends Component {
     return `<article class="point">
                 <form action="" method="get" class="point__form">
                   <header class="point__header">
-                    <label class="point__date">
-                      choose day
-                      <input class="point__input" type="text" value="${this._getDay()}" name="day" readonly>
-                    </label>
 
                     <div class="travel-way">
                       <label class="travel-way__label" for="travel-way__toggle">${EVENT_TYPES[this._state.type].icon}</label>
@@ -114,8 +110,9 @@ export default class TripOpen extends Component {
 
                     <div class="point__time">
                       choose time
-                      <input class="point__input" type="text" value="" name="date-start" placeholder="00:00">
-                      <input class="point__input" type="text" value="" name="date-end" placeholder="00:00">
+                      <input class="point__input" type="text" value="" name="date-start" placeholder="00:00 01 apr">
+                      <span class="point__md">&nbsp;&mdash;&nbsp;</span>
+                      <input class="point__input" type="text" value="" name="date-end" placeholder="00:00 01 apr">
                     </div>
 
                     <label class="point__price">
@@ -188,15 +185,6 @@ export default class TripOpen extends Component {
     const arrResult = [];
     this._referenceDestinations.map((item) => arrResult.push(item.name));
     return arrResult.map((item) => `<option value="${item}"></option>`).join(``);
-  }
-
-  /**
-   * @description Формирует строку с днем для новой точки маршрута для вывода в шаблон
-   * @return {Node} DOM-элемент <template>
-   * @member TripOpen
-   */
-  _getDay() {
-    return moment(this._state.timeStart).format(`MMM YY`);
   }
 
   /**
@@ -390,7 +378,7 @@ export default class TripOpen extends Component {
       enableTime: true,
       altInput: true,
       dateFormat: `Z`,
-      altFormat: `H:i`,
+      altFormat: `H:i d MMM`,
       defaultDate: moment(this._state.timeStart).format(),
       onClose: (dateStr) => {
         this._state.timeStart = Date.parse(dateStr);
@@ -405,7 +393,7 @@ export default class TripOpen extends Component {
       enableTime: true,
       altInput: true,
       dateFormat: `Z`,
-      altFormat: `H:i`,
+      altFormat: `H:i d MMM`,
       defaultDate: moment(this._state.timeStop).format(),
       onClose: (dateStr) => {
         this._state.timeStop = Date.parse(dateStr);

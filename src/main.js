@@ -8,7 +8,7 @@ import {TotalCost, TripDay, Trip, TripOpen, Filter, Sorting, Stat} from './view/
  * @const AUTHORIZATION, END_POINT
  * @type {string}
  */
-const AUTHORIZATION = `Basic dXNfckBgtXuzd27yZAo=${Math.random()}`;
+const AUTHORIZATION = `Basic dXNsckBgtOuzd27yZAo=${Math.random()}`;
 const END_POINT = `https://es8-demo-srv.appspot.com/big-trip`;
 
 /**

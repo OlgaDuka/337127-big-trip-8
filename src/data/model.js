@@ -17,8 +17,8 @@ export default class Model {
     this._events = [];
     this._destinations = [];
     this._offers = [];
-    this.filters = util.NAME_FILTERS;
-    this.sorting = util.NAME_SORTING;
+    this.filters = util.FILTER_NAMES;
+    this.sorting = util.SORTING_NAMES;
     this.stat = util.StatData;
     this.state = {
       nameFilter: `filter-everything`,

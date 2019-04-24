@@ -5,8 +5,10 @@ self.addEventListener(`install`, (evt) => {
         `/`,
         `/index.html`,
         `/bundle.js`,
-        `/img/*.*`,
-        `/css/*.*`
+        `/img/star.svg`,
+        `/img/star--check.svg`,
+        `/css/main.css`,
+        `/css/normalize.css`
       ]);
 });
 evt.waitUntil(openCache);
